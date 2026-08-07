@@ -37,8 +37,8 @@ export default function HowItWorks() {
               <p className="eyebrow">How it works</p>
               <h1>From profile to reasoned matches.</h1>
               <p className="lede">
-                Watch a live example of the flow. Click the steps or let the demo cycle — this is what happens after you
-                sign up.
+                Feed Opportunistic like an assistant: profile in, processing on screen, reasoned matches out. Click the
+                steps or watch the console cycle.
               </p>
             </div>
           </section>
