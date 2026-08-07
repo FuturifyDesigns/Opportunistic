@@ -107,7 +107,7 @@ textarea {
   border-radius: 0;
   display: block;
   background: transparent;
-  filter: invert(1);
+  filter: none;
 }
 
 .nav {
@@ -195,7 +195,7 @@ textarea {
   border-radius: 0;
   background: transparent;
   display: block;
-  filter: invert(1);
+  filter: none;
 }
 
 .hero-copy h1 {
@@ -251,7 +251,7 @@ textarea {
   background: transparent;
   object-fit: contain;
   aspect-ratio: 1;
-  filter: invert(1);
+  filter: none;
 }
 
 .cta-row {
@@ -369,7 +369,7 @@ h2 {
   object-fit: contain;
   border-radius: 0;
   background: transparent;
-  filter: invert(1);
+  filter: none;
 }
 
 .footer-brand p {
@@ -1427,7 +1427,7 @@ sup {
   width: 34px;
   height: 34px;
   object-fit: contain;
-  filter: invert(1);
+  filter: none;
   background: transparent;
   border-radius: 0;
   padding: 0;
@@ -1712,7 +1712,7 @@ a.btn-auth {
   border-radius: 0;
   background: transparent;
   object-fit: contain;
-  filter: invert(1);
+  filter: none;
 }
 
 .scan-ring {
@@ -2235,7 +2235,7 @@ a.btn-auth {
   border-radius: 0;
   object-fit: contain;
   background: transparent;
-  filter: invert(1);
+  filter: none;
 }
 
 .auth-orb-core strong {
@@ -2259,7 +2259,7 @@ a.btn-auth {
 }
 
 .auth-orb.hot .auth-orb-core img {
-  filter: none;
+  filter: invert(1);
 }
 
 .auth-orb.hot .auth-orb-ring {
