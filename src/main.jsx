@@ -7,9 +7,12 @@ import './index.css'
 const redirect = sessionStorage.getItem('opportunistic-redirect')
 if (redirect) {
   sessionStorage.removeItem('opportunistic-redirect')
-  const base = '/Opportunistic'
-  if (redirect.startsWith(base) && redirect !== `${base}/` && redirect !== base) {
+  if (redirect !== '/' && !redirect.startsWith('/Opportunistic')) {
     window.history.replaceState(null, '', redirect)
+  } else if (redirect.startsWith('/Opportunistic')) {
+    // Legacy project-path bookmarks → strip prefix on custom domain
+    const stripped = redirect.replace(/^\/Opportunistic/, '') || '/'
+    window.history.replaceState(null, '', stripped)
   }
 }
 

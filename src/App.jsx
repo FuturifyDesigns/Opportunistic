@@ -17,7 +17,7 @@ import Terms from './pages/Terms'
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter basename="/Opportunistic">
+      <BrowserRouter>
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
