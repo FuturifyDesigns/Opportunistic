@@ -6,6 +6,7 @@ export default function PageBackdrop({ image, children, className = '' }) {
       <div className="page-bg" aria-hidden="true">
         <img src={src} alt="" />
         <div className="page-bg-scrim" />
+        <div className="page-bg-tint" />
       </div>
       <div className="page-fg">{children}</div>
     </div>
