@@ -25,6 +25,8 @@ export function markIntroSeen() {
   }
 }
 
+const CARD_KEYS = ['pathway', 'sync', 'reason', 'lane']
+
 export default function Intro() {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -32,7 +34,7 @@ export default function Intro() {
   const sweepRef = useRef(null)
   const [ready, setReady] = useState(false)
   const [exiting, setExiting] = useState(false)
-  const [logs, setLogs] = useState([])
+  const [visibleCount, setVisibleCount] = useState(0)
   const entered = useRef(false)
 
   useEffect(() => {
@@ -43,45 +45,37 @@ export default function Intro() {
   }, [navigate, t])
 
   useEffect(() => {
-    const lines = [
-      t('intro.log1'),
-      t('intro.log2'),
-      t('intro.log3'),
-      t('intro.log4'),
-      t('intro.log5'),
-    ]
     if (prefersReducedMotion()) {
-      setLogs(lines)
+      setVisibleCount(CARD_KEYS.length)
       setReady(true)
       return undefined
     }
-    setLogs([])
+    setVisibleCount(0)
     let i = 0
     const id = window.setInterval(() => {
-      setLogs((prev) => [...prev, lines[i]])
       i += 1
-      if (i >= lines.length) {
+      setVisibleCount(i)
+      if (i >= CARD_KEYS.length) {
         window.clearInterval(id)
         setReady(true)
       }
-    }, 520)
+    }, 380)
     return () => window.clearInterval(id)
-  }, [t])
+  }, [])
 
   useGSAP(
     () => {
       if (prefersReducedMotion()) {
-        if (sweepRef.current) gsap.set(sweepRef.current, { opacity: 0.35 })
+        if (sweepRef.current) gsap.set(sweepRef.current, { opacity: 0.28 })
         return
       }
 
       const tl = gsap.timeline({ defaults: { ease: 'power2.out' } })
-      tl.from('.intro-veil', { opacity: 0, duration: 0.7 })
-        .from('.intro-core', { scale: 0.82, opacity: 0, duration: 0.9 }, '-=0.25')
-        .from('.intro-rings span:not(.intro-sweep)', { scale: 0.7, opacity: 0, stagger: 0.1, duration: 0.6 }, '-=0.6')
-        .from('.intro-word', { y: 20, opacity: 0, duration: 0.55 }, '-=0.3')
-        .from('.intro-log', { y: 14, opacity: 0, duration: 0.45 }, '-=0.2')
-        .from('.intro-enter', { y: 10, opacity: 0, duration: 0.4 }, '-=0.1')
+      tl.from('.intro-veil', { opacity: 0, duration: 0.55 })
+        .from('.intro-core', { scale: 0.88, opacity: 0, duration: 0.8 }, '-=0.2')
+        .from('.intro-rings span:not(.intro-sweep)', { scale: 0.75, opacity: 0, stagger: 0.08, duration: 0.5 }, '-=0.55')
+        .from('.intro-word', { y: 16, opacity: 0, duration: 0.45 }, '-=0.25')
+        .from('.intro-enter', { y: 10, opacity: 0, duration: 0.35 }, '-=0.1')
 
       gsap.to('.intro-rings .r2', {
         rotate: 360,
@@ -98,7 +92,7 @@ export default function Intro() {
 
       if (sweepRef.current) {
         gsap.set(sweepRef.current, {
-          opacity: 0.72,
+          opacity: 0.55,
           rotate: 0,
           force3D: true,
           transformOrigin: '50% 50%',
@@ -113,7 +107,7 @@ export default function Intro() {
       }
 
       gsap.to('.intro-mark', {
-        scale: 1.035,
+        scale: 1.03,
         duration: 2.6,
         yoyo: true,
         repeat: -1,
@@ -121,6 +115,24 @@ export default function Intro() {
       })
     },
     { scope: root },
+  )
+
+  useGSAP(
+    () => {
+      const cards = root.current?.querySelectorAll('.intro-card.is-on:not(.is-shown)')
+      if (!cards?.length) return
+      cards.forEach((el) => el.classList.add('is-shown'))
+      if (prefersReducedMotion()) {
+        gsap.set(cards, { opacity: 1, y: 0, clearProps: 'transform' })
+        return
+      }
+      gsap.fromTo(
+        cards,
+        { opacity: 0, y: 18 },
+        { opacity: 1, y: 0, duration: 0.45, stagger: 0.06, ease: 'power2.out' },
+      )
+    },
+    { scope: root, dependencies: [visibleCount] },
   )
 
   function enter() {
@@ -137,10 +149,10 @@ export default function Intro() {
     }
 
     const tl = gsap.timeline({ onComplete: go })
-    tl.to('.intro-enter, .intro-log, .intro-word', { opacity: 0, y: -14, duration: 0.3, stagger: 0.04 })
-      .to('.intro-rings span', { scale: 1.4, opacity: 0, duration: 0.55, stagger: 0.04 }, '-=0.1')
-      .to('.intro-core', { scale: 1.45, opacity: 0, duration: 0.55, ease: 'power2.in' }, '-=0.4')
-      .to('.intro-veil', { opacity: 0, duration: 0.35 }, '-=0.2')
+    tl.to('.intro-enter, .intro-cards, .intro-word', { opacity: 0, y: -12, duration: 0.28, stagger: 0.04 })
+      .to('.intro-rings span', { scale: 1.35, opacity: 0, duration: 0.5, stagger: 0.04 }, '-=0.1')
+      .to('.intro-core', { scale: 1.35, opacity: 0, duration: 0.5, ease: 'power2.in' }, '-=0.35')
+      .to('.intro-veil', { opacity: 0, duration: 0.3 }, '-=0.2')
   }
 
   return (
@@ -171,11 +183,20 @@ export default function Intro() {
 
           <p className="intro-word">{t('common.brand')}</p>
 
-          <div className="intro-log" aria-live="polite">
-            {logs.map((line) => (
-              <p key={line}>{line}</p>
+          <div className="intro-cards" aria-live="polite">
+            {CARD_KEYS.map((key, index) => (
+              <article
+                key={key}
+                className={`intro-card${index < visibleCount ? ' is-on' : ''}`}
+                aria-hidden={index >= visibleCount}
+              >
+                <span className="intro-card-index" aria-hidden="true">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+                <h2>{t(`intro.cards.${key}.title`)}</h2>
+                <p>{t(`intro.cards.${key}.body`)}</p>
+              </article>
             ))}
-            {!ready ? <span className="log-cursor" aria-hidden="true" /> : null}
           </div>
 
           <span className={`intro-enter${ready ? ' show' : ''}`}>

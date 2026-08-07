@@ -107,14 +107,27 @@
   },
   "intro": {
     "docTitle": "Opportunistic — Enter",
-    "booting": "Initializing lane…",
+    "booting": "Preparing your lane…",
     "enterHint": "Click anywhere to enter",
     "enter": "Enter Opportunistic",
-    "log1": "> opportunistic kernel online",
-    "log2": "> open pathway through the mark",
-    "log3": "> sync scholarship + job grids",
-    "log4": "> reason engine armed",
-    "log5": "> lane ready · await entry"
+    "cards": {
+      "pathway": {
+        "title": "Open pathway",
+        "body": "Move through the mark into ranked opportunities built around you."
+      },
+      "sync": {
+        "title": "Scholarship + job grids",
+        "body": "Two lanes stay in sync — funding and roles, matched together."
+      },
+      "reason": {
+        "title": "Reason engine",
+        "body": "Every card explains why it fits your skills and profile."
+      },
+      "lane": {
+        "title": "Lane ready",
+        "body": "Your entry point is set. Step in when you are."
+      }
+    }
   },
   "auth": {
     "choosePortal": "Choose a portal.",

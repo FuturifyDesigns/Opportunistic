@@ -576,17 +576,17 @@ textarea:focus-visible {
   display: grid;
   place-items: center;
   overflow: hidden;
-  background: #0a0a0a;
-  color: #f2f2f0;
+  background: var(--bg);
+  color: var(--ink);
 }
 
 .intro-veil {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.09) 0%, transparent 38%),
-    radial-gradient(circle at 50% 100%, rgba(11, 110, 79, 0.2) 0%, transparent 50%),
-    #0a0a0a;
+    radial-gradient(circle at 50% 42%, rgba(11, 110, 79, 0.1) 0%, transparent 42%),
+    radial-gradient(circle at 50% 100%, rgba(11, 110, 79, 0.07) 0%, transparent 52%),
+    var(--bg);
   pointer-events: none;
 }
 
@@ -602,7 +602,7 @@ textarea:focus-visible {
   background: transparent;
   color: inherit;
   cursor: pointer;
-  padding: max(1.5rem, env(safe-area-inset-top)) 1.25rem max(1.5rem, env(safe-area-inset-bottom));
+  padding: max(1.25rem, env(safe-area-inset-top)) 1.15rem max(1.25rem, env(safe-area-inset-bottom));
   text-align: center;
   font: inherit;
 }
@@ -612,13 +612,13 @@ textarea:focus-visible {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(1.1rem, 2.5vh, 1.75rem);
-  width: min(40rem, 100%);
+  gap: clamp(1rem, 2.2vh, 1.5rem);
+  width: min(44rem, 100%);
 }
 
 .intro-core {
   position: relative;
-  width: min(280px, 68vw);
+  width: min(240px, 58vw);
   aspect-ratio: 1;
   display: grid;
   place-items: center;
@@ -636,7 +636,7 @@ textarea:focus-visible {
   inset: 0;
   margin: auto;
   border-radius: 50%;
-  border: 1px solid rgba(242, 242, 240, 0.18);
+  border: 1px solid rgba(10, 10, 10, 0.12);
 }
 
 .intro-rings .r1 {
@@ -648,13 +648,13 @@ textarea:focus-visible {
   width: 78%;
   height: 78%;
   border-style: dashed;
-  opacity: 0.7;
+  opacity: 0.75;
 }
 
 .intro-rings .r3 {
   width: 100%;
   height: 100%;
-  opacity: 0.4;
+  opacity: 0.45;
 }
 
 .intro-sweep {
@@ -664,15 +664,15 @@ textarea:focus-visible {
     from 0deg,
     transparent 0deg,
     transparent 250deg,
-    rgba(11, 110, 79, 0.08) 275deg,
-    rgba(52, 211, 153, 0.55) 310deg,
-    rgba(11, 110, 79, 0.12) 335deg,
+    rgba(11, 110, 79, 0.06) 275deg,
+    rgba(11, 110, 79, 0.42) 310deg,
+    rgba(11, 110, 79, 0.08) 335deg,
     transparent 360deg
   );
   border: 0 !important;
-  opacity: 0.7;
+  opacity: 0.65;
   will-change: transform;
-  filter: blur(0.5px);
+  filter: blur(0.4px);
 }
 
 .intro-mark-wrap {
@@ -683,15 +683,16 @@ textarea:focus-visible {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(242, 242, 240, 0.2);
-  box-shadow: 0 0 48px rgba(11, 110, 79, 0.18);
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  box-shadow: 0 0 0 1px rgba(11, 110, 79, 0.06), 0 18px 40px rgba(10, 10, 10, 0.06);
+  overflow: hidden;
 }
 
 .intro-mark {
-  width: 62%;
+  width: 100%;
   height: auto;
-  filter: invert(1);
+  display: block;
 }
 
 .intro-word {
@@ -700,59 +701,78 @@ textarea:focus-visible {
   margin: 0;
   font-family: var(--display);
   font-weight: 600;
-  font-size: clamp(2.35rem, 7vw, 3.5rem);
+  font-size: clamp(2.1rem, 6vw, 3.15rem);
   letter-spacing: -0.035em;
   line-height: 1.05;
+  color: var(--ink);
 }
 
-.intro-log {
+.intro-cards {
   position: relative;
   z-index: 2;
-  width: min(34rem, 100%);
-  min-height: 8.5rem;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem 0.85rem;
   text-align: left;
+  min-height: 11rem;
+}
+
+.intro-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.95rem 1rem 1rem;
+  opacity: 0;
+  pointer-events: none;
+  display: grid;
+  gap: 0.35rem;
+  align-content: start;
+}
+
+.intro-card.is-on {
+  pointer-events: auto;
+}
+
+.intro-card-index {
   font-family: var(--mono);
-  font-size: clamp(0.95rem, 2.4vw, 1.15rem);
-  line-height: 1.65;
-  letter-spacing: 0.01em;
-  color: rgba(242, 242, 240, 0.78);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--accent);
 }
 
-.intro-log p {
-  margin: 0 0 0.35rem;
+.intro-card h2 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(1rem, 2.4vw, 1.15rem);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--ink);
 }
 
-.intro-log .log-cursor {
-  display: inline-block;
-  width: 0.55em;
-  height: 1.1em;
-  margin-left: 0.15em;
-  vertical-align: text-bottom;
-  background: rgba(52, 211, 153, 0.85);
-  animation: intro-cursor 0.9s steps(1) infinite;
-}
-
-@keyframes intro-cursor {
-  50% {
-    opacity: 0;
-  }
+.intro-card p {
+  margin: 0;
+  font-size: clamp(0.82rem, 1.8vw, 0.92rem);
+  line-height: 1.45;
+  color: var(--muted);
 }
 
 .intro-enter {
   position: relative;
   z-index: 2;
-  margin-top: 0.25rem;
+  margin-top: 0.15rem;
   font-family: var(--mono);
-  font-size: clamp(0.85rem, 2vw, 1rem);
-  letter-spacing: 0.14em;
+  font-size: clamp(0.78rem, 1.8vw, 0.92rem);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(242, 242, 240, 0.5);
-  opacity: 0.75;
+  color: var(--muted);
+  opacity: 0.8;
   transition: color 0.2s ease, opacity 0.2s ease;
 }
 
 .intro-enter.show {
-  color: #fff;
+  color: var(--ink);
   opacity: 1;
   animation: intro-pulse 1.6s ease-in-out infinite;
 }
@@ -768,13 +788,28 @@ textarea:focus-visible {
 }
 
 .intro-page.is-ready .intro-hit:hover .intro-enter {
-  color: #fff;
+  color: var(--accent);
+}
+
+@media (max-width: 560px) {
+  .intro-cards {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+    min-height: 0;
+  }
+
+  .intro-core {
+    width: min(200px, 56vw);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .intro-enter.show,
-  .intro-log .log-cursor {
+  .intro-enter.show {
     animation: none;
+  }
+
+  .intro-card.is-on {
+    opacity: 1;
   }
 }
 
