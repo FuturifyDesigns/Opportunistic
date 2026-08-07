@@ -139,7 +139,19 @@ export function AuthProvider({ children }) {
       profile,
       loading,
       refreshProfile: () => refreshProfile(session?.user?.id, session?.user),
-      signOut: () => supabase.auth.signOut(),
+      signOut: async () => {
+        await supabase.auth.signOut({ scope: 'local' })
+        try {
+          const keys = []
+          for (let i = 0; i < localStorage.length; i += 1) {
+            const k = localStorage.key(i)
+            if (k && k.startsWith('opp_')) keys.push(k)
+          }
+          keys.forEach((k) => localStorage.removeItem(k))
+        } catch {
+          /* ignore */
+        }
+      },
     }),
     [session, profile, loading],
   )
