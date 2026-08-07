@@ -107,7 +107,7 @@
   },
   "intro": {
     "docTitle": "Opportunistic — Enter",
-    "enterHint": "Enter site",
+    "enterHint": "Click anywhere to enter",
     "enter": "Enter Opportunistic",
     "booting": "Preparing…",
     "cards": {

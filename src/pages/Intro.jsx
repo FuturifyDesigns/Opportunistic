@@ -96,14 +96,14 @@ export default function Intro() {
 
       if (sweepRef.current) {
         gsap.set(sweepRef.current, {
-          opacity: 0.4,
+          opacity: 0.85,
           rotate: 0,
           force3D: true,
           transformOrigin: '50% 50%',
         })
         gsap.to(sweepRef.current, {
           rotate: 360,
-          duration: 6.5,
+          duration: 5.5,
           repeat: -1,
           ease: 'none',
           force3D: true,
@@ -132,8 +132,27 @@ export default function Intro() {
       }
       gsap.fromTo(
         cards,
-        { opacity: 0, scale: 0.96 },
-        { opacity: 1, scale: 1, duration: 0.45, stagger: 0.06, ease: 'power2.out' },
+        { opacity: 0, y: 14 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.45,
+          stagger: 0.06,
+          ease: 'power2.out',
+          onComplete: () => {
+            if (prefersReducedMotion()) return
+            cards.forEach((el, i) => {
+              gsap.to(el, {
+                y: i % 2 === 0 ? -7 : -10,
+                duration: 2.2 + i * 0.25,
+                yoyo: true,
+                repeat: -1,
+                ease: 'sine.inOut',
+                delay: i * 0.15,
+              })
+            })
+          },
+        },
       )
     },
     { scope: root, dependencies: [visibleCount] },
@@ -180,7 +199,7 @@ export default function Intro() {
               </article>
             ))}
 
-            <div className="intro-center">
+              <div className="intro-center">
               <div className="intro-core">
                 <div className="intro-rings" aria-hidden="true">
                   <span className="r1" />
@@ -199,15 +218,14 @@ export default function Intro() {
                 </div>
               </div>
               <p className="intro-word">{t('common.brand')}</p>
+              <span className={`intro-enter${ready ? ' show' : ''}`}>
+                <span className="intro-enter-label">{ready ? t('intro.enterHint') : t('intro.booting')}</span>
+                <span className="intro-enter-arrow" aria-hidden="true">
+                  →
+                </span>
+              </span>
             </div>
           </div>
-
-          <span className={`intro-enter${ready ? ' show' : ''}`}>
-            <span className="intro-enter-label">{ready ? t('intro.enterHint') : t('intro.booting')}</span>
-            <span className="intro-enter-arrow" aria-hidden="true">
-              →
-            </span>
-          </span>
         </div>
       </button>
     </div>
