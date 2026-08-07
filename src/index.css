@@ -568,6 +568,316 @@ textarea:focus-visible {
   padding: 2.5rem 0 4rem;
 }
 
+.hero-sim {
+  padding: 1.75rem 0 3.25rem;
+}
+
+.hero-sim-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.15fr);
+  gap: 1.75rem 2rem;
+  align-items: center;
+  min-height: min(78vh, 760px);
+}
+
+.hero-sim-copy {
+  max-width: 34rem;
+}
+
+.hero-sim-copy .hero-brand {
+  margin-left: 0;
+}
+
+.hero-sim-copy h1 {
+  max-width: 16ch;
+}
+
+/* Lane Control simulation */
+.lane-control {
+  display: grid;
+  grid-template-rows: minmax(280px, 1fr) auto;
+  gap: 0.85rem;
+  min-height: min(62vh, 560px);
+  width: 100%;
+}
+
+.lane-stage {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.55) 42%, rgba(242, 242, 240, 0.35) 100%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.7), rgba(232, 232, 228, 0.55));
+  overflow: hidden;
+  min-height: 320px;
+}
+
+.lane-orbit {
+  position: absolute;
+  inset: 8%;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.lane-ring {
+  position: absolute;
+  border: 1px solid rgba(26, 28, 30, 0.14);
+  border-radius: 50%;
+}
+
+.lane-ring.r1 {
+  width: min(72%, 280px);
+  aspect-ratio: 1;
+}
+
+.lane-ring.r2 {
+  width: min(88%, 360px);
+  aspect-ratio: 1;
+  border-style: dashed;
+  opacity: 0.7;
+}
+
+.lane-ring.r3 {
+  width: min(104%, 440px);
+  aspect-ratio: 1;
+  opacity: 0.45;
+}
+
+.lane-sweep {
+  position: absolute;
+  width: min(88%, 360px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: conic-gradient(from 210deg, transparent 0 72%, rgba(11, 110, 79, 0.18) 78%, transparent 88%);
+  opacity: 0;
+  transform-origin: center;
+}
+
+.lane-node {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ink);
+  opacity: 0;
+  box-shadow: 0 0 0 4px rgba(11, 110, 79, 0.12);
+}
+
+.lane-node.n1 { top: 18%; left: 28%; }
+.lane-node.n2 { top: 24%; right: 22%; }
+.lane-node.n3 { bottom: 28%; left: 20%; }
+.lane-node.n4 { bottom: 22%; right: 26%; }
+
+.lane-portal {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  justify-items: center;
+  gap: 0.65rem;
+  z-index: 2;
+}
+
+.lane-portal-core {
+  position: relative;
+  width: min(148px, 34vw);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid var(--line);
+}
+
+.lane-portal-mark {
+  width: 58%;
+  height: auto;
+  display: block;
+}
+
+.lane-path {
+  position: absolute;
+  bottom: 10%;
+  left: 50%;
+  width: 2px;
+  height: 28%;
+  transform: translateX(-50%);
+  background: linear-gradient(to top, rgba(10, 10, 10, 0.35), transparent);
+  opacity: 0.55;
+}
+
+.lane-status {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.28rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.92);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.lane-status-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: #8a8a86;
+}
+
+.lane-control.is-scanning .lane-status-dot,
+.lane-control.phase-scan .lane-status-dot,
+.lane-control.phase-match .lane-status-dot {
+  background: var(--accent);
+  box-shadow: 0 0 0 3px rgba(11, 110, 79, 0.16);
+}
+
+.lane-matches {
+  position: absolute;
+  inset: auto 0.75rem 0.75rem;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+.lane-match {
+  pointer-events: auto;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.65rem 0.7rem;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+}
+
+.lane-match-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.25rem;
+}
+
+.lane-match-kind {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.lane-match strong {
+  display: block;
+  font-size: 0.88rem;
+  line-height: 1.25;
+  margin-bottom: 0.2rem;
+}
+
+.lane-match p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.lane-console {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 0.7rem 0.8rem 0.75rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.lane-console-chrome {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: baseline;
+}
+
+.lane-console-title,
+.lane-console-meta {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.lane-console-title {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.lane-console-meta {
+  color: var(--muted);
+}
+
+.lane-log {
+  min-height: 4.6rem;
+  max-height: 6.2rem;
+  overflow: auto;
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: #3a3a38;
+  border-top: 1px solid #ecece8;
+  border-bottom: 1px solid #ecece8;
+  padding: 0.45rem 0.1rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.lane-log p {
+  margin: 0 0 0.15rem;
+}
+
+.lane-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.lane-chip {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 0.42rem 0.75rem;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 2.2rem;
+}
+
+.lane-chip:hover:not(:disabled) {
+  border-color: #b8b8b2;
+}
+
+.lane-chip.active {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #fff;
+}
+
+.lane-chip:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.lane-chip-rerun {
+  margin-left: auto;
+}
+
 .hero-grid {
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;
@@ -3728,6 +4038,64 @@ a.btn-auth {
     padding: 1rem 0 1.75rem;
   }
 
+  .hero-sim {
+    padding: 0.85rem 0 1.5rem;
+  }
+
+  .hero-sim-grid {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    gap: 1rem;
+  }
+
+  .hero-sim-copy {
+    max-width: none;
+    text-align: center;
+  }
+
+  .hero-sim-copy .hero-brand {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hero-sim-copy .cta-row {
+    justify-content: center;
+  }
+
+  .lane-control {
+    min-height: 0;
+    grid-template-rows: auto auto;
+  }
+
+  .lane-stage {
+    min-height: 260px;
+  }
+
+  .lane-matches {
+    grid-template-columns: 1fr;
+    inset: auto 0.55rem 0.55rem;
+    max-height: 42%;
+    overflow: auto;
+  }
+
+  .lane-match:nth-child(n + 3) {
+    display: none;
+  }
+
+  .lane-portal-core {
+    width: min(112px, 36vw);
+  }
+
+  .lane-chip-rerun {
+    margin-left: 0;
+  }
+
+  .lane-log {
+    min-height: 3.6rem;
+    max-height: 4.8rem;
+    font-size: 0.72rem;
+  }
+
   .hero-grid {
     min-height: auto;
     gap: 1.25rem;
@@ -4782,6 +5150,17 @@ body {
 
   .hero-visual {
     min-height: 150px;
+  }
+
+  .lane-stage {
+    min-height: 240px;
+  }
+
+  .lane-match p {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   .section {

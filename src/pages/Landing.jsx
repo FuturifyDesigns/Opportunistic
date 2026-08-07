@@ -8,6 +8,7 @@ import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
 import InteractiveCard from '../components/InteractiveCard'
 import PageBackdrop from '../components/PageBackdrop'
+import LaneControl from '../components/LaneControl'
 import { prefersReducedMotion, revealOnScroll } from '../lib/animations'
 
 gsap.registerPlugin(useGSAP, ScrollTrigger)
@@ -21,31 +22,11 @@ export default function Landing() {
       if (prefersReducedMotion()) return
 
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
-      tl.from('.hero-brand', { y: 28, opacity: 0, duration: 0.55 })
-        .from('.hero-copy h1', { y: 36, opacity: 0, duration: 0.55 }, '-=0.25')
-        .from('.hero-copy .lede', { y: 24, opacity: 0, duration: 0.45 }, '-=0.28')
-        .from('.hero-copy .cta-row', { y: 18, opacity: 0, duration: 0.4 }, '-=0.25')
-        .from(
-          '.float-card',
-          { x: 50, opacity: 0, stagger: 0.12, duration: 0.55, ease: 'power2.out' },
-          '-=0.35',
-        )
-
-      gsap.to('.float-card', {
-        y: '+=12',
-        duration: 2.4,
-        yoyo: true,
-        repeat: -1,
-        ease: 'sine.inOut',
-        stagger: 0.35,
-      })
-
-      gsap.to('.orbit', {
-        rotate: 360,
-        duration: 48,
-        repeat: -1,
-        ease: 'none',
-      })
+      tl.from('.hero-brand', { y: 24, opacity: 0, duration: 0.5 })
+        .from('.hero-copy h1', { y: 28, opacity: 0, duration: 0.5 }, '-=0.28')
+        .from('.hero-copy .lede', { y: 18, opacity: 0, duration: 0.4 }, '-=0.26')
+        .from('.hero-copy .cta-row', { y: 14, opacity: 0, duration: 0.35 }, '-=0.22')
+        .from('.lane-control', { y: 28, opacity: 0, duration: 0.55 }, '-=0.3')
 
       revealOnScroll(root.current)
     },
@@ -57,13 +38,13 @@ export default function Landing() {
   }, [t])
 
   return (
-    <PageBackdrop image="home.jpg" className="landing">
+    <PageBackdrop image="home.jpg" className="landing landing-sim">
       <div ref={root}>
         <SiteHeader />
 
-        <section className="hero">
-          <div className="container hero-grid">
-            <div className="hero-copy glass-panel">
+        <section className="hero hero-sim">
+          <div className="container hero-sim-grid">
+            <div className="hero-copy hero-sim-copy">
               <img className="hero-brand" src={`${import.meta.env.BASE_URL}logo.png`} alt={t('common.brand')} />
               <h1>{t('landing.headline')}</h1>
               <p className="lede">{t('landing.lede')}</p>
@@ -77,21 +58,7 @@ export default function Landing() {
               </div>
             </div>
 
-            <div className="hero-visual" aria-hidden="true">
-              <div className="orbit">
-                <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" />
-              </div>
-              <InteractiveCard className="float-card float-a">
-                <p className="eyebrow">{t('landing.scholarship')}</p>
-                <strong>{t('landing.matchPct')}</strong>
-                <p>{t('landing.floatA')}</p>
-              </InteractiveCard>
-              <InteractiveCard className="float-card float-b">
-                <p className="eyebrow">{t('landing.job')}</p>
-                <strong>{t('landing.floatBTitle')}</strong>
-                <p>{t('landing.floatB')}</p>
-              </InteractiveCard>
-            </div>
+            <LaneControl />
           </div>
         </section>
 
