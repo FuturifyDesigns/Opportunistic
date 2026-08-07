@@ -8,7 +8,15 @@
     <!-- Revalidate the shell so a new deploy's hashed assets are picked up right away -->
     <meta http-equiv="Cache-Control" content="no-cache, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=()" />
+    <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=(), usb=(), interest-cohort=()" />
+    <!--
+      Meta CSP is defense-in-depth. Prefer real HTTP headers via Cloudflare (see supabase/SECURITY.md).
+      frame-ancestors is ignored in meta CSP — set X-Frame-Options / CSP on the CDN.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://remotive.com https://www.arbeitnow.com; upgrade-insecure-requests"
+    />
 
     <title>Opportunistic — Scholarships &amp; Jobs Matched to You</title>
     <meta
@@ -80,26 +88,12 @@
         }
       }
     </script>
-    <script type="module" crossorigin src="/assets/index-DX5fDIAp.js"></script>
+    <script type="module" crossorigin src="/assets/index-DAa40mSY.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-CtZ0pzuW.css">
   </head>
   <body>
     <div id="root"></div>
     <!-- Restore deep link BEFORE Vite modules load (critical for Google OAuth ?code= on GitHub Pages) -->
-    <script>
-      (function () {
-        try {
-          var redirect = sessionStorage.getItem('opportunistic-redirect')
-          if (!redirect) return
-          sessionStorage.removeItem('opportunistic-redirect')
-          if (redirect.indexOf('/Opportunistic') === 0) {
-            redirect = redirect.replace(/^\/Opportunistic/, '') || '/'
-          }
-          if (redirect && redirect !== '/') {
-            history.replaceState(null, '', redirect)
-          }
-        } catch (e) {}
-      })()
-    </script>
+    <script src="/redirect-restore.js"></script>
   </body>
 </html>
