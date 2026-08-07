@@ -4,6 +4,7 @@ import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { prefersReducedMotion } from '../lib/animations'
 import { getListingBySource } from '../lib/listingCatalog'
+import ListingImage, { DEFAULT_OPPORTUNITY_IMAGE } from './ListingImage'
 
 gsap.registerPlugin(useGSAP)
 
@@ -12,7 +13,7 @@ export default function MatchCard({ match, kind, onSave, onDismiss, onOpen }) {
   const score = Math.round(Number(match.match_score) || 0)
   const ref = useRef(null)
   const listing = getListingBySource(match.source)
-  const thumb = listing?.cover || listing?.gallery?.[0] || null
+  const thumb = listing?.cover || listing?.gallery?.[0] || DEFAULT_OPPORTUNITY_IMAGE
 
   useGSAP(
     () => {
@@ -62,16 +63,15 @@ export default function MatchCard({ match, kind, onSave, onDismiss, onOpen }) {
         onClick={() => onOpen?.(match)}
         aria-label={t('matchCard.openAria', { title: match.title })}
       >
-        {thumb ? (
-          <div className="match-card-media">
-            <img src={thumb} alt="" loading="lazy" />
-          </div>
-        ) : null}
+        <div className="match-card-media">
+          <ListingImage src={thumb} loading="lazy" />
+        </div>
         <div className="match-card-top">
           <div>
             <p className="eyebrow">{match.source || kind}</p>
             <h3>{match.title}</h3>
             {match.company ? <p className="muted">{match.company}</p> : null}
+            {match.location ? <p className="muted match-location">{match.location}</p> : null}
           </div>
           <div className="score-pill" title={t('matchCard.scoreTitle')}>
             {score}%

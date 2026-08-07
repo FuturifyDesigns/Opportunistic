@@ -7,6 +7,7 @@ import { getListingBySource } from '../lib/listingCatalog'
 import { generateWinTips } from '../lib/tipEngine'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
+import ListingImage, { DEFAULT_OPPORTUNITY_IMAGE } from '../components/ListingImage'
 
 function splitSentences(text = '') {
   return text
@@ -115,8 +116,9 @@ export default function MatchDetail() {
   }
 
   const gallery = listing?.gallery?.filter(Boolean) || []
-  const cover = listing?.cover || gallery[0] || null
+  const cover = listing?.cover || gallery[0] || DEFAULT_OPPORTUNITY_IMAGE
   const reasons = splitSentences(match?.reasoning || '')
+  const locationLabel = match?.location || listing?.location || null
 
   return (
     <div className="page">
@@ -146,38 +148,26 @@ export default function MatchDetail() {
 
         {match ? (
           <article className="detail detail-rich">
-            {cover ? (
-              <div className="detail-hero">
-                <img
-                  src={cover}
-                  alt=""
-                  className="detail-cover"
-                  loading="eager"
-                  onClick={() => setActiveImage(cover)}
-                />
-                <div className="detail-hero-meta">
-                  <p className="eyebrow">{match.source || kind}</p>
-                  <h1>{match.title}</h1>
-                  {match.company ? <p className="muted">{match.company}</p> : null}
-                  <div className="detail-badges">
-                    <span className="score-pill large">
-                      {t('match.scorePill', { score: Math.round(Number(match.match_score) || 0) })}
-                    </span>
-                    {listing?.level ? <span className="info-chip">{listing.level}</span> : null}
-                    {listing?.location ? <span className="info-chip">{listing.location}</span> : null}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <>
+            <div className="detail-hero">
+              <ListingImage
+                src={cover}
+                className="detail-cover"
+                loading="eager"
+                onClick={() => setActiveImage(cover)}
+              />
+              <div className="detail-hero-meta">
                 <p className="eyebrow">{match.source || kind}</p>
                 <h1>{match.title}</h1>
                 {match.company ? <p className="muted">{match.company}</p> : null}
-                <div className="score-pill large">
-                  {t('match.scorePill', { score: Math.round(Number(match.match_score) || 0) })}
+                <div className="detail-badges">
+                  <span className="score-pill large">
+                    {t('match.scorePill', { score: Math.round(Number(match.match_score) || 0) })}
+                  </span>
+                  {listing?.level ? <span className="info-chip">{listing.level}</span> : null}
+                  {locationLabel ? <span className="info-chip">{locationLabel}</span> : null}
                 </div>
-              </>
-            )}
+              </div>
+            </div>
 
             {listing?.tags?.length ? (
               <div className="feed-chips detail-tags">
@@ -230,7 +220,7 @@ export default function MatchDetail() {
                       onClick={() => setActiveImage(src)}
                       aria-label={t('match.expandGallery')}
                     >
-                      <img src={src} alt="" loading="lazy" />
+                      <ListingImage src={src} loading="lazy" />
                     </button>
                   ))}
                 </div>
@@ -252,10 +242,10 @@ export default function MatchDetail() {
                     <dd>{listing.level}</dd>
                   </>
                 ) : null}
-                {listing?.location ? (
+                {locationLabel ? (
                   <>
                     <dt>{t('match.factLocation')}</dt>
-                    <dd>{listing.location}</dd>
+                    <dd>{locationLabel}</dd>
                   </>
                 ) : null}
                 <dt>{t('match.factDeadline')}</dt>
@@ -336,7 +326,7 @@ export default function MatchDetail() {
 
         {activeImage ? (
           <button type="button" className="lightbox" onClick={() => setActiveImage(null)} aria-label={t('match.closeImage')}>
-            <img src={activeImage} alt="" />
+            <ListingImage src={activeImage} loading="eager" />
           </button>
         ) : null}
       </main>

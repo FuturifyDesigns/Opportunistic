@@ -1,9 +1,11 @@
 /**
  * Live job feed from public APIs + country-aware scoring.
  * Sources: Remotive (remote), Arbeitnow (EU board). Results are real postings with official URLs.
+ * Only keeps jobs that match the selected country or are open remote/worldwide.
  */
 
 import i18n from '../i18n'
+import { countryFitScore, jobFitsSelectedCountry } from './countryMatch'
 
 function skillBlob(skills = [], field = '') {
   return `${field} ${(skills || []).map((s) => s.skill_name || s).join(' ')}`.toLowerCase()
@@ -24,26 +26,16 @@ function overlapScore(text, blob) {
   return hits
 }
 
-function countryMatch(location, country) {
-  if (!country) return 0
-  const loc = String(location || '').toLowerCase()
-  const c = country.toLowerCase()
-  if (!loc || loc.includes('worldwide') || loc.includes('remote') || loc.includes('anywhere')) return 1
-  if (loc.includes(c)) return 3
-  // Regional proxies
-  if (c.includes('botswana') || c.includes('namibia') || c.includes('south africa')) {
-    if (loc.includes('africa') || loc.includes('gmt+2') || loc.includes('sast')) return 2
-  }
-  return 0
-}
-
 function mapRemotive(job, profile) {
   const country = profile.country || ''
+  const location = job.candidate_required_location || job.job_type || 'Remote'
+  if (!jobFitsSelectedCountry(location, country)) return null
+
   const blob = skillBlob(profile.skills, profile.field)
   const text = `${job.title} ${job.company_name} ${job.description || ''} ${(job.tags || []).join(' ')}`
   const skillHits = overlapScore(text, blob)
-  const locHits = countryMatch(job.candidate_required_location || job.job_type, country)
-  let score = 42 + Math.min(30, skillHits * 4) + locHits * 6
+  const locHits = countryFitScore(location, country)
+  let score = 42 + Math.min(30, skillHits * 4) + locHits * 8
   if (profile.goal === 'jobs') score += 4
   if (profile.goal === 'scholarships') score -= 4
   score = Math.max(32, Math.min(96, Math.round(score)))
@@ -59,9 +51,7 @@ function mapRemotive(job, profile) {
     reasons.push(
       locHits >= 3
         ? i18n.t('reasons.locationExplicit', { country })
-        : locHits >= 1
-          ? i18n.t('reasons.locationRemote', { country })
-          : i18n.t('reasons.locationVerify', { country }),
+        : i18n.t('reasons.locationRemote', { country }),
     )
   }
   reasons.push(i18n.t('reasons.remotiveFetched'))
@@ -70,22 +60,29 @@ function mapRemotive(job, profile) {
     title: job.title,
     url: job.url || job.job_url,
     company: job.company_name || null,
-    source: `Remotive · ${job.category || 'Remote'}`,
+    source:
+      locHits >= 3 && country
+        ? `Remotive · ${country}`
+        : `Remotive · ${job.category || 'Remote'}`,
     reasoning: reasons.join(' '),
     match_score: score,
-    location: job.candidate_required_location || 'Remote',
+    location,
     published: job.publication_date || null,
     feed: 'remotive',
+    country_fit: locHits,
   }
 }
 
 function mapArbeitnow(job, profile) {
   const country = profile.country || ''
+  const location = job.location || ''
+  if (!jobFitsSelectedCountry(location, country)) return null
+
   const blob = skillBlob(profile.skills, profile.field)
-  const text = `${job.title} ${job.company_name} ${job.description || ''} ${(job.tags || []).join(' ')} ${job.location || ''}`
+  const text = `${job.title} ${job.company_name} ${job.description || ''} ${(job.tags || []).join(' ')} ${location}`
   const skillHits = overlapScore(text, blob)
-  const locHits = countryMatch(job.location, country)
-  let score = 40 + Math.min(28, skillHits * 4) + locHits * 7
+  const locHits = countryFitScore(location, country)
+  let score = 40 + Math.min(28, skillHits * 4) + locHits * 9
   if (profile.goal === 'jobs') score += 3
   score = Math.max(30, Math.min(94, Math.round(score)))
 
@@ -100,10 +97,7 @@ function mapArbeitnow(job, profile) {
     reasons.push(
       locHits >= 3
         ? i18n.t('reasons.locationAligns', { country })
-        : i18n.t('reasons.locationListed', {
-            location: job.location || i18n.t('reasons.euRemote'),
-            country,
-          }),
+        : i18n.t('reasons.locationRemote', { country }),
     )
   }
   reasons.push(i18n.t('reasons.arbeitnowFetched'))
@@ -115,14 +109,15 @@ function mapArbeitnow(job, profile) {
     source: 'Arbeitnow',
     reasoning: reasons.join(' '),
     match_score: score,
-    location: job.location || null,
+    location: location || null,
     published: job.created_at || null,
     feed: 'arbeitnow',
+    country_fit: locHits,
   }
 }
 
 async function fetchRemotive(query) {
-  const url = `https://remotive.com/api/remote-jobs?search=${encodeURIComponent(query || 'developer')}&limit=30`
+  const url = `https://remotive.com/api/remote-jobs?search=${encodeURIComponent(query || 'developer')}&limit=50`
   const res = await fetch(url)
   if (!res.ok) throw new Error(`Remotive ${res.status}`)
   const data = await res.json()
@@ -136,12 +131,12 @@ async function fetchArbeitnow(query) {
   const data = await res.json()
   const jobs = Array.isArray(data.data) ? data.data : []
   const q = String(query || '').toLowerCase()
-  if (!q) return jobs.slice(0, 40)
+  if (!q) return jobs.slice(0, 60)
   const filtered = jobs.filter((j) => {
-    const hay = `${j.title} ${j.company_name} ${(j.tags || []).join(' ')}`.toLowerCase()
+    const hay = `${j.title} ${j.company_name} ${(j.tags || []).join(' ')} ${j.location || ''}`.toLowerCase()
     return q.split(/\s+/).some((w) => w.length > 2 && hay.includes(w))
   })
-  return (filtered.length ? filtered : jobs).slice(0, 40)
+  return (filtered.length ? filtered : jobs).slice(0, 60)
 }
 
 /** Country-targeted search board links (always available as fallback / supplement). */
@@ -170,8 +165,10 @@ export function buildCountryJobBoards(profile) {
         query: decodeURIComponent(query),
         country: locationLabel,
       }),
-      match_score: country ? 78 : 55,
+      match_score: country ? 88 : 55,
+      location: country || null,
       feed: 'board',
+      country_fit: country ? 3 : 0,
     },
     {
       title: i18n.t('reasons.linkedinTitle', { field }),
@@ -179,8 +176,10 @@ export function buildCountryJobBoards(profile) {
       company: null,
       source: 'LinkedIn',
       reasoning: i18n.t('reasons.linkedinReason', { country: countryLabel }),
-      match_score: country ? 76 : 54,
+      match_score: country ? 86 : 54,
+      location: country || null,
       feed: 'board',
+      country_fit: country ? 3 : 0,
     },
     {
       title: i18n.t('reasons.remoteTitle', { field }),
@@ -188,8 +187,10 @@ export function buildCountryJobBoards(profile) {
       company: null,
       source: 'Remote OK',
       reasoning: i18n.t('reasons.remoteReason', { slug, country: countryLabel }),
-      match_score: 70,
+      match_score: country ? 68 : 50,
+      location: 'Remote',
       feed: 'board',
+      country_fit: 1,
     },
     {
       title: i18n.t('reasons.reliefTitle', { country: country || i18n.t('reasons.region') }),
@@ -197,34 +198,57 @@ export function buildCountryJobBoards(profile) {
       company: null,
       source: 'ReliefWeb',
       reasoning: i18n.t('reasons.reliefReason', { country: regionLabel }),
-      match_score: /public|health|development|social|education|humanitarian|policy/i.test(field) ? 74 : 48,
+      match_score: /public|health|development|social|education|humanitarian|policy/i.test(field)
+        ? country
+          ? 84
+          : 48
+        : country
+          ? 62
+          : 40,
+      location: country || null,
       feed: 'board',
+      country_fit: country ? 3 : 0,
     },
   ]
 }
 
 /**
  * Fetch live jobs and merge with country board links.
+ * Live API results are hard-filtered to the selected country (or open remote).
  * @returns {{ jobs: object[], meta: { live: number, boards: number, errors: string[] } }}
  */
 export async function fetchLiveJobs(profile) {
+  const country = profile.country || ''
   const query = [profile.field, ...(profile.skills || []).slice(0, 3).map((s) => s.skill_name || s)]
     .filter(Boolean)
     .join(' ')
 
   const errors = []
   let live = []
+  let fetched = 0
+  let dropped = 0
 
   try {
     const remotive = await fetchRemotive(query)
-    live = live.concat(remotive.map((j) => mapRemotive(j, profile)))
+    fetched += remotive.length
+    for (const j of remotive) {
+      const mapped = mapRemotive(j, profile)
+      if (mapped) live.push(mapped)
+      else dropped += 1
+    }
   } catch (e) {
     errors.push(`Remotive: ${e.message}`)
   }
 
   try {
-    const arbeitnow = await fetchArbeitnow(query)
-    live = live.concat(arbeitnow.map((j) => mapArbeitnow(j, profile)))
+    // Prefer country name in the local board filter when available
+    const arbeitnow = await fetchArbeitnow(country ? `${query} ${country}` : query)
+    fetched += arbeitnow.length
+    for (const j of arbeitnow) {
+      const mapped = mapArbeitnow(j, profile)
+      if (mapped) live.push(mapped)
+      else dropped += 1
+    }
   } catch (e) {
     errors.push(`Arbeitnow: ${e.message}`)
   }
@@ -237,18 +261,30 @@ export async function fetchLiveJobs(profile) {
     return true
   })
 
-  live.sort((a, b) => b.match_score - a.match_score)
+  // Prefer explicit country matches over generic remote
+  live.sort((a, b) => {
+    const fit = (b.country_fit || 0) - (a.country_fit || 0)
+    if (fit) return fit
+    return b.match_score - a.match_score
+  })
+
   const topLive = live.slice(0, 24)
   const boards = buildCountryJobBoards(profile)
 
   return {
-    jobs: [...topLive, ...boards].sort((a, b) => b.match_score - a.match_score),
+    jobs: [...topLive, ...boards].sort((a, b) => {
+      const fit = (b.country_fit || 0) - (a.country_fit || 0)
+      if (fit) return fit
+      return b.match_score - a.match_score
+    }),
     meta: {
       live: topLive.length,
       boards: boards.length,
+      fetched,
+      dropped,
       errors,
       query,
-      country: profile.country || null,
+      country: country || null,
     },
   }
 }

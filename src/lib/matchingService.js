@@ -47,7 +47,7 @@ export async function runMatchingForUser(userId) {
       user_id: userId,
       type: 'job',
       status: 'running',
-      notes: `live=${jobMeta?.live ?? 0}; boards=${jobMeta?.boards ?? 0}; q=${jobMeta?.query || ''}`,
+      notes: `live=${jobMeta?.live ?? 0}; boards=${jobMeta?.boards ?? 0}; dropped=${jobMeta?.dropped ?? 0}; country=${jobMeta?.country || profile.country || ''}; q=${jobMeta?.query || ''}`,
     },
   ])
 
@@ -84,7 +84,10 @@ export async function runMatchingForUser(userId) {
     url: m.url,
     company: m.company ?? null,
     source: m.source,
-    reasoning: m.reasoning,
+    // Persist location inside reasoning so cards/detail keep country context without a DB migration.
+    reasoning: m.location
+      ? `${m.location} · ${m.reasoning}`
+      : m.reasoning,
     match_score: m.match_score,
     saved: savedJobs.has(sourceKey(m)),
     dismissed: dismissedJobs.has(sourceKey(m)),

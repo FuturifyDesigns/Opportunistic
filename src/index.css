@@ -3740,7 +3740,7 @@ a.btn-auth {
   border-radius: var(--radius);
   overflow: hidden;
   aspect-ratio: 16 / 7;
-  background: #e8e8e8;
+  background: linear-gradient(135deg, #0b6e4f 0%, #0a3d2e 55%, #071a14 100%);
 }
 
 .match-card-media img {
@@ -3748,6 +3748,11 @@ a.btn-auth {
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+.match-location {
+  margin-top: 0.15rem;
+  font-size: 0.85rem;
 }
 
 /* Match detail — rich listing */
