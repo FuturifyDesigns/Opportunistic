@@ -91,6 +91,10 @@ textarea:focus-visible {
   margin-inline: auto;
 }
 
+.dash-page .container.dashboard {
+  width: min(1320px, calc(100% - 2rem));
+}
+
 .narrow {
   width: min(640px, calc(100% - 2rem));
 }
@@ -1845,7 +1849,7 @@ sup {
 }
 
 .dash-page .dashboard {
-  max-width: 1120px;
+  max-width: 1280px;
 }
 
 .dash-hero {
@@ -2049,15 +2053,25 @@ sup {
 }
 
 .dashboard-layout.dash-grid {
-  grid-template-columns: minmax(0, 1.6fr) minmax(240px, 0.75fr);
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
   max-width: none;
+  width: 100%;
 }
 
+.dashboard .match-list,
 .match-list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   gap: 0.9rem;
   align-items: stretch;
+  width: 100%;
+}
+
+.dashboard .match-list > .match-card,
+.match-list > .match-card {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
 }
 
 .match-list > .dash-loading,
@@ -2132,8 +2146,10 @@ sup {
     grid-template-columns: 1fr;
   }
 
+  /* Keep 2 match cards per row on tablets; collapse only on phones */
+  .dashboard .match-list,
   .match-list {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 
   .dash-side {
@@ -5797,6 +5813,11 @@ body {
 
   .match-list {
     gap: 0.7rem;
+    grid-template-columns: 1fr !important;
+  }
+
+  .dashboard .match-list {
+    grid-template-columns: 1fr !important;
   }
 
   .match-card-hit {
