@@ -497,6 +497,7 @@
     "saveError": "Could not save profile",
     "doneToast": "Profile ready. Opening your matches…",
     "beaconReady": "Matches ready — opening your lane…",
+    "beaconWorking": "Preparing your matches…",
     "reviewLede": "Everything looks set. Start matching to scan scholarships and jobs for your profile.",
     "summaryCountry": "Country",
     "summaryName": "Name",
