@@ -721,6 +721,13 @@ textarea:focus-visible {
   color: var(--ink);
 }
 
+.intro-cards {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
 .intro-card {
   position: absolute;
   z-index: 3;
@@ -831,28 +838,63 @@ textarea:focus-visible {
   transform: translateX(3px);
 }
 
-@media (max-width: 900px) {
-  .intro-card {
-    width: min(13.5rem, 32vw);
+/* Tablet + mobile: stack logo/CTA, then neat card grid */
+@media (max-width: 860px) {
+  .intro-page {
+    overflow-x: hidden;
+    overflow-y: auto;
+    place-items: stretch;
   }
 
-  .intro-orbit {
-    min-height: min(58vh, 460px);
+  .intro-hit {
+    place-items: start center;
+    align-content: start;
+    min-height: 100dvh;
+    padding: max(0.85rem, env(safe-area-inset-top)) 1rem max(1.25rem, env(safe-area-inset-bottom));
   }
-}
 
-@media (max-width: 640px) {
+  .intro-stage {
+    width: 100%;
+    max-width: 40rem;
+    margin: 0 auto;
+    padding-top: 0.5rem;
+  }
+
   .intro-orbit {
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: 0.75rem;
+    gap: 1.15rem;
     min-height: 0;
   }
 
   .intro-center {
-    order: -1;
-    margin-bottom: 0.35rem;
+    gap: 0.7rem;
+  }
+
+  .intro-core {
+    width: min(168px, 42vw);
+  }
+
+  .intro-word {
+    font-size: clamp(1.75rem, 7.5vw, 2.35rem);
+  }
+
+  .intro-enter {
+    width: min(100%, 20rem);
+    min-height: 3rem;
+    padding: 0.9rem 1.2rem;
+    font-size: 0.84rem;
+  }
+
+  .intro-cards {
+    position: relative;
+    inset: auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.7rem;
+    width: 100%;
+    pointer-events: auto;
   }
 
   .intro-card {
@@ -861,11 +903,101 @@ textarea:focus-visible {
     left: auto !important;
     right: auto !important;
     width: 100%;
+    min-height: 100%;
+    padding: 0.8rem 0.85rem 0.9rem;
+    box-shadow: 0 6px 18px rgba(10, 10, 10, 0.06);
     transform: none !important;
+    will-change: auto;
+  }
+
+  .intro-card h2 {
+    font-size: 0.95rem;
+  }
+
+  .intro-card p {
+    font-size: 0.78rem;
+    line-height: 1.4;
+  }
+}
+
+@media (max-width: 480px) {
+  .intro-hit {
+    padding-left: 0.85rem;
+    padding-right: 0.85rem;
+  }
+
+  .intro-orbit {
+    gap: 1rem;
   }
 
   .intro-core {
-    width: min(180px, 52vw);
+    width: min(148px, 46vw);
+  }
+
+  .intro-center {
+    gap: 0.55rem;
+  }
+
+  .intro-center .intro-enter {
+    margin-top: 0.25rem;
+  }
+
+  .intro-cards {
+    gap: 0.55rem;
+  }
+
+  .intro-card {
+    padding: 0.7rem 0.75rem 0.8rem;
+    gap: 0.22rem;
+  }
+
+  .intro-card-index {
+    font-size: 0.68rem;
+  }
+
+  .intro-card h2 {
+    font-size: 0.88rem;
+  }
+
+  .intro-card p {
+    font-size: 0.74rem;
+  }
+
+  .intro-enter {
+    width: 100%;
+    letter-spacing: 0.03em;
+  }
+}
+
+/* Very short screens (landscape phones) */
+@media (max-height: 560px) and (max-width: 900px) {
+  .intro-hit {
+    place-items: start center;
+  }
+
+  .intro-core {
+    width: min(110px, 28vw);
+  }
+
+  .intro-word {
+    font-size: clamp(1.35rem, 5vw, 1.75rem);
+  }
+
+  .intro-enter {
+    min-height: 2.4rem;
+    padding: 0.55rem 1rem;
+  }
+
+  .intro-cards {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.45rem;
+  }
+
+  .intro-card p {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 }
 

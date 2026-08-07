@@ -32,6 +32,12 @@ const CARDS = [
   { key: 'lane', slot: 'mr' },
 ]
 
+function canFloatCards() {
+  if (prefersReducedMotion()) return false
+  if (typeof window === 'undefined') return false
+  return window.matchMedia('(min-width: 861px) and (pointer: fine)').matches
+}
+
 export default function Intro() {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -64,7 +70,7 @@ export default function Intro() {
         window.clearInterval(id)
         setReady(true)
       }
-    }, 380)
+    }, 320)
     return () => window.clearInterval(id)
   }, [])
 
@@ -76,9 +82,9 @@ export default function Intro() {
       }
 
       const tl = gsap.timeline({ defaults: { ease: 'power2.out' } })
-      tl.from('.intro-core', { scale: 0.88, opacity: 0, duration: 0.8 })
-        .from('.intro-rings span:not(.intro-sweep)', { scale: 0.75, opacity: 0, stagger: 0.08, duration: 0.5 }, '-=0.55')
-        .from('.intro-word', { y: 16, opacity: 0, duration: 0.45, clearProps: 'transform' }, '-=0.25')
+      tl.from('.intro-core', { scale: 0.9, opacity: 0, duration: 0.7 })
+        .from('.intro-rings span:not(.intro-sweep)', { scale: 0.8, opacity: 0, stagger: 0.07, duration: 0.45 }, '-=0.45')
+        .from('.intro-word', { y: 12, opacity: 0, duration: 0.4, clearProps: 'transform' }, '-=0.2')
 
       gsap.set('.intro-enter', { clearProps: 'opacity,transform,visibility' })
 
@@ -133,23 +139,24 @@ export default function Intro() {
       }
       gsap.fromTo(
         cards,
-        { opacity: 0, y: 14 },
+        { opacity: 0, y: 12 },
         {
           opacity: 1,
           y: 0,
-          duration: 0.45,
-          stagger: 0.06,
+          duration: 0.4,
+          stagger: 0.05,
           ease: 'power2.out',
+          clearProps: canFloatCards() ? '' : 'transform',
           onComplete: () => {
-            if (prefersReducedMotion()) return
+            if (!canFloatCards()) return
             cards.forEach((el, i) => {
               gsap.to(el, {
-                y: i % 2 === 0 ? -7 : -10,
+                y: i % 2 === 0 ? -6 : -9,
                 duration: 2.2 + i * 0.25,
                 yoyo: true,
                 repeat: -1,
                 ease: 'sine.inOut',
-                delay: i * 0.15,
+                delay: i * 0.12,
               })
             })
           },
@@ -173,9 +180,9 @@ export default function Intro() {
     }
 
     const tl = gsap.timeline({ onComplete: go })
-    tl.to('.intro-enter, .intro-card, .intro-word', { opacity: 0, duration: 0.28, stagger: 0.03 })
-      .to('.intro-rings span', { scale: 1.35, opacity: 0, duration: 0.5, stagger: 0.04 }, '-=0.1')
-      .to('.intro-core', { scale: 1.35, opacity: 0, duration: 0.5, ease: 'power2.in' }, '-=0.35')
+    tl.to('.intro-enter, .intro-card, .intro-word', { opacity: 0, duration: 0.25, stagger: 0.03 })
+      .to('.intro-rings span', { scale: 1.3, opacity: 0, duration: 0.45, stagger: 0.04 }, '-=0.1')
+      .to('.intro-core', { scale: 1.3, opacity: 0, duration: 0.45, ease: 'power2.in' }, '-=0.3')
   }
 
   return (
@@ -186,21 +193,7 @@ export default function Intro() {
       <button type="button" className="intro-hit" onClick={enter} aria-label={t('intro.enter')}>
         <div className="intro-stage">
           <div className="intro-orbit">
-            {CARDS.map((card, index) => (
-              <article
-                key={card.key}
-                className={`intro-card slot-${card.slot}${index < visibleCount ? ' is-on' : ''}`}
-                aria-hidden={index >= visibleCount}
-              >
-                <span className="intro-card-index" aria-hidden="true">
-                  {String(index + 1).padStart(2, '0')}
-                </span>
-                <h2>{t(`intro.cards.${card.key}.title`)}</h2>
-                <p>{t(`intro.cards.${card.key}.body`)}</p>
-              </article>
-            ))}
-
-              <div className="intro-center">
+            <div className="intro-center">
               <div className="intro-core">
                 <div className="intro-rings" aria-hidden="true">
                   <span className="r1" />
@@ -219,12 +212,28 @@ export default function Intro() {
                 </div>
               </div>
               <p className="intro-word">{t('common.brand')}</p>
-              <span className="intro-enter show" aria-hidden="false">
+              <span className="intro-enter show">
                 <span className="intro-enter-label">{ready ? t('intro.enterHint') : t('intro.booting')}</span>
                 <span className="intro-enter-arrow" aria-hidden="true">
                   →
                 </span>
               </span>
+            </div>
+
+            <div className="intro-cards" aria-live="polite">
+              {CARDS.map((card, index) => (
+                <article
+                  key={card.key}
+                  className={`intro-card slot-${card.slot}${index < visibleCount ? ' is-on' : ''}`}
+                  aria-hidden={index >= visibleCount}
+                >
+                  <span className="intro-card-index" aria-hidden="true">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <h2>{t(`intro.cards.${card.key}.title`)}</h2>
+                  <p>{t(`intro.cards.${card.key}.body`)}</p>
+                </article>
+              ))}
             </div>
           </div>
         </div>
