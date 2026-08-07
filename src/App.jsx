@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AuthProvider } from './context/AuthContext'
 import { ConsentProvider } from './context/ConsentContext'
+import { ToastProvider } from './context/ToastContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import GlitchHeadings from './components/GlitchHeadings'
 import CookieConsent from './components/CookieConsent'
@@ -79,11 +80,13 @@ export default function App() {
   return (
     <AuthProvider>
       <ConsentProvider>
-        <BrowserRouter>
-          <GlitchHeadings />
-          <CookieConsent />
-          <AppRoutes />
-        </BrowserRouter>
+        <ToastProvider>
+          <BrowserRouter>
+            <GlitchHeadings />
+            <CookieConsent />
+            <AppRoutes />
+          </BrowserRouter>
+        </ToastProvider>
       </ConsentProvider>
     </AuthProvider>
   )

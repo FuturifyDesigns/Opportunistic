@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { COUNTRIES } from '../lib/countries'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
+import { useToast } from '../context/ToastContext'
 import { openCookiePreferences } from '../lib/consent'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
@@ -11,11 +12,11 @@ import LanguageSwitcher from '../components/LanguageSwitcher'
 
 export default function Settings() {
   const { user, profile, refreshProfile, signOut } = useAuth()
+  const toast = useToast()
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const [digest, setDigest] = useState('weekly')
   const [country, setCountry] = useState('Botswana')
-  const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
 
   useEffect(() => {
@@ -28,15 +29,14 @@ export default function Settings() {
 
   async function save() {
     setBusy(true)
-    setMessage('')
     const { error } = await supabase
       .from('profiles')
       .update({ digest_frequency: digest, country })
       .eq('user_id', user.id)
     setBusy(false)
-    if (error) setMessage(error.message)
+    if (error) toast.error(error.message || t('common.toast.genericError'))
     else {
-      setMessage(t('settings.saved'))
+      toast.success(t('settings.saved'))
       refreshProfile()
     }
   }
@@ -44,17 +44,23 @@ export default function Settings() {
   async function deleteAccount() {
     if (!window.confirm(t('settings.deleteConfirm'))) return
     setBusy(true)
-    await Promise.all([
-      supabase.from('scholarship_matches').delete().eq('user_id', user.id),
-      supabase.from('job_matches').delete().eq('user_id', user.id),
-      supabase.from('qualifications').delete().eq('user_id', user.id),
-      supabase.from('skills').delete().eq('user_id', user.id),
-      supabase.from('search_runs').delete().eq('user_id', user.id),
-      supabase.from('profiles').delete().eq('user_id', user.id),
-    ])
-    setMessage(t('settings.deleted'))
-    await signOut()
-    navigate('/')
+    try {
+      await Promise.all([
+        supabase.from('scholarship_matches').delete().eq('user_id', user.id),
+        supabase.from('job_matches').delete().eq('user_id', user.id),
+        supabase.from('qualifications').delete().eq('user_id', user.id),
+        supabase.from('skills').delete().eq('user_id', user.id),
+        supabase.from('search_runs').delete().eq('user_id', user.id),
+        supabase.from('profiles').delete().eq('user_id', user.id),
+      ])
+      toast.success(t('settings.deleted'))
+      await signOut()
+      navigate('/')
+    } catch (err) {
+      toast.error(err.message || t('common.toast.genericError'))
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (
@@ -92,7 +98,6 @@ export default function Settings() {
             </select>
           </label>
 
-          {message ? <p className="form-message">{message}</p> : null}
           <button type="button" className="btn" disabled={busy} onClick={save}>
             {t('settings.saveSettings')}
           </button>

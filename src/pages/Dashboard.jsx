@@ -5,6 +5,7 @@ import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
+import { useToast } from '../context/ToastContext'
 import {
   getLastMatchAt,
   getLastMatchMeta,
@@ -19,6 +20,7 @@ gsap.registerPlugin(useGSAP)
 
 export default function Dashboard() {
   const { user, profile, refreshProfile } = useAuth()
+  const toast = useToast()
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [tab, setTab] = useState('scholarships')
@@ -86,13 +88,23 @@ export default function Dashboard() {
         setMeta(result.meta || null)
         await refreshProfile?.()
         await load()
+        if (reason === 'manual') {
+          toast.success(
+            t('dashboard.updated', {
+              scholarships: result.scholarships,
+              jobs: result.jobs,
+            }),
+          )
+        }
       } catch (e) {
-        setEngineNote(e.message || t('dashboard.refreshFailed'))
+        const msg = e.message || t('dashboard.refreshFailed')
+        setEngineNote(msg)
+        toast.error(msg)
       } finally {
         setRefreshing(false)
       }
     },
-    [user?.id, refreshing, load, refreshProfile, t],
+    [user?.id, refreshing, load, refreshProfile, t, toast],
   )
 
   useEffect(() => {
@@ -127,14 +139,27 @@ export default function Dashboard() {
 
   async function onSave(match) {
     const table = tab === 'scholarships' ? 'scholarship_matches' : 'job_matches'
-    await supabase.from(table).update({ saved: !match.saved }).eq('id', match.id)
-    load()
+    const nextSaved = !match.saved
+    try {
+      const { error } = await supabase.from(table).update({ saved: nextSaved }).eq('id', match.id)
+      if (error) throw error
+      toast.success(nextSaved ? t('common.toast.matchSaved') : t('common.toast.matchUnsaved'))
+      load()
+    } catch (err) {
+      toast.error(err.message || t('common.toast.genericError'))
+    }
   }
 
   async function onDismiss(match) {
     const table = tab === 'scholarships' ? 'scholarship_matches' : 'job_matches'
-    await supabase.from(table).update({ dismissed: true }).eq('id', match.id)
-    load()
+    try {
+      const { error } = await supabase.from(table).update({ dismissed: true }).eq('id', match.id)
+      if (error) throw error
+      toast.info(t('common.toast.matchDismissed'))
+      load()
+    } catch (err) {
+      toast.error(err.message || t('common.toast.genericError'))
+    }
   }
 
   const pool = tab === 'scholarships' ? scholarships : jobs

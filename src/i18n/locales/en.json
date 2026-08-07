@@ -18,7 +18,24 @@
     "builtBy": "Built by",
     "allRights": "All rights reserved.",
     "updated": "Updated",
-    "footerNav": "Footer"
+    "footerNav": "Footer",
+    "toast": {
+      "signedIn": "Signed in.",
+      "signedOut": "Signed out.",
+      "accountCreated": "Account created.",
+      "checkEmail": "Check your email to confirm your account.",
+      "languageChanged": "Language updated.",
+      "cookiesSaved": "Cookie preferences saved.",
+      "cookiesAccepted": "All cookies accepted.",
+      "cookiesNecessary": "Necessary cookies only.",
+      "matchSaved": "Match saved.",
+      "matchUnsaved": "Removed from saved.",
+      "matchDismissed": "Match dismissed.",
+      "matchRestored": "Match restored.",
+      "copied": "Copied to clipboard.",
+      "genericError": "Something went wrong. Try again.",
+      "loadFailed": "Could not load data."
+    }
   },
   "nav": {
     "howItWorks": "How it works",
@@ -369,6 +386,11 @@
     "unknownType": "Unknown listing type.",
     "missingRef": "Missing match reference.",
     "updateFailed": "Could not update match",
+    "savedToast": "Match saved.",
+    "unsavedToast": "Removed from saved.",
+    "dismissedToast": "Match dismissed.",
+    "restoredToast": "Match restored.",
+    "tipsRefreshed": "Tips refreshed.",
     "expandGallery": "Expand gallery image",
     "closeImage": "Close image"
   },
@@ -427,6 +449,7 @@
     "startMatching": "Start matching",
     "processing": "Processing…",
     "saveError": "Could not save profile",
+    "doneToast": "Profile ready. Opening your matches…",
     "assistantTitle": "OPPORTUNISTIC // GUIDE",
     "assistantStep": "STEP {{step}}",
     "assistantWhat": "What this step does",

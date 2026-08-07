@@ -7,6 +7,7 @@ import { COUNTRIES } from '../lib/countries'
 import { supabase } from '../lib/supabase'
 import { runMatchingForUser } from '../lib/matchingService'
 import { useAuth } from '../context/AuthContext'
+import { useToast } from '../context/ToastContext'
 import SiteHeader from '../components/SiteHeader'
 import PageBackdrop from '../components/PageBackdrop'
 import SkillPicker from '../components/SkillPicker'
@@ -19,6 +20,7 @@ const emptyQual = { type: 'degree', field: '', institution: '', year: new Date()
 
 export default function Onboarding() {
   const { user, refreshProfile } = useAuth()
+  const toast = useToast()
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const root = useRef(null)
@@ -180,9 +182,12 @@ export default function Onboarding() {
 
       await runMatchingForUser(user.id)
       await refreshProfile()
+      toast.success(t('onboarding.doneToast'))
       window.setTimeout(() => navigate('/dashboard'), Math.max(2800, lines.length * 380))
     } catch (err) {
-      setError(err.message || t('onboarding.saveError'))
+      const msg = err.message || t('onboarding.saveError')
+      setError(msg)
+      toast.error(msg)
       setBusy(false)
     }
   }

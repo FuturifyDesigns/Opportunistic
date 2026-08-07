@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { LANGUAGES, nativeLanguageName } from '../i18n/languages'
 import { changeAppLanguage } from '../i18n'
+import { useToast } from '../context/ToastContext'
 
 function useIsNarrow(max = 860) {
   const [narrow, setNarrow] = useState(() =>
@@ -22,6 +23,7 @@ function useIsNarrow(max = 860) {
 
 export default function LanguageSwitcher({ compact = false, onPick }) {
   const { i18n, t } = useTranslation()
+  const toast = useToast()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [panelStyle, setPanelStyle] = useState(null)
@@ -123,6 +125,7 @@ export default function LanguageSwitcher({ compact = false, onPick }) {
   function pick(code) {
     void changeAppLanguage(code).then(() => {
       setOpen(false)
+      toast.success(t('common.toast.languageChanged'))
       onPick?.(code)
     })
   }

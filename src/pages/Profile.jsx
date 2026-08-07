@@ -5,6 +5,7 @@ import { COUNTRIES } from '../lib/countries'
 import { supabase } from '../lib/supabase'
 import { runMatchingForUser } from '../lib/matchingService'
 import { useAuth } from '../context/AuthContext'
+import { useToast } from '../context/ToastContext'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
 import SkillPicker from '../components/SkillPicker'
@@ -14,6 +15,7 @@ const emptyQual = { type: 'degree', field: '', institution: '', year: new Date()
 
 export default function Profile() {
   const { user, profile, refreshProfile } = useAuth()
+  const toast = useToast()
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const [form, setForm] = useState({
@@ -25,7 +27,6 @@ export default function Profile() {
   const [qualifications, setQualifications] = useState([{ ...emptyQual }])
   const [skills, setSkills] = useState([])
   const [busy, setBusy] = useState(false)
-  const [message, setMessage] = useState('')
 
   useEffect(() => {
     document.title = t('profile.metaTitle')
@@ -67,7 +68,6 @@ export default function Profile() {
   async function save(e) {
     e.preventDefault()
     setBusy(true)
-    setMessage('')
     try {
       const { error: pErr } = await supabase
         .from('profiles')
@@ -101,10 +101,10 @@ export default function Profile() {
 
       await runMatchingForUser(user.id)
       await refreshProfile()
-      setMessage(t('profile.saveSuccess'))
+      toast.success(t('profile.saveSuccess'))
       setTimeout(() => navigate('/dashboard'), 700)
     } catch (err) {
-      setMessage(err.message || t('profile.saveError'))
+      toast.error(err.message || t('profile.saveError'))
     } finally {
       setBusy(false)
     }
@@ -195,7 +195,6 @@ export default function Profile() {
           <p className="muted">{t('profile.skillsHint')}</p>
           <SkillPicker qualifications={qualifications} value={skills} onChange={setSkills} />
 
-          {message ? <p className="form-message">{message}</p> : null}
           <button className="btn" type="submit" disabled={busy}>
             {busy ? t('profile.saving') : t('profile.save')}
           </button>

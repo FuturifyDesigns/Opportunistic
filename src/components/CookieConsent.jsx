@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useConsent } from '../context/ConsentContext'
+import { useToast } from '../context/ToastContext'
 
 export default function CookieConsent() {
   const { t } = useTranslation()
+  const toast = useToast()
   const {
     consent,
     bannerOpen,
@@ -48,7 +50,14 @@ export default function CookieConsent() {
               </p>
             </div>
             <div className="cookie-banner-actions">
-              <button type="button" className="btn btn-ghost btn-sm" onClick={rejectExtras}>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                onClick={() => {
+                  rejectExtras()
+                  toast.info(t('common.toast.cookiesNecessary'))
+                }}
+              >
                 {t('cookies.necessaryOnly')}
               </button>
               <button
@@ -61,7 +70,14 @@ export default function CookieConsent() {
               >
                 {t('cookies.customize')}
               </button>
-              <button type="button" className="btn btn-sm" onClick={acceptEverything}>
+              <button
+                type="button"
+                className="btn btn-sm"
+                onClick={() => {
+                  acceptEverything()
+                  toast.success(t('common.toast.cookiesAccepted'))
+                }}
+              >
                 {t('cookies.acceptAll')}
               </button>
             </div>
@@ -126,19 +142,27 @@ export default function CookieConsent() {
             </div>
 
             <div className="cookie-modal-actions">
-              <button type="button" className="btn btn-ghost" onClick={rejectExtras}>
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={() => {
+                  rejectExtras()
+                  toast.info(t('common.toast.cookiesNecessary'))
+                }}
+              >
                 {t('cookies.necessaryOnly')}
               </button>
               <button
                 type="button"
                 className="btn"
-                onClick={() =>
+                onClick={() => {
                   savePrefs({
                     preferences: draft.preferences,
                     analytics: draft.analytics,
                     marketing: draft.marketing,
                   })
-                }
+                  toast.success(t('common.toast.cookiesSaved'))
+                }}
               >
                 {t('cookies.saveChoices')}
               </button>

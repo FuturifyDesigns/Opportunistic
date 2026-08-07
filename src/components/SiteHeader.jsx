@@ -2,11 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
+import { useToast } from '../context/ToastContext'
 import GetStartedLogo from './GetStartedLogo'
 import LanguageSwitcher from './LanguageSwitcher'
 
 export default function SiteHeader() {
   const { user, profile, signOut } = useAuth()
+  const toast = useToast()
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [accountOpen, setAccountOpen] = useState(false)
@@ -113,7 +115,7 @@ export default function SiteHeader() {
                     className="account-menu-signout"
                     onClick={() => {
                       close()
-                      signOut()
+                      void signOut().then(() => toast.info(t('common.toast.signedOut')))
                     }}
                   >
                     {t('nav.signOut')}

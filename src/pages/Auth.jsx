@@ -5,6 +5,7 @@ import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
+import { useToast } from '../context/ToastContext'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
 import PageBackdrop from '../components/PageBackdrop'
@@ -75,6 +76,7 @@ export default function Auth() {
   const [params] = useSearchParams()
   const navigate = useNavigate()
   const { user, profile, loading } = useAuth()
+  const toast = useToast()
   const root = useRef(null)
   const formRef = useRef(null)
   const floatTweens = useRef({})
@@ -237,7 +239,9 @@ export default function Auth() {
     setTouched({ fullName: true, email: true, password: true, confirm: true })
     const nextErrors = validate(mode, { fullName, email, password, confirm }, t)
     if (Object.keys(nextErrors).length) {
-      setMessage(t('auth.errFixFields'))
+      const msg = t('auth.errFixFields')
+      setMessage(msg)
+      toast.error(msg)
       return
     }
     setBusy(true)
@@ -251,18 +255,24 @@ export default function Auth() {
         })
         if (error) throw error
         if (!data.session) {
-          setMessage(t('auth.checkEmail'))
+          const msg = t('auth.checkEmail')
+          setMessage(msg)
+          toast.info(msg)
           setMode('login')
         } else {
+          toast.success(t('common.toast.accountCreated'))
           navigate('/onboarding')
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
         if (error) throw error
+        toast.success(t('common.toast.signedIn'))
         navigate('/dashboard')
       }
     } catch (err) {
-      setMessage(err.message || t('auth.genericError'))
+      const msg = err.message || t('auth.genericError')
+      setMessage(msg)
+      toast.error(msg)
     } finally {
       setBusy(false)
     }

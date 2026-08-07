@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
+import { useToast } from '../context/ToastContext'
 import { getListingBySource } from '../lib/listingCatalog'
 import { generateWinTips } from '../lib/tipEngine'
 import SiteHeader from '../components/SiteHeader'
@@ -19,6 +20,7 @@ function splitSentences(text = '') {
 export default function MatchDetail() {
   const { kind, id } = useParams()
   const { user, profile } = useAuth()
+  const toast = useToast()
   const { t, i18n } = useTranslation()
   const [match, setMatch] = useState(null)
   const [qualifications, setQualifications] = useState([])
@@ -98,7 +100,8 @@ export default function MatchDetail() {
     if (!match || !table || busy) return
     setBusy(true)
     try {
-      const next = { [field]: !match[field] }
+      const nextValue = !match[field]
+      const next = { [field]: nextValue }
       const { data, error: err } = await supabase
         .from(table)
         .update(next)
@@ -108,8 +111,15 @@ export default function MatchDetail() {
         .single()
       if (err) throw err
       if (data) setMatch(data)
+      if (field === 'saved') {
+        toast.success(nextValue ? t('match.savedToast') : t('match.unsavedToast'))
+      } else if (field === 'dismissed') {
+        toast.info(nextValue ? t('match.dismissedToast') : t('match.restoredToast'))
+      }
     } catch (err) {
-      setError(err.message || t('match.updateFailed'))
+      const msg = err.message || t('match.updateFailed')
+      setError(msg)
+      toast.error(msg)
     } finally {
       setBusy(false)
     }
@@ -194,7 +204,14 @@ export default function MatchDetail() {
                     {t('match.playbookNote')}
                   </p>
                 </div>
-                <button type="button" className="btn btn-ghost btn-sm" onClick={() => setTipNonce((n) => n + 1)}>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => {
+                    setTipNonce((n) => n + 1)
+                    toast.success(t('match.tipsRefreshed'))
+                  }}
+                >
                   {t('match.newTips')}
                 </button>
               </div>
