@@ -13,7 +13,8 @@ export default function SiteHeader() {
     <header className="site-header">
       <div className="container header-inner">
         <NavLink to="/" className="brand" aria-label="Opportunistic home" onClick={close} end>
-          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="Opportunistic" className="brand-logo" />
+          <img src={`${import.meta.env.BASE_URL}mark.svg`} alt="" className="brand-mark" width="32" height="32" />
+          <span className="brand-word">Opportunistic</span>
         </NavLink>
 
         <button
@@ -28,20 +29,17 @@ export default function SiteHeader() {
         </button>
 
         <nav className={`nav ${open ? 'open' : ''}`}>
-          {!user ? (
-            <>
-              <NavLink to="/how-it-works" onClick={close}>
-                How it works
-              </NavLink>
-              <NavLink to="/features" onClick={close}>
-                Features
-              </NavLink>
-              <NavLink to="/about" onClick={close}>
-                About
-              </NavLink>
-              <GetStartedLogo onClick={close} />
-            </>
-          ) : (
+          <NavLink to="/how-it-works" onClick={close}>
+            How it works
+          </NavLink>
+          <NavLink to="/features" onClick={close}>
+            Features
+          </NavLink>
+          <NavLink to="/about" onClick={close}>
+            About
+          </NavLink>
+
+          {user ? (
             <>
               <NavLink to="/dashboard" onClick={close}>
                 Dashboard
@@ -63,6 +61,8 @@ export default function SiteHeader() {
                 Sign out
               </button>
             </>
+          ) : (
+            <GetStartedLogo onClick={close} />
           )}
         </nav>
       </div>

@@ -84,6 +84,13 @@ export default function HowItWorksDemo() {
     () => {
       if (prefersReducedMotion()) return
       gsap.from('.jarvis-screen', { opacity: 0, y: 20, duration: 0.5, ease: 'power2.out' })
+      gsap.from('.demo-step', {
+        opacity: 0,
+        x: -24,
+        stagger: 0.1,
+        duration: 0.45,
+        ease: 'power2.out',
+      })
     },
     { scope: root },
   )

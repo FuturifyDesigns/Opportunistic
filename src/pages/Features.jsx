@@ -7,6 +7,7 @@ import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
 import InteractiveCard from '../components/InteractiveCard'
 import PageBackdrop from '../components/PageBackdrop'
+import LiveFeaturePreview from '../components/LiveFeaturePreview'
 import { prefersReducedMotion, revealOnScroll } from '../lib/animations'
 
 gsap.registerPlugin(useGSAP, ScrollTrigger)
@@ -18,6 +19,7 @@ const FEATURES = [
     title: 'Worldwide awards, ranked for you',
     body: 'Your degrees and skills drive the search. Each scholarship card shows score + why it fits.',
     points: ['Regional preference from your country', 'Reasoning visible by default', 'Deadlines filtered on read'],
+    preview: 'scholarship',
   },
   {
     side: 'right',
@@ -25,6 +27,7 @@ const FEATURES = [
     title: 'Roles filtered to your country',
     body: 'Same profile, second engine. Jobs respect the country you chose — with transparent fit notes.',
     points: ['Country-aware queries', 'Skills-weighted scoring', 'Save or dismiss per listing'],
+    preview: 'job',
   },
   {
     side: 'left',
@@ -32,6 +35,7 @@ const FEATURES = [
     title: 'Guided onboarding, not a wall of fields',
     body: 'Country → about you → qualifications → skills. Editing later rematches automatically.',
     points: ['Step-by-step flow', 'Degrees & certificates', 'Proficiency levels'],
+    preview: 'profile',
   },
   {
     side: 'right',
@@ -39,6 +43,7 @@ const FEATURES = [
     title: 'Delete means cascade',
     body: 'GDPR-level deletion for everyone. Profile removal cascades to skills, quals, and matches.',
     points: ['Own-data RLS', 'Digest controls', 'Clear terms & privacy'],
+    preview: 'privacy',
   },
 ]
 
@@ -108,16 +113,7 @@ export default function Features() {
                     </ul>
                   </div>
                   <div className="zig-media">
-                    <InteractiveCard className="feature-showcase">
-                      <p className="eyebrow">Preview</p>
-                      <strong>{f.eyebrow}</strong>
-                      <div className="mini-bars" aria-hidden="true">
-                        <span style={{ width: `${88 - i * 6}%` }} />
-                        <span style={{ width: `${72 - i * 4}%` }} />
-                        <span style={{ width: `${64 - i * 5}%` }} />
-                      </div>
-                      <p className="muted">Hover / tilt this card</p>
-                    </InteractiveCard>
+                    <LiveFeaturePreview kind={f.preview} title={f.eyebrow} />
                   </div>
                 </div>
               ))}
