@@ -2804,6 +2804,139 @@ a.btn-auth {
   width: 100%;
 }
 
+.stack-form .auth-field {
+  display: grid;
+  gap: 0.35rem;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.stack-form .auth-field > label {
+  font: inherit;
+  font-weight: 600;
+}
+
+.field-required {
+  color: var(--danger);
+  margin-left: 0.2rem;
+  font-weight: 700;
+}
+
+.password-guide {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 0.15rem;
+}
+
+.password-meter {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.password-meter-track {
+  height: 6px;
+  border-radius: 999px;
+  background: #e4e4e0;
+  overflow: hidden;
+}
+
+.password-meter-fill {
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: #8a8a86;
+  transition: width 0.2s ease, background-color 0.2s ease;
+}
+
+.password-meter.level-weak .password-meter-fill {
+  background: #8b1e1e;
+}
+
+.password-meter.level-fair .password-meter-fill {
+  background: #a56b1d;
+}
+
+.password-meter.level-good .password-meter-fill {
+  background: #3d6b4f;
+}
+
+.password-meter.level-strong .password-meter-fill {
+  background: #0b6e4f;
+}
+
+.password-meter-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted);
+  min-width: 3.5rem;
+  text-align: right;
+}
+
+.password-meter.level-weak .password-meter-label {
+  color: var(--danger);
+}
+
+.password-meter.level-fair .password-meter-label {
+  color: #a56b1d;
+}
+
+.password-meter.level-good .password-meter-label,
+.password-meter.level-strong .password-meter-label {
+  color: var(--accent);
+}
+
+.password-reqs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.28rem;
+}
+
+.password-reqs li {
+  position: relative;
+  padding-left: 1.15rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.password-reqs li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.35rem;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  border: 1.5px solid #b8b8b2;
+  background: transparent;
+}
+
+.password-reqs li.met {
+  color: var(--ink);
+}
+
+.password-reqs li.met::before {
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: inset 0 0 0 1.5px #fff;
+}
+
+.password-reqs li.optional:not(.met) {
+  opacity: 0.85;
+}
+
+.field-ok {
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
 .ghost-toggle {
   border: 1px solid var(--line);
   background: #fff;
@@ -2829,7 +2962,10 @@ a.btn-auth {
 
 .stack-form label.invalid input,
 .stack-form label.invalid select,
-.stack-form label.invalid textarea {
+.stack-form label.invalid textarea,
+.stack-form .auth-field.invalid input,
+.stack-form .auth-field.invalid select,
+.stack-form .auth-field.invalid textarea {
   border-color: #d98989;
   background: #fff7f7;
 }

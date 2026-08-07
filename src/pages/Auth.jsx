@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import gsap from 'gsap'
@@ -12,6 +12,34 @@ import { prefersReducedMotion } from '../lib/animations'
 
 gsap.registerPlugin(useGSAP)
 
+const PASSWORD_MIN = 8
+
+function passwordChecks(password) {
+  return {
+    length: password.length >= PASSWORD_MIN,
+    letter: /[A-Za-z]/.test(password),
+    number: /[0-9]/.test(password),
+    upper: /[A-Z]/.test(password),
+    special: /[^A-Za-z0-9]/.test(password),
+    long: password.length >= 12,
+  }
+}
+
+function passwordStrength(password) {
+  if (!password) return { score: 0, level: 'empty', percent: 0, checks: passwordChecks('') }
+  const checks = passwordChecks(password)
+  let score = 0
+  if (checks.length) score += 1
+  if (checks.letter) score += 1
+  if (checks.number) score += 1
+  if (checks.upper) score += 1
+  if (checks.special || checks.long) score += 1
+  const levels = ['weak', 'weak', 'fair', 'good', 'strong', 'strong']
+  const level = levels[score] || 'weak'
+  const percent = Math.min(100, Math.round((score / 5) * 100))
+  return { score, level, percent, checks }
+}
+
 function validate(mode, { fullName, email, password, confirm }, t) {
   const errors = {}
   if (mode === 'signup') {
@@ -21,14 +49,25 @@ function validate(mode, { fullName, email, password, confirm }, t) {
   if (!email.trim()) errors.email = t('auth.errEmailRequired')
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) errors.email = t('auth.errEmailInvalid')
   if (!password) errors.password = t('auth.errPasswordRequired')
-  else if (password.length < 8) errors.password = t('auth.errPasswordShort')
-  else if (mode === 'signup' && !/[A-Za-z]/.test(password)) errors.password = t('auth.errPasswordLetter')
-  else if (mode === 'signup' && !/[0-9]/.test(password)) errors.password = t('auth.errPasswordNumber')
+  else if (password.length < PASSWORD_MIN) errors.password = t('auth.errPasswordShort')
+  else if (mode === 'signup') {
+    const checks = passwordChecks(password)
+    if (!checks.letter) errors.password = t('auth.errPasswordLetter')
+    else if (!checks.number) errors.password = t('auth.errPasswordNumber')
+  }
   if (mode === 'signup') {
     if (!confirm) errors.confirm = t('auth.errConfirmRequired')
     else if (confirm !== password) errors.confirm = t('auth.errPasswordMismatch')
   }
   return errors
+}
+
+function RequiredMark() {
+  return (
+    <span className="field-required" aria-hidden="true">
+      *
+    </span>
+  )
 }
 
 export default function Auth() {
@@ -73,7 +112,8 @@ export default function Auth() {
     () => validate(mode, { fullName, email, password, confirm }, t),
     [mode, fullName, email, password, confirm, t],
   )
-  const hasErrors = Object.keys(errors).length > 0
+  const strength = useMemo(() => passwordStrength(password), [password])
+  const showPasswordGuide = mode === 'signup' && password.length > 0
   const activeSide = hover || (phase === 'form' ? mode : null)
 
   useEffect(() => {
@@ -195,8 +235,9 @@ export default function Auth() {
   async function onSubmit(e) {
     e.preventDefault()
     setTouched({ fullName: true, email: true, password: true, confirm: true })
-    if (hasErrors) {
-      setMessage(t('auth.errEmailRequired'))
+    const nextErrors = validate(mode, { fullName, email, password, confirm }, t)
+    if (Object.keys(nextErrors).length) {
+      setMessage(t('auth.errFixFields'))
       return
     }
     setBusy(true)
@@ -286,61 +327,126 @@ export default function Auth() {
                 <form className="stack-form" onSubmit={onSubmit} noValidate>
                   {mode === 'signup' ? (
                     <label className={`auth-field ${touched.fullName && errors.fullName ? 'invalid' : ''}`}>
-                      {t('auth.fullName')}
+                      <span>
+                        {t('auth.fullName')}
+                        <RequiredMark />
+                      </span>
                       <input
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
                         onBlur={() => markTouched('fullName')}
                         autoComplete="name"
+                        required
+                        aria-required="true"
                         aria-invalid={Boolean(touched.fullName && errors.fullName)}
                       />
                       {touched.fullName && errors.fullName ? <span className="field-error">{errors.fullName}</span> : null}
                     </label>
                   ) : null}
                   <label className={`auth-field ${touched.email && errors.email ? 'invalid' : ''}`}>
-                    {t('auth.email')}
+                    <span>
+                      {t('auth.email')}
+                      <RequiredMark />
+                    </span>
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       onBlur={() => markTouched('email')}
                       autoComplete="email"
+                      required
+                      aria-required="true"
                       aria-invalid={Boolean(touched.email && errors.email)}
                     />
                     {touched.email && errors.email ? <span className="field-error">{errors.email}</span> : null}
                   </label>
-                  <label className={`auth-field ${touched.password && errors.password ? 'invalid' : ''}`}>
-                    {t('auth.password')}
+                  <div className={`auth-field ${touched.password && errors.password ? 'invalid' : ''}`}>
+                    <label htmlFor="auth-password">
+                      <span>
+                        {t('auth.password')}
+                        <RequiredMark />
+                      </span>
+                    </label>
                     <div className="password-field">
                       <input
+                        id="auth-password"
                         type={showPass ? 'text' : 'password'}
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        onChange={(e) => {
+                          setPassword(e.target.value)
+                          if (message) setMessage('')
+                        }}
                         onBlur={() => markTouched('password')}
                         autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+                        required
+                        aria-required="true"
                         aria-invalid={Boolean(touched.password && errors.password)}
+                        aria-describedby={showPasswordGuide ? 'auth-password-guide' : undefined}
+                        minLength={mode === 'signup' ? PASSWORD_MIN : undefined}
                       />
                       <button type="button" className="ghost-toggle" onClick={() => setShowPass((v) => !v)}>
                         {showPass ? t('auth.hidePassword') : t('auth.showPassword')}
                       </button>
                     </div>
+                    {showPasswordGuide ? (
+                      <div id="auth-password-guide" className="password-guide">
+                        <div
+                          className={`password-meter level-${strength.level}`}
+                          role="progressbar"
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                          aria-valuenow={strength.percent}
+                          aria-label={t('auth.passwordStrengthLabel', { level: t(`auth.strength.${strength.level}`) })}
+                        >
+                          <div className="password-meter-track">
+                            <div className="password-meter-fill" style={{ width: `${strength.percent}%` }} />
+                          </div>
+                          <span className="password-meter-label">{t(`auth.strength.${strength.level}`)}</span>
+                        </div>
+                        <p className="field-hint">{t('auth.passwordHint')}</p>
+                        <ul className="password-reqs">
+                          <li className={strength.checks.length ? 'met' : ''}>{t('auth.reqLength')}</li>
+                          <li className={strength.checks.letter ? 'met' : ''}>{t('auth.reqLetter')}</li>
+                          <li className={strength.checks.number ? 'met' : ''}>{t('auth.reqNumber')}</li>
+                          <li className={strength.checks.upper ? 'met' : 'optional'}>{t('auth.reqUpper')}</li>
+                          <li className={strength.checks.special || strength.checks.long ? 'met' : 'optional'}>
+                            {t('auth.reqStronger')}
+                          </li>
+                        </ul>
+                      </div>
+                    ) : mode === 'signup' ? (
+                      <p className="field-hint">{t('auth.passwordHintIdle')}</p>
+                    ) : null}
                     {touched.password && errors.password ? <span className="field-error">{errors.password}</span> : null}
-                  </label>
+                  </div>
                   {mode === 'signup' ? (
                     <label className={`auth-field ${touched.confirm && errors.confirm ? 'invalid' : ''}`}>
-                      {t('auth.confirmPassword')}
+                      <span>
+                        {t('auth.confirmPassword')}
+                        <RequiredMark />
+                      </span>
                       <input
                         type={showPass ? 'text' : 'password'}
                         value={confirm}
-                        onChange={(e) => setConfirm(e.target.value)}
+                        onChange={(e) => {
+                          setConfirm(e.target.value)
+                          if (message) setMessage('')
+                        }}
                         onBlur={() => markTouched('confirm')}
                         autoComplete="new-password"
+                        required
+                        aria-required="true"
                         aria-invalid={Boolean(touched.confirm && errors.confirm)}
                       />
+                      {confirm.length > 0 && !errors.confirm ? (
+                        <span className="field-ok">{t('auth.passwordsMatch')}</span>
+                      ) : null}
                       {touched.confirm && errors.confirm ? <span className="field-error">{errors.confirm}</span> : null}
                     </label>
                   ) : null}
-                  {message ? <p className="form-message">{message}</p> : null}
+                  {message ? (
+                    <p className={`form-message ${Object.keys(errors).length && !busy ? 'warn' : ''}`}>{message}</p>
+                  ) : null}
                   <button className="btn auth-field" type="submit" disabled={busy}>
                     {busy ? t('common.loading') : mode === 'signup' ? t('auth.submitSignUp') : t('auth.submitSignIn')}
                   </button>
