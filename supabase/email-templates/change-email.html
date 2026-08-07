@@ -1,0 +1,56 @@
+Subject: Confirm your new Opportunistic email
+
+Body:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Change email</title>
+</head>
+<body style="margin:0;padding:0;background:#0a0b0c;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#0a0b0c;padding:32px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" style="max-width:560px;background:#111314;border:1px solid #222628;border-radius:8px;overflow:hidden;">
+          <tr>
+            <td style="padding:28px 28px 12px;text-align:center;border-bottom:1px solid #1c2124;">
+              <img src="https://opportunistic.online/logo.png" width="72" height="72" alt="Opportunistic" style="display:block;margin:0 auto 14px;border:0;" />
+              <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#0b6e4f;font-weight:700;">Opportunistic // Identity</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:28px;">
+              <h1 style="margin:0 0 12px;font-size:24px;line-height:1.2;color:#f4f6f5;font-weight:600;letter-spacing:-0.02em;">Verify the new address.</h1>
+              <p style="margin:0 0 18px;font-size:15px;line-height:1.6;color:#9aa3a1;">
+                Confirm this email to finish updating your Opportunistic login. Matches and profile stay tied to the verified address.
+              </p>
+              <table role="presentation" cellspacing="0" cellpadding="0" style="margin:24px 0;">
+                <tr>
+                  <td style="border-radius:4px;background:#0b6e4f;">
+                    <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:14px 22px;color:#ffffff;text-decoration:none;font-size:14px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;">
+                      Confirm new email
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:0;font-size:12px;line-height:1.55;color:#6b7472;">
+                Link:<br />
+                <a href="{{ .ConfirmationURL }}" style="color:#2de2e6;word-break:break-all;">{{ .ConfirmationURL }}</a>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:16px 28px 24px;border-top:1px solid #1c2124;text-align:center;">
+              <p style="margin:0;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#4a5250;">
+                Opportunistic™ · Futurify Designs
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

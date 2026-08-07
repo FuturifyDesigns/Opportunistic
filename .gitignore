@@ -14,6 +14,11 @@ dist-ssr
 .env
 .env.local
 .env.*.local
+.env.smtp
+.env.smtp.local
+secrets/
+*.pem
+*.key
 
 # Editor directories and files
 .vscode/*
