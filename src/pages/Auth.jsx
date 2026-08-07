@@ -51,6 +51,7 @@ export default function Auth() {
   const { user, profile, loading } = useAuth()
   const root = useRef(null)
   const formRef = useRef(null)
+  const floatTweens = useRef({})
 
   const paramMode = params.get('mode') === 'signup' ? 'signup' : 'login'
   const [phase, setPhase] = useState('choose')
@@ -86,79 +87,104 @@ export default function Auth() {
   useGSAP(
     () => {
       if (prefersReducedMotion() || phase !== 'choose') return
-      gsap.from('.auth-orb', {
-        scale: 0.7,
-        opacity: 0,
-        y: 30,
-        stagger: 0.12,
-        duration: 0.65,
-        ease: 'power3.out',
-      })
-      gsap.to('.auth-orb-core', {
-        y: -8,
-        duration: 2.2,
-        yoyo: true,
-        repeat: -1,
-        ease: 'sine.inOut',
-        stagger: 0.35,
-      })
-      gsap.to('.auth-orb-ring', {
-        rotate: 360,
-        duration: 18,
-        repeat: -1,
-        ease: 'none',
-        stagger: 0.2,
-      })
+      gsap.fromTo(
+        '.auth-orb',
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, stagger: 0.1, duration: 0.5, ease: 'power2.out', clearProps: 'transform' },
+      )
     },
     { scope: root, dependencies: [phase] },
   )
 
   useGSAP(
     () => {
-      if (phase !== 'form' || prefersReducedMotion()) return
+      if (phase !== 'form') return
+      const panel = formRef.current
+      if (!panel) return
+      if (prefersReducedMotion()) {
+        gsap.set(panel, { clearProps: 'all' })
+        return
+      }
       gsap.fromTo(
-        formRef.current,
-        { opacity: 0, y: 28, scale: 0.98 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: 'power3.out' },
+        panel,
+        { opacity: 0, y: 24 },
+        { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' },
       )
-      gsap.from('.auth-field', {
-        opacity: 0,
-        x: mode === 'signup' ? 24 : -24,
-        stagger: 0.07,
-        duration: 0.4,
-        delay: 0.15,
-        ease: 'power2.out',
-      })
+      gsap.fromTo(
+        panel.querySelectorAll('.auth-field'),
+        { opacity: 0, y: 12 },
+        { opacity: 1, y: 0, stagger: 0.06, duration: 0.35, delay: 0.1, ease: 'power2.out' },
+      )
     },
     { scope: root, dependencies: [phase, mode] },
   )
 
+  function startFloat(side, el) {
+    if (prefersReducedMotion() || !el) return
+    stopFloat(side)
+    const core = el.querySelector('.auth-orb-core')
+    const ring = el.querySelector('.auth-orb-ring')
+    if (!core) return
+    floatTweens.current[side] = [
+      gsap.to(core, { y: -10, duration: 1.1, yoyo: true, repeat: -1, ease: 'sine.inOut' }),
+      ring
+        ? gsap.to(ring, { rotate: '+=360', duration: 10, repeat: -1, ease: 'none' })
+        : null,
+    ].filter(Boolean)
+  }
+
+  function stopFloat(side) {
+    const list = floatTweens.current[side] || []
+    list.forEach((t) => t.kill())
+    floatTweens.current[side] = []
+    const el = root.current?.querySelector(`.orb-${side}`)
+    if (!el) return
+    const core = el.querySelector('.auth-orb-core')
+    const ring = el.querySelector('.auth-orb-ring')
+    if (core) gsap.set(core, { y: 0 })
+    if (ring) gsap.set(ring, { rotate: 0 })
+  }
+
+  function onOrbEnter(side, el) {
+    setHover(side)
+    startFloat(side, el)
+  }
+
+  function onOrbLeave(side) {
+    setHover(null)
+    stopFloat(side)
+  }
+
   function openSide(next) {
+    stopFloat('login')
+    stopFloat('signup')
     setMode(next)
+    setHover(next)
     setTouched({})
     setMessage('')
-    setHover(next)
 
+    // Always switch to the form — animation is optional polish
     if (prefersReducedMotion()) {
       setPhase('form')
       return
     }
 
-    const tl = gsap.timeline({
-      onComplete: () => setPhase('form'),
+    const choose = root.current?.querySelector('.auth-choose')
+    if (!choose) {
+      setPhase('form')
+      return
+    }
+
+    gsap.to(choose, {
+      opacity: 0,
+      y: -12,
+      duration: 0.28,
+      ease: 'power2.in',
+      onComplete: () => {
+        setPhase('form')
+        gsap.set(choose, { clearProps: 'all' })
+      },
     })
-    tl.to('.auth-choose-copy', { opacity: 0, y: -12, duration: 0.25 })
-      .to(
-        next === 'login' ? '.orb-signup' : '.orb-login',
-        { scale: 0.4, opacity: 0, x: next === 'login' ? 80 : -80, duration: 0.4, ease: 'power2.in' },
-        0,
-      )
-      .to(
-        next === 'login' ? '.orb-login' : '.orb-signup',
-        { scale: 1.15, duration: 0.35, ease: 'power2.out' },
-        0,
-      )
-      .to('.auth-orbs', { opacity: 0, duration: 0.25 }, 0.25)
   }
 
   function backToChoose() {
@@ -166,6 +192,8 @@ export default function Auth() {
     setHover(null)
     setTouched({})
     setMessage('')
+    stopFloat('login')
+    stopFloat('signup')
   }
 
   function markTouched(field) {
@@ -233,10 +261,10 @@ export default function Auth() {
                       key={side}
                       type="button"
                       className={`auth-orb orb-${side} ${isHot ? 'hot' : ''} ${hover && !isHot ? 'dim' : ''}`}
-                      onMouseEnter={() => setHover(side)}
-                      onMouseLeave={() => setHover(null)}
-                      onFocus={() => setHover(side)}
-                      onBlur={() => setHover(null)}
+                      onMouseEnter={(e) => onOrbEnter(side, e.currentTarget)}
+                      onMouseLeave={() => onOrbLeave(side)}
+                      onFocus={(e) => onOrbEnter(side, e.currentTarget)}
+                      onBlur={() => onOrbLeave(side)}
                       onClick={() => openSide(side)}
                       aria-label={meta.label}
                     >

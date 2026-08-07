@@ -1894,19 +1894,18 @@ a.btn-auth {
 
 .auth-orb {
   position: relative;
-  width: min(280px, 72vw);
-  aspect-ratio: 1;
+  width: 240px;
+  height: 240px;
   border: none;
   background: transparent;
   cursor: pointer;
   padding: 0;
   color: var(--ink);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: opacity 0.25s ease;
 }
 
 .auth-orb.dim {
-  opacity: 0.35;
-  transform: scale(0.92);
+  opacity: 0.4;
 }
 
 .auth-orb-ring {
@@ -2081,7 +2080,12 @@ a.btn-auth {
 @media (max-width: 860px) {
   .auth-orbs {
     grid-template-columns: 1fr;
-    gap: 2.5rem;
+    gap: 4.5rem;
+  }
+
+  .auth-orb {
+    width: 220px;
+    height: 220px;
   }
 
   .orb-login .auth-orb-info,
