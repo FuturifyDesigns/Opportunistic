@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { COUNTRIES } from '../lib/countries'
@@ -16,41 +17,9 @@ gsap.registerPlugin(useGSAP)
 
 const emptyQual = { type: 'degree', field: '', institution: '', year: new Date().getFullYear() }
 
-const GUIDE = [
-  {
-    id: 'country',
-    title: 'Where should we look for jobs?',
-    tip: 'Pick the country you want job matches for. Scholarships stay worldwide, with a preference for your region.',
-    why: 'Jobs are filtered by this country. Changing it later rematches automatically.',
-  },
-  {
-    id: 'you',
-    title: 'Who are you to Opportunistic?',
-    tip: 'Name is required. Headline is your one-line summary — like a short bio for matching.',
-    why: 'This is how matches “talk” about you in reasoning lines.',
-  },
-  {
-    id: 'quals',
-    title: 'What have you studied or earned?',
-    tip: 'Add degrees or certificates. Field matters most (e.g. Computer Science). Institution and year help ranking.',
-    why: 'Qualifications drive scholarship fit and career-level job matches.',
-  },
-  {
-    id: 'skills',
-    title: 'Confirm skills for your field',
-    tip: 'Tick skills that match your degree. Add anything missing under Other.',
-    why: 'Checked skills drive job queries and make scholarship reasoning specific — not generic.',
-  },
-  {
-    id: 'process',
-    title: 'Hand it to Opportunistic',
-    tip: 'We’ll lock your profile, search, score, and return reasoned matches — like briefing an assistant.',
-    why: 'No extra forms. When this finishes, your dashboard opens with results.',
-  },
-]
-
 export default function Onboarding() {
   const { user, refreshProfile } = useAuth()
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const root = useRef(null)
   const [step, setStep] = useState(0)
@@ -63,6 +32,42 @@ export default function Onboarding() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [processLogs, setProcessLogs] = useState([])
+
+  const GUIDE = useMemo(
+    () => [
+      {
+        id: 'country',
+        title: t('onboarding.guideCountryTitle'),
+        tip: t('onboarding.guideCountryTip'),
+        why: t('onboarding.guideCountryWhy'),
+      },
+      {
+        id: 'you',
+        title: t('onboarding.guideYouTitle'),
+        tip: t('onboarding.guideYouTip'),
+        why: t('onboarding.guideYouWhy'),
+      },
+      {
+        id: 'quals',
+        title: t('onboarding.guideQualsTitle'),
+        tip: t('onboarding.guideQualsTip'),
+        why: t('onboarding.guideQualsWhy'),
+      },
+      {
+        id: 'skills',
+        title: t('onboarding.guideSkillsTitle'),
+        tip: t('onboarding.guideSkillsTip'),
+        why: t('onboarding.guideSkillsWhy'),
+      },
+      {
+        id: 'process',
+        title: t('onboarding.guideProcessTitle'),
+        tip: t('onboarding.guideProcessTip'),
+        why: t('onboarding.guideProcessWhy'),
+      },
+    ],
+    [t, i18n.language],
+  )
 
   const guide = GUIDE[step]
   const progress = ((step + 1) / GUIDE.length) * 100
@@ -169,14 +174,14 @@ export default function Onboarding() {
       await refreshProfile()
       window.setTimeout(() => navigate('/dashboard'), Math.max(2800, lines.length * 380))
     } catch (err) {
-      setError(err.message || 'Could not save profile')
+      setError(err.message || t('onboarding.saveError'))
       setBusy(false)
     }
   }
 
   useEffect(() => {
-    document.title = 'Setup — Opportunistic'
-  }, [])
+    document.title = t('onboarding.metaTitle')
+  }, [t, i18n.language])
 
   return (
     <PageBackdrop image="auth.jpg" className="onboarding-page">
@@ -186,7 +191,7 @@ export default function Onboarding() {
           <section className="ob-panel glass-panel">
             <div className="ob-progress-head">
               <p className="eyebrow">
-                Setup · {step + 1}/{GUIDE.length}
+                {t('onboarding.setupEyebrow', { step: step + 1, total: GUIDE.length })}
               </p>
               <div className="progress">
                 <div style={{ width: `${progress}%` }} />
@@ -198,7 +203,7 @@ export default function Onboarding() {
             {step === 0 && (
               <div className="stack-form">
                 <label>
-                  Country for job matching
+                  {t('onboarding.countryLabel')}
                   <select value={country} onChange={(e) => setCountry(e.target.value)}>
                     {COUNTRIES.map((c) => (
                       <option key={c} value={c}>
@@ -207,11 +212,11 @@ export default function Onboarding() {
                     ))}
                   </select>
                 </label>
-                <div className="choice-pills" role="group" aria-label="What are you looking for?">
+                <div className="choice-pills" role="group" aria-label={t('onboarding.goalAria')}>
                   {[
-                    ['both', 'Scholarships + jobs'],
-                    ['scholarships', 'Mostly scholarships'],
-                    ['jobs', 'Mostly jobs'],
+                    ['both', t('onboarding.goalBoth')],
+                    ['scholarships', t('onboarding.goalScholarships')],
+                    ['jobs', t('onboarding.goalJobs')],
                   ].map(([value, label]) => (
                     <button
                       key={value}
@@ -229,20 +234,20 @@ export default function Onboarding() {
             {step === 1 && (
               <div className="stack-form">
                 <label>
-                  Full name
+                  {t('onboarding.fullName')}
                   <input
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="e.g. Thabo Molefe"
+                    placeholder={t('onboarding.fullNamePlaceholder')}
                     autoComplete="name"
                   />
                 </label>
                 <label>
-                  Headline <span className="optional">(optional)</span>
+                  {t('onboarding.headline')} <span className="optional">{t('onboarding.optional')}</span>
                   <input
                     value={headline}
                     onChange={(e) => setHeadline(e.target.value)}
-                    placeholder="BSc CS · React developer"
+                    placeholder={t('onboarding.headlinePlaceholder')}
                   />
                 </label>
               </div>
@@ -254,37 +259,37 @@ export default function Onboarding() {
                   <div className="card-lite" key={i}>
                     <div className="inline-fields">
                       <label>
-                        Type
+                        {t('onboarding.qualType')}
                         <select value={q.type} onChange={(e) => updateQual(i, 'type', e.target.value)}>
-                          <option value="degree">Degree</option>
-                          <option value="certificate">Certificate</option>
+                          <option value="degree">{t('onboarding.qualDegree')}</option>
+                          <option value="certificate">{t('onboarding.qualCertificate')}</option>
                         </select>
                       </label>
                       <label>
-                        Year
+                        {t('onboarding.qualYear')}
                         <input type="number" value={q.year} onChange={(e) => updateQual(i, 'year', e.target.value)} />
                       </label>
                     </div>
                     <label>
-                      Field of study
+                      {t('onboarding.qualField')}
                       <input
                         value={q.field}
                         onChange={(e) => updateQual(i, 'field', e.target.value)}
-                        placeholder="Computer Science"
+                        placeholder={t('onboarding.qualFieldPlaceholder')}
                       />
                     </label>
                     <label>
-                      Institution <span className="optional">(optional)</span>
+                      {t('onboarding.qualInstitution')} <span className="optional">{t('onboarding.optional')}</span>
                       <input
                         value={q.institution}
                         onChange={(e) => updateQual(i, 'institution', e.target.value)}
-                        placeholder="University name"
+                        placeholder={t('onboarding.qualInstitutionPlaceholder')}
                       />
                     </label>
                   </div>
                 ))}
                 <button type="button" className="btn btn-ghost" onClick={() => setQualifications((r) => [...r, { ...emptyQual }])}>
-                  + Add another qualification
+                  {t('onboarding.addQual')}
                 </button>
               </div>
             )}
@@ -302,7 +307,7 @@ export default function Onboarding() {
                   <span className="scan-ring" />
                   <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" width="40" height="40" />
                 </div>
-                <p className="ob-process-title">{busy ? 'Matching in progress…' : 'Ready to process your profile'}</p>
+                <p className="ob-process-title">{busy ? t('onboarding.processBusy') : t('onboarding.processReady')}</p>
                 <div className="jarvis-log-lines ob-logs">
                   {processLogs.map((line) => (
                     <p key={line}>{line}</p>
@@ -317,7 +322,7 @@ export default function Onboarding() {
             <div className="cta-row ob-actions">
               {step > 0 && step < 4 ? (
                 <button type="button" className="btn btn-ghost" onClick={() => setStep((s) => s - 1)} disabled={busy}>
-                  Back
+                  {t('onboarding.back')}
                 </button>
               ) : null}
               {step < 4 ? (
@@ -327,11 +332,11 @@ export default function Onboarding() {
                   disabled={!canContinue()}
                   onClick={() => setStep((s) => s + 1)}
                 >
-                  {step === 3 ? 'Review & process' : 'Continue'}
+                  {step === 3 ? t('onboarding.review') : t('onboarding.continue')}
                 </button>
               ) : (
                 <button type="button" className="btn" disabled={busy} onClick={finish}>
-                  {busy ? 'Processing…' : 'Start matching'}
+                  {busy ? t('onboarding.processing') : t('onboarding.startMatching')}
                 </button>
               )}
             </div>
@@ -339,16 +344,16 @@ export default function Onboarding() {
 
           <aside className="ob-assistant jarvis-screen">
             <div className="jarvis-chrome">
-              <p className="jarvis-title">OPPORTUNISTIC // GUIDE</p>
-              <p className="jarvis-status">STEP {step + 1}</p>
+              <p className="jarvis-title">{t('onboarding.assistantTitle')}</p>
+              <p className="jarvis-status">{t('onboarding.assistantStep', { step: step + 1 })}</p>
             </div>
             <div className="ob-assistant-body">
-              <p className="jarvis-caption">What this step does</p>
+              <p className="jarvis-caption">{t('onboarding.assistantWhat')}</p>
               <p className="ob-tip">{guide.tip}</p>
-              <p className="jarvis-caption">Why it matters</p>
+              <p className="jarvis-caption">{t('onboarding.assistantWhy')}</p>
               <p className="ob-tip muted">{guide.why}</p>
 
-              <p className="jarvis-caption">Live feed</p>
+              <p className="jarvis-caption">{t('onboarding.assistantFeed')}</p>
               <div className="feed-chips">
                 {feedPreview.length ? (
                   feedPreview.map((c) => (
@@ -357,7 +362,7 @@ export default function Onboarding() {
                     </span>
                   ))
                 ) : (
-                  <span className="feed-chip muted-chip">Waiting for your first inputs…</span>
+                  <span className="feed-chip muted-chip">{t('onboarding.feedWaiting')}</span>
                 )}
               </div>
             </div>

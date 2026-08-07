@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -12,43 +13,50 @@ import { prefersReducedMotion, revealOnScroll } from '../lib/animations'
 
 gsap.registerPlugin(useGSAP, ScrollTrigger)
 
-const FEATURES = [
-  {
-    side: 'left',
-    eyebrow: 'Scholarship matcher',
-    title: 'Worldwide awards, ranked for you',
-    body: 'Your degrees and skills drive the search. Each scholarship card shows score + why it fits.',
-    points: ['Regional preference from your country', 'Reasoning visible by default', 'Deadlines filtered on read'],
-    preview: 'scholarship',
-  },
-  {
-    side: 'right',
-    eyebrow: 'Job matcher',
-    title: 'Roles filtered to your country',
-    body: 'Same profile, second engine. Jobs respect the country you chose — with transparent fit notes.',
-    points: ['Country-aware queries', 'Skills-weighted scoring', 'Save or dismiss per listing'],
-    preview: 'job',
-  },
-  {
-    side: 'left',
-    eyebrow: 'Profile builder',
-    title: 'Guided onboarding, not a wall of fields',
-    body: 'Country → about you → qualifications → skills. Editing later rematches automatically.',
-    points: ['Step-by-step flow', 'Degrees & certificates', 'Proficiency levels'],
-    preview: 'profile',
-  },
-  {
-    side: 'right',
-    eyebrow: 'Privacy baseline',
-    title: 'Delete means cascade',
-    body: 'GDPR-level deletion for everyone. Profile removal cascades to skills, quals, and matches.',
-    points: ['Own-data RLS', 'Digest controls', 'Clear terms & privacy'],
-    preview: 'privacy',
-  },
-]
-
 export default function Features() {
   const root = useRef(null)
+  const { t, i18n } = useTranslation()
+
+  const FEATURES = [
+    {
+      side: 'left',
+      eyebrow: t('features.scholarshipEyebrow'),
+      title: t('features.scholarshipTitle'),
+      body: t('features.scholarshipBody'),
+      points: [t('features.scholarshipPoint1'), t('features.scholarshipPoint2'), t('features.scholarshipPoint3')],
+      preview: 'scholarship',
+    },
+    {
+      side: 'right',
+      eyebrow: t('features.jobEyebrow'),
+      title: t('features.jobTitle'),
+      body: t('features.jobBody'),
+      points: [t('features.jobPoint1'), t('features.jobPoint2'), t('features.jobPoint3')],
+      preview: 'job',
+    },
+    {
+      side: 'left',
+      eyebrow: t('features.profileEyebrow'),
+      title: t('features.profileTitle'),
+      body: t('features.profileBody'),
+      points: [t('features.profilePoint1'), t('features.profilePoint2'), t('features.profilePoint3')],
+      preview: 'profile',
+    },
+    {
+      side: 'right',
+      eyebrow: t('features.privacyEyebrow'),
+      title: t('features.privacyTitle'),
+      body: t('features.privacyBody'),
+      points: [t('features.privacyPoint1'), t('features.privacyPoint2'), t('features.privacyPoint3')],
+      preview: 'privacy',
+    },
+  ]
+
+  const gridCards = [
+    [t('features.gridReasonTitle'), t('features.gridReasonBody')],
+    [t('features.gridMobileTitle'), t('features.gridMobileBody')],
+    [t('features.gridAdsTitle'), t('features.gridAdsBody')],
+  ]
 
   useGSAP(
     () => {
@@ -80,8 +88,8 @@ export default function Features() {
   )
 
   useEffect(() => {
-    document.title = 'Features — Opportunistic'
-  }, [])
+    document.title = t('features.metaTitle')
+  }, [t, i18n.language])
 
   return (
     <PageBackdrop image="features.jpg">
@@ -90,18 +98,16 @@ export default function Features() {
         <main>
           <section className="page-hero container">
             <div className="glass-panel hero-copy-block">
-              <p className="eyebrow">Features</p>
-              <h1>Two matchers. One profile.</h1>
-              <p className="lede">
-                Scholarships worldwide. Jobs by country. Scores and reasons stay on the card.
-              </p>
+              <p className="eyebrow">{t('features.eyebrow')}</p>
+              <h1>{t('features.title')}</h1>
+              <p className="lede">{t('features.lede')}</p>
             </div>
           </section>
 
           <section className="section">
             <div className="container feature-zigzags">
-              {FEATURES.map((f, i) => (
-                <div key={f.title} className={`feature-zigzag ${f.side === 'right' ? 'flip' : ''}`}>
+              {FEATURES.map((f) => (
+                <div key={f.preview} className={`feature-zigzag ${f.side === 'right' ? 'flip' : ''}`}>
                   <div className="zig-copy glass-panel">
                     <p className="eyebrow">{f.eyebrow}</p>
                     <h2>{f.title}</h2>
@@ -122,14 +128,10 @@ export default function Features() {
 
           <section className="section">
             <div className="container card-grid">
-              {[
-                ['Visible reasoning', 'Why each match fits sits on the card — not behind a modal.'],
-                ['Mobile-first', 'Most applicants arrive on a phone; layout and motion respect that.'],
-                ['Honest ads later', 'At most 1–2 units, never inside forms or the matching flow.'],
-              ].map(([t, b], i) => (
-                <InteractiveCard key={t} className="grid-card" data-reveal={i % 2 ? 'right' : 'left'}>
-                  <h3>{t}</h3>
-                  <p>{b}</p>
+              {gridCards.map(([title, body], i) => (
+                <InteractiveCard key={title} className="grid-card" data-reveal={i % 2 ? 'right' : 'left'}>
+                  <h3>{title}</h3>
+                  <p>{body}</p>
                 </InteractiveCard>
               ))}
             </div>
@@ -137,14 +139,14 @@ export default function Features() {
 
           <section className="section">
             <div className="container cta-panel glass-panel" data-reveal="up">
-              <h2>See it in motion</h2>
-              <p>Jump to the animated walkthrough, or start building your profile.</p>
+              <h2>{t('features.ctaTitle')}</h2>
+              <p>{t('features.ctaBody')}</p>
               <div className="cta-row" style={{ justifyContent: 'center' }}>
                 <Link className="btn" to="/how-it-works">
-                  How it works
+                  {t('features.ctaHow')}
                 </Link>
                 <Link className="btn btn-auth" to="/auth?mode=signup">
-                  <span>Sign up</span>
+                  <span>{t('features.ctaSignup')}</span>
                   <span className="btn-auth-shine" aria-hidden="true" />
                 </Link>
               </div>

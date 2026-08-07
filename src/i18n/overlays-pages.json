@@ -1,0 +1,394 @@
+{
+  "tn": {
+    "howItWorks": {
+      "metaTitle": "E dira jang — Opportunistic",
+      "eyebrow": "E dira jang",
+      "title": "Fepa tsamaiso. Bona ditshwantsho tse di beilweng.",
+      "lede": "Tobetsa kgato nngwe le nngwe kgotsa lebelela console: tsenya porofaele, dira dipotso, ntsha dipholo ka mabaka.",
+      "cadenceEyebrow": "Nako",
+      "cadenceTitle": "Ntšha fa go tlhokega",
+      "cadenceBody": "Tshwantsho e dira fa o bopa porofaele, fa o fetola dithuto, bokgoni kgotsa naga, le beke le beke — e seng mo go eteleng dashboard nngwe le nngwe.",
+      "trustEyebrow": "Tshepo",
+      "trustTitle": "Batla-kabo, ba tlhalositswe sentle",
+      "trustBody": "Re bontsha mananeo a boammaaruri. Netefatsa dinako mo setšaeng sa motheo. Dinako tse di fetileng di tlosa mo dashboard.",
+      "ctaTitle": "A o siametse go leka ka porofaele ya gago?",
+      "ctaBody": "Bopa akhaonto mme o feleletse onboarding go dira ditshwantsho tsa ntlha.",
+      "ctaStart": "Simolola",
+      "ctaFeatures": "Bona dikarolo"
+    },
+    "features": {
+      "metaTitle": "Dikarolo — Opportunistic",
+      "eyebrow": "Dikarolo",
+      "title": "Ditshwantshi di le pedi. Porofaele e le nngwe.",
+      "lede": "Dibursari lefatsheng ka bophara. Ditiro ka naga. Dipalo le mabaka a nna mo karateng.",
+      "ctaTitle": "Bona e tsamaya",
+      "ctaBody": "Ya kwa walkthrough e e tsamayang, kgotsa simolola go bopa porofaele.",
+      "ctaHow": "E dira jang",
+      "ctaSignup": "Ikwadise"
+    },
+    "about": {
+      "metaTitle": "Ka ga rona — Opportunistic",
+      "eyebrow": "Ka ga Opportunistic",
+      "title": "Dibursari le ditiro, di tshwantshitswe ka mabaka.",
+      "lede": "E agilwe bakeng sa batho ba ba lapileng ke go scrolla diboto tse di tlwaelegileng. Tsenya se o ithutileng le se o ka se dirang — re beeletsa mananeo mme re bolela gore ke eng a tshwanang.",
+      "ctaCreate": "Bopa porofaele",
+      "ctaHow": "Bona e dira jang"
+    },
+    "profile": {
+      "metaTitle": "Porofaele — Opportunistic",
+      "eyebrow": "Porofaele",
+      "title": "Fetola porofaele ya gago",
+      "lede": "Go boloka go tsosolosa tshwantsho ya dibursari le ditiro.",
+      "fullName": "Leina ka botlalo",
+      "headline": "Sehlooho",
+      "bio": "Bio",
+      "country": "Naga",
+      "qualsTitle": "Dithuto",
+      "skillsTitle": "Bokgoni",
+      "save": "Boloka & tshwantsha gape",
+      "saving": "E a boloka & tshwantsha…"
+    },
+    "match": {
+      "back": "← Boela kwa desheboto",
+      "newTips": "Dikgakololo tse dintšha",
+      "openOfficial": "Bula listing ya semmuso",
+      "save": "Boloka",
+      "unsave": "Tlosa boloka",
+      "dismiss": "Latlha",
+      "whyFits": "Ke eng e tshwanang le wena",
+      "playbookTitle": "Buka ya gago ya go fenya"
+    },
+    "matchCard": {
+      "save": "Boloka",
+      "saved": "E bolokilwe",
+      "dismiss": "Latlha",
+      "openListing": "Bula listing",
+      "rolling": "E tsweletse / leka motheo"
+    },
+    "onboarding": {
+      "metaTitle": "Peakanyo — Opportunistic",
+      "countryLabel": "Naga ya tshwantsho ya ditiro",
+      "fullName": "Leina ka botlalo",
+      "continue": "Tswelela",
+      "back": "Morago",
+      "startMatching": "Simolola tshwantsho",
+      "processing": "E a dira…"
+    },
+    "privacy": {
+      "title": "Pholisi ya Sephiri",
+      "eyebrow": "Molao",
+      "switchTerms": "Bona Melao ya Tiriso →",
+      "langNote": "Molaotheo o nna ka Seisimane gore o nne o nepahetse. UI e latela puo ya gago."
+    },
+    "terms": {
+      "title": "Melao ya Tiriso",
+      "eyebrow": "Molao",
+      "switchPrivacy": "Bona Pholisi ya Sephiri →"
+    },
+    "howDemo": {
+      "phaseIngestTitle": "Fepa porofaele ya gago",
+      "phaseProcessTitle": "Opportunistic e a akanya",
+      "phaseOutputTitle": "Ditshwantsho ka mabaka",
+      "consoleTitle": "OPPORTUNISTIC // MATCH CONSOLE",
+      "meterSearch": "Batla",
+      "meterScore": "Palo",
+      "meterReason": "Lebaka",
+      "systemLog": "Log ya tsamaiso"
+    },
+    "settings": {
+      "country": "Naga"
+    }
+  },
+  "es": {
+    "howItWorks": {
+      "metaTitle": "Cómo funciona — Opportunistic",
+      "eyebrow": "Cómo funciona",
+      "title": "Alimenta el sistema. Obtén coincidencias ordenadas.",
+      "lede": "Haz clic en cada etapa o mira la consola: ingesta el perfil, procesa consultas, muestra resultados con motivos.",
+      "cadenceEyebrow": "Cadencia",
+      "cadenceTitle": "Actualiza cuando importa",
+      "cadenceBody": "El matching corre al crear el perfil, al editar cualificaciones, habilidades o país, y semanalmente — no en cada visita al panel.",
+      "trustEyebrow": "Confianza",
+      "trustTitle": "Terceros, claramente etiquetados",
+      "trustBody": "Mostramos listados de portales reales. Verifica plazos en el sitio de origen. Los plazos vencidos se filtran del panel.",
+      "ctaTitle": "¿Listo para probarlo con tu perfil?",
+      "ctaBody": "Crea una cuenta y termina el onboarding para generar tus primeras coincidencias.",
+      "ctaStart": "Empezar",
+      "ctaFeatures": "Ver funciones"
+    },
+    "features": {
+      "metaTitle": "Funciones — Opportunistic",
+      "eyebrow": "Funciones",
+      "title": "Dos motores. Un perfil.",
+      "lede": "Becas en todo el mundo. Empleos por país. Puntuaciones y motivos en la tarjeta.",
+      "scholarshipEyebrow": "Matcher de becas",
+      "scholarshipTitle": "Premios mundiales, ordenados para ti",
+      "jobEyebrow": "Matcher de empleos",
+      "jobTitle": "Roles filtrados a tu país",
+      "profileEyebrow": "Constructor de perfil",
+      "privacyEyebrow": "Privacidad",
+      "ctaTitle": "Véalo en movimiento",
+      "ctaHow": "Cómo funciona",
+      "ctaSignup": "Registrarse"
+    },
+    "about": {
+      "metaTitle": "Acerca de — Opportunistic",
+      "eyebrow": "Acerca de Opportunistic",
+      "title": "Becas y empleos, emparejados con motivos.",
+      "lede": "Hecho para quienes están cansados de tableros genéricos. Introduce lo que estudiaste y lo que sabes hacer — clasificamos ofertas y explicamos el encaje.",
+      "ideaCaption": "La idea",
+      "rulesCaption": "Cómo trabajamos",
+      "ctaCreate": "Crear perfil",
+      "ctaHow": "Ver cómo funciona"
+    },
+    "profile": {
+      "title": "Edita tu perfil",
+      "lede": "Guardar vuelve a ejecutar el matching de becas y empleos.",
+      "fullName": "Nombre completo",
+      "headline": "Titular",
+      "bio": "Bio",
+      "country": "País",
+      "qualsTitle": "Cualificaciones",
+      "skillsTitle": "Habilidades",
+      "save": "Guardar y volver a emparejar",
+      "saving": "Guardando y emparejando…"
+    },
+    "match": {
+      "back": "← Volver al panel",
+      "newTips": "Nuevos consejos",
+      "openOfficial": "Abrir listado oficial",
+      "save": "Guardar",
+      "unsave": "Quitar guardado",
+      "dismiss": "Descartar",
+      "whyFits": "Por qué te encaja",
+      "playbookTitle": "Tu guía para conseguirlo"
+    },
+    "matchCard": {
+      "save": "Guardar",
+      "saved": "Guardado",
+      "dismiss": "Descartar",
+      "openListing": "Abrir listado"
+    },
+    "onboarding": {
+      "countryLabel": "País para empleos",
+      "fullName": "Nombre completo",
+      "continue": "Continuar",
+      "back": "Atrás",
+      "startMatching": "Empezar matching",
+      "processing": "Procesando…"
+    },
+    "privacy": {
+      "title": "Política de privacidad",
+      "eyebrow": "Legal",
+      "switchTerms": "Ver Términos de uso →"
+    },
+    "terms": {
+      "title": "Términos de uso",
+      "eyebrow": "Legal",
+      "switchPrivacy": "Ver Política de privacidad →"
+    },
+    "settings": {
+      "country": "País"
+    }
+  },
+  "fr": {
+    "howItWorks": {
+      "eyebrow": "Comment ça marche",
+      "title": "Nourrissez le système. Obtenez des correspondances classées.",
+      "lede": "Cliquez chaque étape ou regardez la console : profil, requêtes, résultats motivés.",
+      "ctaStart": "Commencer",
+      "ctaFeatures": "Voir les fonctionnalités"
+    },
+    "features": {
+      "eyebrow": "Fonctionnalités",
+      "title": "Deux moteurs. Un profil.",
+      "lede": "Bourses dans le monde. Emplois par pays. Scores et raisons sur la carte."
+    },
+    "about": {
+      "eyebrow": "À propos d’Opportunistic",
+      "title": "Bourses et emplois, assortis avec des raisons.",
+      "ctaCreate": "Créer un profil"
+    },
+    "profile": {
+      "title": "Modifier votre profil",
+      "save": "Enregistrer et relancer"
+    },
+    "match": {
+      "back": "← Retour au tableau de bord",
+      "newTips": "Nouveaux conseils",
+      "save": "Enregistrer",
+      "dismiss": "Ignorer"
+    },
+    "settings": { "country": "Pays" },
+    "privacy": { "title": "Politique de confidentialité" },
+    "terms": { "title": "Conditions d’utilisation" }
+  },
+  "de": {
+    "howItWorks": {
+      "eyebrow": "So funktioniert’s",
+      "title": "Füttere das System. Erhalte gerankte Matches.",
+      "ctaStart": "Loslegen",
+      "ctaFeatures": "Funktionen ansehen"
+    },
+    "features": {
+      "eyebrow": "Funktionen",
+      "title": "Zwei Matcher. Ein Profil."
+    },
+    "about": {
+      "eyebrow": "Über Opportunistic",
+      "title": "Stipendien und Jobs — mit Begründung."
+    },
+    "profile": { "title": "Profil bearbeiten", "save": "Speichern & neu matchen" },
+    "match": { "back": "← Zurück zur Übersicht", "save": "Speichern", "dismiss": "Verwerfen" },
+    "settings": { "country": "Land" }
+  },
+  "pt": {
+    "howItWorks": {
+      "eyebrow": "Como funciona",
+      "title": "Alimente o sistema. Receba matches ranqueados.",
+      "ctaStart": "Começar"
+    },
+    "features": { "eyebrow": "Recursos", "title": "Dois matchers. Um perfil." },
+    "about": { "eyebrow": "Sobre o Opportunistic", "title": "Bolsas e empregos, com motivos." },
+    "profile": { "title": "Editar perfil", "save": "Salvar e remarcar" },
+    "match": { "back": "← Voltar ao painel", "save": "Salvar", "dismiss": "Dispensar" },
+    "settings": { "country": "País" }
+  },
+  "pt-BR": {
+    "howItWorks": { "eyebrow": "Como funciona", "title": "Alimente o sistema. Receba matches ranqueados." },
+    "features": { "eyebrow": "Recursos", "title": "Dois matchers. Um perfil." },
+    "about": { "title": "Bolsas e vagas, com motivos." },
+    "settings": { "country": "País" }
+  },
+  "zh": {
+    "howItWorks": { "eyebrow": "如何运作", "title": "输入资料。获得排序匹配。", "ctaStart": "开始" },
+    "features": { "eyebrow": "功能", "title": "两个匹配引擎。一份资料。" },
+    "about": { "eyebrow": "关于 Opportunistic", "title": "奖学金与工作，附匹配理由。" },
+    "profile": { "title": "编辑个人资料", "save": "保存并重新匹配" },
+    "match": { "back": "← 返回控制台", "save": "保存", "dismiss": "忽略" },
+    "settings": { "country": "国家" }
+  },
+  "ar": {
+    "howItWorks": { "eyebrow": "كيف يعمل", "title": "غذِّ النظام. احصل على تطابقات مرتّبة.", "ctaStart": "ابدأ" },
+    "features": { "eyebrow": "الميزات", "title": "محرّكان. ملف واحد." },
+    "about": { "title": "منح ووظائف، مع أسباب التطابق." },
+    "profile": { "title": "عدّل ملفك", "save": "حفظ وإعادة المطابقة" },
+    "match": { "back": "← العودة للوحة", "save": "حفظ", "dismiss": "تجاهل" },
+    "settings": { "country": "البلد" }
+  },
+  "sw": {
+    "howItWorks": { "eyebrow": "Inavyofanya kazi", "title": "Lisha mfumo. Pata mechi zilizopangwa.", "ctaStart": "Anza" },
+    "features": { "eyebrow": "Vipengele", "title": "Matchers wawili. Wasifu mmoja." },
+    "about": { "title": "Ufadhili na kazi, zinalinganishwa kwa sababu." },
+    "profile": { "title": "Hariri wasifu", "save": "Hifadhi na linganisha tena" },
+    "settings": { "country": "Nchi" }
+  },
+  "zu": {
+    "howItWorks": { "eyebrow": "Kusebenza kanjani", "title": "Faka ulwazi. Thola ukufanisa okuhleliwe.", "ctaStart": "Qala" },
+    "features": { "eyebrow": "Izici", "title": "Izifanisi ezimbili. Iphrofayela eyodwa." },
+    "about": { "title": "Imifundaze nemisebenzi, efaniswe ngezizathu." },
+    "profile": { "title": "Hlela iphrofayela", "save": "Londoloza futhi fanisa" },
+    "settings": { "country": "Izwe" }
+  },
+  "af": {
+    "howItWorks": { "eyebrow": "Hoe dit werk", "title": "Voer die stelsel. Kry gerangskikte passen.", "ctaStart": "Begin" },
+    "features": { "eyebrow": "Kenmerke", "title": "Twee matchers. Een profiel." },
+    "about": { "title": "Beurse en werk, met redes." },
+    "profile": { "title": "Wysig jou profiel", "save": "Stoor & hermatch" },
+    "settings": { "country": "Land" }
+  },
+  "st": {
+    "howItWorks": { "eyebrow": "E sebetsa jwang", "title": "Fepa sistimi. Fumana litshwantso tse hlophisitsoeng." },
+    "features": { "eyebrow": "Likarolo", "title": "Li-matcher tse peli. Profaele e le 'ngoe." },
+    "about": { "title": "Dibursari le mesebetsi, ka mabaka." },
+    "settings": { "country": "Naha" }
+  },
+  "nso": {
+    "howItWorks": { "eyebrow": "E šoma bjang", "title": "Fepa sisteme. Hwetša ditshwantšo tše di beakantšwego." },
+    "features": { "title": "Di-matcher tše pedi. Profaele e tee." },
+    "settings": { "country": "Naga" }
+  },
+  "xh": {
+    "howItWorks": { "eyebrow": "Isebenza njani", "title": "Yondla inkqubo. Fumana uthelekiso oluhlelweyo." },
+    "settings": { "country": "Ilizwe" }
+  },
+  "hi": {
+    "howItWorks": { "eyebrow": "यह कैसे काम करता है", "title": "सिस्टम को फीड करें। रैंक किए मैच पाएँ।" },
+    "features": { "title": "दो मैचर। एक प्रोफ़ाइल।" },
+    "about": { "title": "छात्रवृत्ति और नौकरियाँ, कारणों के साथ।" },
+    "settings": { "country": "देश" }
+  },
+  "ja": {
+    "howItWorks": { "eyebrow": "仕組み", "title": "プロフィールを入力。ランク付きマッチを取得。" },
+    "features": { "title": "2つのマッチャー。1つのプロフィール。" },
+    "settings": { "country": "国" }
+  },
+  "ko": {
+    "howItWorks": { "eyebrow": "작동 방식", "title": "시스템에 입력하세요. 순위 매칭을 받으세요." },
+    "settings": { "country": "국가" }
+  },
+  "ru": {
+    "howItWorks": { "eyebrow": "Как это работает", "title": "Заполните профиль. Получите ранжированные совпадения." },
+    "settings": { "country": "Страна" }
+  },
+  "it": {
+    "howItWorks": { "eyebrow": "Come funziona", "title": "Alimenta il sistema. Ottieni match classificati." },
+    "settings": { "country": "Paese" }
+  },
+  "nl": {
+    "howItWorks": { "eyebrow": "Hoe het werkt", "title": "Voed het systeem. Krijg gerangschikte matches." },
+    "settings": { "country": "Land" }
+  },
+  "tr": {
+    "howItWorks": { "eyebrow": "Nasıl çalışır", "title": "Sistemi besleyin. Sıralı eşleşmeler alın." },
+    "settings": { "country": "Ülke" }
+  },
+  "vi": {
+    "howItWorks": { "eyebrow": "Cách hoạt động", "title": "Nhập hồ sơ. Nhận kết quả xếp hạng." },
+    "settings": { "country": "Quốc gia" }
+  },
+  "id": {
+    "howItWorks": { "eyebrow": "Cara kerja", "title": "Isi sistem. Dapatkan kecocokan berperingkat." },
+    "settings": { "country": "Negara" }
+  },
+  "pl": {
+    "howItWorks": { "eyebrow": "Jak to działa", "title": "Uzupełnij system. Otrzymaj ranking dopasowań." },
+    "settings": { "country": "Kraj" }
+  },
+  "uk": {
+    "howItWorks": { "eyebrow": "Як це працює", "title": "Заповніть систему. Отримайте ранжовані збіги." },
+    "settings": { "country": "Країна" }
+  },
+  "ha": {
+    "howItWorks": { "eyebrow": "Yadda yake aiki", "title": "Ciyar da tsarin. Samu daidaitawa da aka jera." },
+    "settings": { "country": "Ƙasa" }
+  },
+  "yo": {
+    "howItWorks": { "eyebrow": "Bí ó ṣe ń ṣiṣẹ́", "title": "Bọ́ ẹ̀rọ náà. Gba àwọn ìbámu tí a ṣètò." },
+    "settings": { "country": "Orílẹ̀-èdè" }
+  },
+  "ig": {
+    "howItWorks": { "eyebrow": "Otu o si arụ ọrụ", "title": "Nye sistemụ nri. Nweta ndakọrịta ahaziri." },
+    "settings": { "country": "Obodo" }
+  },
+  "rw": {
+    "howItWorks": { "eyebrow": "Ukora gute", "title": "Ongera umurongo. Bona ibihuye byatunganyijwe." },
+    "settings": { "country": "Igihugu" }
+  },
+  "sn": {
+    "howItWorks": { "eyebrow": "Inoshanda sei", "title": "Dyisa system. Wana matches dzakarongwa." },
+    "settings": { "country": "Nyika" }
+  },
+  "so": {
+    "howItWorks": { "eyebrow": "Sida ay u shaqeyso", "title": "Quudi nidaamka. Hel is-waafajin la habeeyey." },
+    "settings": { "country": "Waddan" }
+  },
+  "am": {
+    "howItWorks": { "eyebrow": "እንዴት እንደሚሰራ", "title": "ስርዓቱን መግቡ። የተደረደሩ ተዛማጆችን ያግኙ።" },
+    "settings": { "country": "አገር" }
+  },
+  "zh-TW": {
+    "howItWorks": { "eyebrow": "運作方式", "title": "輸入資料。取得排序配對。" },
+    "settings": { "country": "國家" }
+  }
+}

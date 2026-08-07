@@ -50,8 +50,9 @@ export default function LanguageSwitcher({ compact = false }) {
   }, [open])
 
   function pick(code) {
-    i18n.changeLanguage(code)
-    setOpen(false)
+    void i18n.changeLanguage(code).then(() => {
+      setOpen(false)
+    })
   }
 
   const label = nativeLanguageName(current, current)

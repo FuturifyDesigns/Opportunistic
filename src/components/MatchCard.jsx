@@ -1,4 +1,5 @@
 import { useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { prefersReducedMotion } from '../lib/animations'
@@ -7,6 +8,7 @@ import { getListingBySource } from '../lib/listingCatalog'
 gsap.registerPlugin(useGSAP)
 
 export default function MatchCard({ match, kind, onSave, onDismiss, onOpen }) {
+  const { t, i18n } = useTranslation()
   const score = Math.round(Number(match.match_score) || 0)
   const ref = useRef(null)
   const listing = getListingBySource(match.source)
@@ -50,9 +52,16 @@ export default function MatchCard({ match, kind, onSave, onDismiss, onOpen }) {
     { scope: ref },
   )
 
+  const foundDate = new Date(match.found_at || Date.now()).toLocaleDateString(i18n.language)
+
   return (
     <article ref={ref} className="match-card interactive">
-      <button type="button" className="match-card-hit" onClick={() => onOpen?.(match)} aria-label={`Open ${match.title}`}>
+      <button
+        type="button"
+        className="match-card-hit"
+        onClick={() => onOpen?.(match)}
+        aria-label={t('matchCard.openAria', { title: match.title })}
+      >
         {thumb ? (
           <div className="match-card-media">
             <img src={thumb} alt="" loading="lazy" />
@@ -64,7 +73,7 @@ export default function MatchCard({ match, kind, onSave, onDismiss, onOpen }) {
             <h3>{match.title}</h3>
             {match.company ? <p className="muted">{match.company}</p> : null}
           </div>
-          <div className="score-pill" title="Match score">
+          <div className="score-pill" title={t('matchCard.scoreTitle')}>
             {score}%
           </div>
         </div>
@@ -76,25 +85,25 @@ export default function MatchCard({ match, kind, onSave, onDismiss, onOpen }) {
         </p>
         <div className="match-meta">
           {match.deadline ? (
-            <span>Deadline: {match.deadline}</span>
+            <span>{t('matchCard.deadline', { date: match.deadline })}</span>
           ) : listing?.deadlineLabel ? (
             <span>{listing.deadlineLabel}</span>
           ) : (
-            <span>Rolling / check source</span>
+            <span>{t('matchCard.rolling')}</span>
           )}
-          <span>Found {new Date(match.found_at || Date.now()).toLocaleDateString()}</span>
+          <span>{t('matchCard.found', { date: foundDate })}</span>
         </div>
       </button>
 
       <div className="match-actions">
         <a className="btn btn-sm" href={match.url} target="_blank" rel="noreferrer noopener">
-          Open listing
+          {t('matchCard.openListing')}
         </a>
         <button type="button" className="btn btn-ghost btn-sm" onClick={() => onSave?.(match)}>
-          {match.saved ? 'Saved' : 'Save'}
+          {match.saved ? t('matchCard.saved') : t('matchCard.save')}
         </button>
         <button type="button" className="btn btn-ghost btn-sm" onClick={() => onDismiss?.(match)}>
-          Dismiss
+          {t('matchCard.dismiss')}
         </button>
       </div>
     </article>

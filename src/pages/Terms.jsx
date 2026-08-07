@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
 import LegalFolders from '../components/LegalFolders'
@@ -99,11 +100,12 @@ const ITEMS = [
 
 export default function Terms() {
   const location = useLocation()
+  const { t, i18n } = useTranslation()
   const section = new URLSearchParams(location.search).get('section') || 'role'
 
   useEffect(() => {
-    document.title = 'Terms of Use — Opportunistic'
-  }, [])
+    document.title = t('terms.metaTitle')
+  }, [t, i18n.language])
 
   return (
     <div className="page legal-page">
@@ -111,15 +113,13 @@ export default function Terms() {
       <main>
         <section className="legal-hero">
           <div className="container legal-hero-inner">
-            <p className="eyebrow">Legal</p>
-            <h1>Terms of Use</h1>
-            <p className="lede">
-              The rules for using Opportunistic as a discovery layer — not as the issuer of any opportunity.
-            </p>
+            <p className="eyebrow">{t('terms.eyebrow')}</p>
+            <h1>{t('terms.title')}</h1>
+            <p className="lede">{t('terms.lede')}</p>
             <div className="legal-meta">
-              <span className="info-chip">Updated August 7, 2026</span>
+              <span className="info-chip">{t('terms.updated')}</span>
               <Link className="legal-switch" to="/privacy">
-                View Privacy Policy →
+                {t('terms.switchPrivacy')}
               </Link>
             </div>
           </div>

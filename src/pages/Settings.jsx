@@ -11,7 +11,7 @@ import LanguageSwitcher from '../components/LanguageSwitcher'
 
 export default function Settings() {
   const { user, profile, refreshProfile, signOut } = useAuth()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const [digest, setDigest] = useState('weekly')
   const [country, setCountry] = useState('Botswana')
@@ -82,7 +82,7 @@ export default function Settings() {
           </label>
 
           <label>
-            Country
+            {i18n.exists('settings.country') ? t('settings.country') : t('profile.country')}
             <select value={country} onChange={(e) => setCountry(e.target.value)}>
               {COUNTRIES.map((c) => (
                 <option key={c} value={c}>

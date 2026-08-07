@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
 import LegalFolders from '../components/LegalFolders'
@@ -193,11 +194,12 @@ const ITEMS = [
 
 export default function Privacy() {
   const location = useLocation()
+  const { t, i18n } = useTranslation()
   const section = new URLSearchParams(location.search).get('section') || 'overview'
 
   useEffect(() => {
-    document.title = 'Privacy Policy — Opportunistic'
-  }, [])
+    document.title = t('privacy.metaTitle')
+  }, [t, i18n.language])
 
   return (
     <div className="page legal-page">
@@ -205,20 +207,17 @@ export default function Privacy() {
       <main>
         <section className="legal-hero">
           <div className="container legal-hero-inner">
-            <p className="eyebrow">Legal</p>
-            <h1>Privacy Policy</h1>
-            <p className="lede">
-              Global data-protection baseline, working cookie controls, and clear rights — updated for Opportunistic.
-            </p>
+            <p className="eyebrow">{t('privacy.eyebrow')}</p>
+            <h1>{t('privacy.title')}</h1>
+            <p className="lede">{t('privacy.lede')}</p>
             <div className="legal-meta">
-              <span className="info-chip">Updated August 7, 2026</span>
+              <span className="info-chip">{t('privacy.updated')}</span>
               <Link className="legal-switch" to="/terms">
-                View Terms of Use →
+                {t('privacy.switchTerms')}
               </Link>
             </div>
             <p className="muted" style={{ marginTop: '0.75rem', maxWidth: '48ch' }}>
-              Legal pages stay in English for accuracy. UI chrome follows your language — use the language control in
-              the header or footer (includes Setswana and 100+ languages).
+              {t('privacy.langNote')}
             </p>
           </div>
         </section>

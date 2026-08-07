@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -13,6 +14,7 @@ gsap.registerPlugin(useGSAP, ScrollTrigger)
 
 export default function HowItWorks() {
   const root = useRef(null)
+  const { t, i18n } = useTranslation()
 
   useGSAP(
     () => {
@@ -24,8 +26,8 @@ export default function HowItWorks() {
   )
 
   useEffect(() => {
-    document.title = 'How it works — Opportunistic'
-  }, [])
+    document.title = t('howItWorks.metaTitle')
+  }, [t, i18n.language])
 
   return (
     <PageBackdrop image="how.jpg">
@@ -34,12 +36,9 @@ export default function HowItWorks() {
         <main>
           <section className="page-hero container">
             <div className="glass-panel hero-copy-block">
-              <p className="eyebrow">How it works</p>
-              <h1>Feed the system. Get ranked matches.</h1>
-              <p className="lede">
-                Click each stage or watch the console cycle: ingest profile data, process queries, output reasoned
-                results.
-              </p>
+              <p className="eyebrow">{t('howItWorks.eyebrow')}</p>
+              <h1>{t('howItWorks.title')}</h1>
+              <p className="lede">{t('howItWorks.lede')}</p>
             </div>
           </section>
 
@@ -53,38 +52,32 @@ export default function HowItWorks() {
             <div className="container detail-rows">
               <article className="detail-row glass-panel" data-reveal="left">
                 <div>
-                  <p className="eyebrow">Cadence</p>
-                  <h2>Refresh when it matters</h2>
+                  <p className="eyebrow">{t('howItWorks.cadenceEyebrow')}</p>
+                  <h2>{t('howItWorks.cadenceTitle')}</h2>
                 </div>
-                <p>
-                  Matching runs on profile creation, when you edit qualifications, skills, or country, and on a weekly
-                  schedule — not on every dashboard visit.
-                </p>
+                <p>{t('howItWorks.cadenceBody')}</p>
               </article>
               <article className="detail-row glass-panel" data-reveal="right">
                 <div>
-                  <p className="eyebrow">Trust</p>
-                  <h2>Third-party, clearly labeled</h2>
+                  <p className="eyebrow">{t('howItWorks.trustEyebrow')}</p>
+                  <h2>{t('howItWorks.trustTitle')}</h2>
                 </div>
-                <p>
-                  We surface listings from real boards and portals. Always verify deadlines on the source site. Past
-                  deadlines are filtered out of your dashboard.
-                </p>
+                <p>{t('howItWorks.trustBody')}</p>
               </article>
             </div>
           </section>
 
           <section className="section">
             <div className="container cta-panel glass-panel" data-reveal="scale">
-              <h2>Ready to try it with your profile?</h2>
-              <p>Create an account and finish onboarding to generate your first matches.</p>
+              <h2>{t('howItWorks.ctaTitle')}</h2>
+              <p>{t('howItWorks.ctaBody')}</p>
               <div className="cta-row" style={{ justifyContent: 'center' }}>
                 <Link className="btn btn-auth" to="/auth?mode=signup">
-                  <span>Get started</span>
+                  <span>{t('howItWorks.ctaStart')}</span>
                   <span className="btn-auth-shine" aria-hidden="true" />
                 </Link>
                 <Link className="btn btn-ghost" to="/features">
-                  See features
+                  {t('howItWorks.ctaFeatures')}
                 </Link>
               </div>
             </div>

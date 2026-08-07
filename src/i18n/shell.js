@@ -156,5 +156,35 @@ export function shellToNested(s) {
       submitSignIn: s.signIn,
       submitSignUp: s.signUp || s.createProfile,
     },
+    howItWorks: {
+      eyebrow: s.howItWorks,
+      ctaStart: s.getStarted,
+      ctaFeatures: s.features,
+    },
+    features: {
+      eyebrow: s.features,
+    },
+    about: {
+      eyebrow: s.about,
+      ctaCreate: s.createProfile,
+      ctaHow: s.howItWorks,
+    },
+    profile: {
+      eyebrow: s.profile,
+    },
+    privacy: {
+      title: s.privacy,
+    },
+    terms: {
+      title: s.terms,
+    },
+    settings: {
+      country: s.country,
+    },
+    matchCard: {
+      save: s.save,
+      saved: s.saved,
+      dismiss: s.dismiss,
+    },
   }
 }

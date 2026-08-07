@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { normalizeSkillName, suggestSkillsFromQualifications } from '../lib/skillCatalog'
 
 /**
@@ -6,6 +7,7 @@ import { normalizeSkillName, suggestSkillsFromQualifications } from '../lib/skil
  * value: Array<{ skill_name, proficiency, is_custom? }>
  */
 export default function SkillPicker({ qualifications, value = [], onChange }) {
+  const { t } = useTranslation()
   const suggested = useMemo(() => suggestSkillsFromQualifications(qualifications), [qualifications])
   const selectedNames = useMemo(
     () => new Set(value.map((s) => s.skill_name.trim().toLowerCase()).filter(Boolean)),
@@ -70,27 +72,33 @@ export default function SkillPicker({ qualifications, value = [], onChange }) {
 
   const fields = qualifications.map((q) => q.field).filter((f) => f?.trim())
 
+  const levelOptions = (
+    <>
+      <option value="beginner">{t('skillPicker.beginner')}</option>
+      <option value="intermediate">{t('skillPicker.intermediate')}</option>
+      <option value="advanced">{t('skillPicker.advanced')}</option>
+      <option value="expert">{t('skillPicker.expert')}</option>
+    </>
+  )
+
   return (
     <div className="skill-picker">
       <div className="skill-picker-head">
         <p className="muted">
           {fields.length
-            ? `Suggested from: ${fields.join(', ')}`
-            : 'Add a qualification field first to unlock suggested skills.'}
+            ? t('skillPicker.suggestedFrom', { fields: fields.join(', ') })
+            : t('skillPicker.needField')}
         </p>
         <label className="skill-prof-default">
-          Default level
+          {t('skillPicker.defaultLevel')}
           <select value={defaultProficiency} onChange={(e) => setDefaultProficiency(e.target.value)}>
-            <option value="beginner">Beginner</option>
-            <option value="intermediate">Intermediate</option>
-            <option value="advanced">Advanced</option>
-            <option value="expert">Expert</option>
+            {levelOptions}
           </select>
         </label>
       </div>
 
       {suggested.length ? (
-        <div className="skill-check-grid" role="group" aria-label="Suggested skills">
+        <div className="skill-check-grid" role="group" aria-label={t('skillPicker.suggestedFrom', { fields: fields.join(', ') })}>
           {suggested.map((name) => {
             const checked = selectedNames.has(name.toLowerCase())
             return (
@@ -102,26 +110,23 @@ export default function SkillPicker({ qualifications, value = [], onChange }) {
           })}
         </div>
       ) : (
-        <p className="muted">No catalog match yet — use Other skills below, or refine your degree field.</p>
+        <p className="muted">{t('skillPicker.noCatalog')}</p>
       )}
 
       {value.length > 0 ? (
         <div className="skill-selected">
           <p className="jarvis-caption" style={{ color: 'var(--accent)' }}>
-            Selected
+            {t('skillPicker.selected')}
           </p>
           <div className="skill-selected-list">
             {value.map((s) => (
               <div className="skill-selected-row" key={s.skill_name}>
                 <strong>{s.skill_name}</strong>
                 <select value={s.proficiency || 'intermediate'} onChange={(e) => setProficiency(s.skill_name, e.target.value)}>
-                  <option value="beginner">Beginner</option>
-                  <option value="intermediate">Intermediate</option>
-                  <option value="advanced">Advanced</option>
-                  <option value="expert">Expert</option>
+                  {levelOptions}
                 </select>
                 <button type="button" className="ghost-toggle" onClick={() => removeSkill(s.skill_name)}>
-                  Remove
+                  {t('skillPicker.remove')}
                 </button>
               </div>
             ))}
@@ -131,9 +136,9 @@ export default function SkillPicker({ qualifications, value = [], onChange }) {
 
       <div className="skill-other">
         <p className="jarvis-caption" style={{ color: 'var(--accent)' }}>
-          Other skills
+          {t('skillPicker.otherTitle')}
         </p>
-        <p className="muted">Not listed above? Add your own — press Add after each skill.</p>
+        <p className="muted">{t('skillPicker.otherHint')}</p>
         <div className="skill-other-row">
           <input
             value={draft}
@@ -144,10 +149,10 @@ export default function SkillPicker({ qualifications, value = [], onChange }) {
                 addCustom()
               }
             }}
-            placeholder="e.g. GraphQL, Kiswahili, Grant writing"
+            placeholder={t('skillPicker.otherPlaceholder')}
           />
           <button type="button" className="btn btn-ghost" onClick={addCustom}>
-            Add
+            {t('skillPicker.add')}
           </button>
         </div>
         {customSkills.length ? (

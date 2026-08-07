@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -10,26 +11,27 @@ import { prefersReducedMotion, revealOnScroll } from '../lib/animations'
 
 gsap.registerPlugin(useGSAP, ScrollTrigger)
 
-const PRINCIPLES = [
-  {
-    num: '01',
-    title: 'Profile first',
-    body: 'Degrees, skills, and country are the source of truth. Matches rebuild when you change them.',
-  },
-  {
-    num: '02',
-    title: 'Reasons on every card',
-    body: 'A score without an explanation is noise. We write why a listing fits — in plain language.',
-  },
-  {
-    num: '03',
-    title: 'You finish on the source',
-    body: 'We discover and rank. You apply on the official scholarship or employer site.',
-  },
-]
-
 export default function About() {
   const root = useRef(null)
+  const { t, i18n } = useTranslation()
+
+  const PRINCIPLES = [
+    {
+      num: '01',
+      title: t('about.p1Title'),
+      body: t('about.p1Body'),
+    },
+    {
+      num: '02',
+      title: t('about.p2Title'),
+      body: t('about.p2Body'),
+    },
+    {
+      num: '03',
+      title: t('about.p3Title'),
+      body: t('about.p3Body'),
+    },
+  ]
 
   useGSAP(
     () => {
@@ -55,8 +57,8 @@ export default function About() {
   )
 
   useEffect(() => {
-    document.title = 'About — Opportunistic'
-  }, [])
+    document.title = t('about.metaTitle')
+  }, [t, i18n.language])
 
   return (
     <PageBackdrop image="about.jpg">
@@ -72,12 +74,9 @@ export default function About() {
               height="120"
             />
             <div className="about-hero-copy">
-              <p className="eyebrow">About Opportunistic</p>
-              <h1>Scholarships and jobs, matched with reasons.</h1>
-              <p className="lede">
-                Built for people who are tired of scrolling generic boards. Enter what you’ve studied and what you can
-                do — we rank openings and say why they fit.
-              </p>
+              <p className="eyebrow">{t('about.eyebrow')}</p>
+              <h1>{t('about.title')}</h1>
+              <p className="lede">{t('about.lede')}</p>
             </div>
             <div className="about-hero-rule" aria-hidden="true" />
           </section>
@@ -85,26 +84,20 @@ export default function About() {
           <section className="about-mission section">
             <div className="container about-mission-grid">
               <div data-reveal="left">
-                <p className="jarvis-caption">The idea</p>
-                <h2>Matching should feel like a briefing, not a dump of links.</h2>
+                <p className="jarvis-caption">{t('about.ideaCaption')}</p>
+                <h2>{t('about.ideaTitle')}</h2>
               </div>
               <div className="about-mission-body" data-reveal="right">
-                <p>
-                  Search engines and opportunity boards show volume. They rarely know your Computer Science degree, your
-                  React skills, or that you’re applying from Botswana — and they almost never explain the fit.
-                </p>
-                <p>
-                  Opportunistic keeps one living profile and runs scholarship and job matching against it. Every result
-                  carries a score, a source, and a reason you can actually use.
-                </p>
+                <p>{t('about.ideaBody1')}</p>
+                <p>{t('about.ideaBody2')}</p>
               </div>
             </div>
           </section>
 
           <section className="about-principles section">
             <div className="container">
-              <p className="jarvis-caption">How we work</p>
-              <h2 className="about-section-title">Three rules we don’t break</h2>
+              <p className="jarvis-caption">{t('about.rulesCaption')}</p>
+              <h2 className="about-section-title">{t('about.rulesTitle')}</h2>
               <div className="about-principle-list">
                 {PRINCIPLES.map((item) => (
                   <article key={item.num} className="about-principle">
@@ -120,21 +113,21 @@ export default function About() {
           <section className="section">
             <div className="container about-split">
               <article className="about-split-panel" data-reveal="up">
-                <p className="jarvis-caption">What we are</p>
-                <h2>A discovery layer</h2>
+                <p className="jarvis-caption">{t('about.areCaption')}</p>
+                <h2>{t('about.areTitle')}</h2>
                 <ul className="about-checklist">
-                  <li>Profile-aware scholarship and job matches</li>
-                  <li>Playbook tips unique to your skills and goals</li>
-                  <li>Save, dismiss, and rematch when your profile changes</li>
+                  <li>{t('about.areItem1')}</li>
+                  <li>{t('about.areItem2')}</li>
+                  <li>{t('about.areItem3')}</li>
                 </ul>
               </article>
               <article className="about-split-panel muted-panel" data-reveal="up">
-                <p className="jarvis-caption">What we are not</p>
-                <h2>Not the issuer</h2>
+                <p className="jarvis-caption">{t('about.notCaption')}</p>
+                <h2>{t('about.notTitle')}</h2>
                 <ul className="about-checklist">
-                  <li>We don’t grant scholarships or hire anyone</li>
-                  <li>We don’t guarantee acceptance or funding</li>
-                  <li>Always verify deadlines on the official listing</li>
+                  <li>{t('about.notItem1')}</li>
+                  <li>{t('about.notItem2')}</li>
+                  <li>{t('about.notItem3')}</li>
                 </ul>
               </article>
             </div>
@@ -143,12 +136,9 @@ export default function About() {
           <section className="section about-maker">
             <div className="container about-maker-inner" data-reveal="scale">
               <div>
-                <p className="jarvis-caption">Studio</p>
-                <h2>Built by Futurify Designs</h2>
-                <p>
-                  Opportunistic™ is a Futurify Designs product — designed to feel precise, calm, and useful, not like
-                  another template board.
-                </p>
+                <p className="jarvis-caption">{t('about.studioCaption')}</p>
+                <h2>{t('about.studioTitle')}</h2>
+                <p>{t('about.studioBody')}</p>
               </div>
               <a
                 className="btn btn-ghost"
@@ -156,21 +146,21 @@ export default function About() {
                 target="_blank"
                 rel="noreferrer"
               >
-                Visit Futurify Designs
+                {t('about.studioCta')}
               </a>
             </div>
           </section>
 
           <section className="section">
             <div className="container about-cta" data-reveal="up">
-              <h2>Ready to hand it your profile?</h2>
-              <p>Create an account, confirm skills from your degree, and open ranked matches with reasons.</p>
+              <h2>{t('about.ctaTitle')}</h2>
+              <p>{t('about.ctaBody')}</p>
               <div className="cta-row">
                 <Link className="btn" to="/auth?mode=signup">
-                  Create profile
+                  {t('about.ctaCreate')}
                 </Link>
                 <Link className="btn btn-ghost" to="/how-it-works">
-                  See how it works
+                  {t('about.ctaHow')}
                 </Link>
               </div>
             </div>

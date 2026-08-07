@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { getListingBySource } from '../lib/listingCatalog'
@@ -17,6 +18,7 @@ function splitSentences(text = '') {
 export default function MatchDetail() {
   const { kind, id } = useParams()
   const { user, profile } = useAuth()
+  const { t, i18n } = useTranslation()
   const [match, setMatch] = useState(null)
   const [qualifications, setQualifications] = useState([])
   const [skills, setSkills] = useState([])
@@ -43,8 +45,8 @@ export default function MatchDetail() {
   }, [match, profile, qualifications, skills, listing, kind, tipNonce])
 
   useEffect(() => {
-    document.title = match?.title ? `${match.title} — Opportunistic` : 'Match detail — Opportunistic'
-  }, [match?.title])
+    document.title = match?.title ? `${match.title} — Opportunistic` : t('match.metaTitle')
+  }, [match?.title, t, i18n.language])
 
   useEffect(() => {
     let cancelled = false
@@ -78,7 +80,7 @@ export default function MatchDetail() {
       }
       if (!matchRes.data) {
         setNotFound(true)
-        setError('This match is no longer available. It may have been refreshed after a profile update.')
+        setError(t('match.gone'))
         return
       }
       setMatch(matchRes.data)
@@ -89,7 +91,7 @@ export default function MatchDetail() {
     return () => {
       cancelled = true
     }
-  }, [table, id, user?.id])
+  }, [table, id, user?.id, t])
 
   async function toggle(field) {
     if (!match || !table || busy) return
@@ -121,17 +123,17 @@ export default function MatchDetail() {
       <SiteHeader />
       <main className="container detail-page">
         <Link to="/dashboard" className="back-link">
-          ← Back to dashboard
+          {t('match.back')}
         </Link>
 
         {error ? <p className="form-message">{error}</p> : null}
 
         {notFound && !match ? (
           <div className="empty-state">
-            <h3>Listing unavailable</h3>
-            <p>Return to the dashboard and open a current match. Saving your profile rebuilds results from your latest data.</p>
+            <h3>{t('match.emptyTitle')}</h3>
+            <p>{t('match.emptyBody')}</p>
             <Link className="btn" to="/dashboard">
-              Go to dashboard
+              {t('match.emptyCta')}
             </Link>
           </div>
         ) : null}
@@ -158,7 +160,9 @@ export default function MatchDetail() {
                   <h1>{match.title}</h1>
                   {match.company ? <p className="muted">{match.company}</p> : null}
                   <div className="detail-badges">
-                    <span className="score-pill large">{Math.round(Number(match.match_score) || 0)}% match</span>
+                    <span className="score-pill large">
+                      {t('match.scorePill', { score: Math.round(Number(match.match_score) || 0) })}
+                    </span>
                     {listing?.level ? <span className="info-chip">{listing.level}</span> : null}
                     {listing?.location ? <span className="info-chip">{listing.location}</span> : null}
                   </div>
@@ -169,7 +173,9 @@ export default function MatchDetail() {
                 <p className="eyebrow">{match.source || kind}</p>
                 <h1>{match.title}</h1>
                 {match.company ? <p className="muted">{match.company}</p> : null}
-                <div className="score-pill large">{Math.round(Number(match.match_score) || 0)}% match</div>
+                <div className="score-pill large">
+                  {t('match.scorePill', { score: Math.round(Number(match.match_score) || 0) })}
+                </div>
               </>
             )}
 
@@ -185,7 +191,7 @@ export default function MatchDetail() {
 
             {listing?.summary ? (
               <section className="detail-section">
-                <h2>About this listing</h2>
+                <h2>{t('match.aboutTitle')}</h2>
                 <p>{listing.summary}</p>
               </section>
             ) : null}
@@ -193,14 +199,13 @@ export default function MatchDetail() {
             <section className="detail-section tip-playbook">
               <div className="tip-playbook-head">
                 <div>
-                  <h2>Your playbook to win this</h2>
+                  <h2>{t('match.playbookTitle')}</h2>
                   <p className="muted detail-note" style={{ marginTop: 0 }}>
-                    Unique tips built from your profile, skills, and this listing. They refresh when you edit your
-                    profile — or tap New tips.
+                    {t('match.playbookNote')}
                   </p>
                 </div>
                 <button type="button" className="btn btn-ghost btn-sm" onClick={() => setTipNonce((n) => n + 1)}>
-                  New tips
+                  {t('match.newTips')}
                 </button>
               </div>
               <ol className="tip-playbook-list">
@@ -215,7 +220,7 @@ export default function MatchDetail() {
 
             {gallery.length > 0 ? (
               <section className="detail-section">
-                <h2>Gallery</h2>
+                <h2>{t('match.galleryTitle')}</h2>
                 <div className="detail-gallery">
                   {gallery.map((src) => (
                     <button
@@ -233,29 +238,29 @@ export default function MatchDetail() {
             ) : null}
 
             <section className="detail-section detail-grid-facts">
-              <h2>Key facts</h2>
+              <h2>{t('match.factsTitle')}</h2>
               <dl className="fact-grid">
                 {listing?.funding ? (
                   <>
-                    <dt>Funding</dt>
+                    <dt>{t('match.factFunding')}</dt>
                     <dd>{listing.funding}</dd>
                   </>
                 ) : null}
                 {listing?.level ? (
                   <>
-                    <dt>Level</dt>
+                    <dt>{t('match.factLevel')}</dt>
                     <dd>{listing.level}</dd>
                   </>
                 ) : null}
                 {listing?.location ? (
                   <>
-                    <dt>Location</dt>
+                    <dt>{t('match.factLocation')}</dt>
                     <dd>{listing.location}</dd>
                   </>
                 ) : null}
-                <dt>Deadline</dt>
-                <dd>{match.deadline || listing?.deadlineLabel || 'Check source listing'}</dd>
-                <dt>Source</dt>
+                <dt>{t('match.factDeadline')}</dt>
+                <dd>{match.deadline || listing?.deadlineLabel || t('match.deadlineFallback')}</dd>
+                <dt>{t('match.factSource')}</dt>
                 <dd>{match.source || '—'}</dd>
                 {match.company ? (
                   <>
@@ -268,7 +273,7 @@ export default function MatchDetail() {
 
             {listing?.highlights?.length ? (
               <section className="detail-section">
-                <h2>What you get</h2>
+                <h2>{t('match.whatYouGet')}</h2>
                 <ul className="detail-list">
                   {listing.highlights.map((item) => (
                     <li key={item}>{item}</li>
@@ -279,21 +284,19 @@ export default function MatchDetail() {
 
             {listing?.eligibility?.length ? (
               <section className="detail-section">
-                <h2>Eligibility snapshot</h2>
+                <h2>{t('match.eligibilityTitle')}</h2>
                 <ul className="detail-list">
                   {listing.eligibility.map((item) => (
                     <li key={item}>{item}</li>
                   ))}
                 </ul>
-                <p className="muted detail-note">
-                  Always confirm the latest rules on the official source — programs change by cycle and nationality.
-                </p>
+                <p className="muted detail-note">{t('match.eligibilityNote')}</p>
               </section>
             ) : null}
 
             {listing?.howToApply?.length ? (
               <section className="detail-section">
-                <h2>How to apply</h2>
+                <h2>{t('match.howToApply')}</h2>
                 <ol className="detail-list numbered">
                   {listing.howToApply.map((item) => (
                     <li key={item}>{item}</li>
@@ -303,7 +306,7 @@ export default function MatchDetail() {
             ) : null}
 
             <section className="detail-section">
-              <h2>Why this fits you</h2>
+              <h2>{t('match.whyFits')}</h2>
               <div className="reasoning-block">
                 {reasons.length ? (
                   reasons.map((sentence, i) => (
@@ -319,13 +322,13 @@ export default function MatchDetail() {
 
             <div className="cta-row sticky-cta">
               <a className="btn" href={match.url} target="_blank" rel="noreferrer noopener">
-                Open official listing
+                {t('match.openOfficial')}
               </a>
               <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => toggle('saved')}>
-                {match.saved ? 'Unsave' : 'Save'}
+                {match.saved ? t('match.unsave') : t('match.save')}
               </button>
               <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => toggle('dismissed')}>
-                {match.dismissed ? 'Restore' : 'Dismiss'}
+                {match.dismissed ? 'Restore' : t('match.dismiss')}
               </button>
             </div>
           </article>

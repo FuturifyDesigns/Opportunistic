@@ -1,4 +1,5 @@
-import { useRef } from 'react'
+import { useMemo, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import InteractiveCard from './InteractiveCard'
@@ -6,43 +7,48 @@ import { prefersReducedMotion } from '../lib/animations'
 
 gsap.registerPlugin(useGSAP)
 
-const PREVIEWS = {
-  scholarship: {
-    label: 'Live match stream',
-    rows: [
-      { title: 'Chevening', score: 91 },
-      { title: 'Mastercard Scholars', score: 87 },
-      { title: 'DAAD Database', score: 78 },
-    ],
-  },
-  job: {
-    label: 'Country-filtered roles',
-    rows: [
-      { title: 'React · Junior', score: 89 },
-      { title: 'Frontend · Remote', score: 84 },
-      { title: 'Support Engineer', score: 71 },
-    ],
-  },
-  profile: {
-    label: 'Guided feed',
-    rows: [
-      { title: 'Country locked', score: 100 },
-      { title: 'Qualifications', score: 80 },
-      { title: 'Skills weighted', score: 65 },
-    ],
-  },
-  privacy: {
-    label: 'Control panel',
-    rows: [
-      { title: 'Digest · weekly', score: 70 },
-      { title: 'RLS · own data', score: 95 },
-      { title: 'Delete cascade', score: 100 },
-    ],
-  },
-}
-
 export default function LiveFeaturePreview({ kind = 'scholarship', title }) {
   const root = useRef(null)
+  const { t, i18n } = useTranslation()
+
+  const PREVIEWS = useMemo(
+    () => ({
+      scholarship: {
+        label: t('featurePreview.scholarshipLabel'),
+        rows: [
+          { title: t('featurePreview.scholarshipRow1'), score: 91 },
+          { title: t('featurePreview.scholarshipRow2'), score: 87 },
+          { title: t('featurePreview.scholarshipRow3'), score: 78 },
+        ],
+      },
+      job: {
+        label: t('featurePreview.jobLabel'),
+        rows: [
+          { title: t('featurePreview.jobRow1'), score: 89 },
+          { title: t('featurePreview.jobRow2'), score: 84 },
+          { title: t('featurePreview.jobRow3'), score: 71 },
+        ],
+      },
+      profile: {
+        label: t('featurePreview.profileLabel'),
+        rows: [
+          { title: t('featurePreview.profileRow1'), score: 100 },
+          { title: t('featurePreview.profileRow2'), score: 80 },
+          { title: t('featurePreview.profileRow3'), score: 65 },
+        ],
+      },
+      privacy: {
+        label: t('featurePreview.privacyLabel'),
+        rows: [
+          { title: t('featurePreview.privacyRow1'), score: 70 },
+          { title: t('featurePreview.privacyRow2'), score: 95 },
+          { title: t('featurePreview.privacyRow3'), score: 100 },
+        ],
+      },
+    }),
+    [t, i18n.language],
+  )
+
   const data = PREVIEWS[kind] || PREVIEWS.scholarship
 
   useGSAP(
@@ -104,17 +110,17 @@ export default function LiveFeaturePreview({ kind = 'scholarship', title }) {
         ease: 'power1.out',
       })
     },
-    { scope: root, dependencies: [kind] },
+    { scope: root, dependencies: [kind, i18n.language] },
   )
 
   return (
     <InteractiveCard className="feature-showcase live-preview">
       <div ref={root} className="live-preview-inner">
         <div className="live-preview-head">
-          <p className="eyebrow">Preview</p>
+          <p className="eyebrow">{t('featurePreview.preview')}</p>
           <span className="live-dot">
             <i className="live-pulse" aria-hidden="true" />
-            Live
+            {t('featurePreview.live')}
           </span>
         </div>
         <strong>{title}</strong>

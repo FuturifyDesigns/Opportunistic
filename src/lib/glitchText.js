@@ -150,6 +150,10 @@ const SELECTOR = [
   '.auth-orb-core em',
 ].join(', ')
 
+export function clearAllGlitchEnhancements(root = document) {
+  root.querySelectorAll('[data-glitch="1"]').forEach((el) => clearEnhanced(el))
+}
+
 export function enhanceAllHeadings(root = document) {
   if (prefersReducedMotion()) return
   root.querySelectorAll(SELECTOR).forEach((el) => {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { COUNTRIES } from '../lib/countries'
 import { supabase } from '../lib/supabase'
 import { runMatchingForUser } from '../lib/matchingService'
@@ -13,6 +14,7 @@ const emptyQual = { type: 'degree', field: '', institution: '', year: new Date()
 
 export default function Profile() {
   const { user, profile, refreshProfile } = useAuth()
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const [form, setForm] = useState({
     full_name: '',
@@ -26,7 +28,10 @@ export default function Profile() {
   const [message, setMessage] = useState('')
 
   useEffect(() => {
-    document.title = 'Profile — Opportunistic'
+    document.title = t('profile.metaTitle')
+  }, [t, i18n.language])
+
+  useEffect(() => {
     async function load() {
       if (profile) {
         setForm({
@@ -96,10 +101,10 @@ export default function Profile() {
 
       await runMatchingForUser(user.id)
       await refreshProfile()
-      setMessage('Profile saved. Matches re-scored from your latest qualifications and skills.')
+      setMessage(t('profile.saveSuccess'))
       setTimeout(() => navigate('/dashboard'), 700)
     } catch (err) {
-      setMessage(err.message || 'Save failed')
+      setMessage(err.message || t('profile.saveError'))
     } finally {
       setBusy(false)
     }
@@ -109,25 +114,25 @@ export default function Profile() {
     <div className="page">
       <SiteHeader />
       <main className="container narrow">
-        <p className="eyebrow">Profile</p>
-        <h1>Edit your profile</h1>
-        <p className="muted">Saving re-runs matching for scholarships and jobs.</p>
+        <p className="eyebrow">{t('profile.eyebrow')}</p>
+        <h1>{t('profile.title')}</h1>
+        <p className="muted">{t('profile.lede')}</p>
 
         <form className="stack-form" onSubmit={save}>
           <label>
-            Full name
+            {t('profile.fullName')}
             <input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} required />
           </label>
           <label>
-            Headline
+            {t('profile.headline')}
             <input value={form.headline} onChange={(e) => setForm({ ...form, headline: e.target.value })} />
           </label>
           <label>
-            Bio
+            {t('profile.bio')}
             <textarea rows={4} value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} />
           </label>
           <label>
-            Country
+            {t('profile.country')}
             <select value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })}>
               {COUNTRIES.map((c) => (
                 <option key={c} value={c}>{c}</option>
@@ -135,23 +140,23 @@ export default function Profile() {
             </select>
           </label>
 
-          <h2 className="form-section">Qualifications</h2>
+          <h2 className="form-section">{t('profile.qualsTitle')}</h2>
           {qualifications.map((q, i) => (
             <div className="card-lite" key={i}>
               <label>
-                Type
+                {t('profile.qualType')}
                 <select
                   value={q.type}
                   onChange={(e) =>
                     setQualifications((rows) => rows.map((row, idx) => (idx === i ? { ...row, type: e.target.value } : row)))
                   }
                 >
-                  <option value="degree">Degree</option>
-                  <option value="certificate">Certificate</option>
+                  <option value="degree">{t('profile.qualDegree')}</option>
+                  <option value="certificate">{t('profile.qualCertificate')}</option>
                 </select>
               </label>
               <label>
-                Field
+                {t('profile.qualField')}
                 <input
                   value={q.field || ''}
                   onChange={(e) =>
@@ -160,7 +165,7 @@ export default function Profile() {
                 />
               </label>
               <label>
-                Institution
+                {t('profile.qualInstitution')}
                 <input
                   value={q.institution || ''}
                   onChange={(e) =>
@@ -171,7 +176,7 @@ export default function Profile() {
                 />
               </label>
               <label>
-                Year
+                {t('profile.qualYear')}
                 <input
                   type="number"
                   value={q.year || ''}
@@ -183,16 +188,16 @@ export default function Profile() {
             </div>
           ))}
           <button type="button" className="btn btn-ghost" onClick={() => setQualifications((r) => [...r, { ...emptyQual }])}>
-            Add qualification
+            {t('profile.addQual')}
           </button>
 
-          <h2 className="form-section">Skills</h2>
-          <p className="muted">Tick skills that fit your degrees. Use Other for anything missing.</p>
+          <h2 className="form-section">{t('profile.skillsTitle')}</h2>
+          <p className="muted">{t('profile.skillsHint')}</p>
           <SkillPicker qualifications={qualifications} value={skills} onChange={setSkills} />
 
           {message ? <p className="form-message">{message}</p> : null}
           <button className="btn" type="submit" disabled={busy}>
-            {busy ? 'Saving & matching…' : 'Save & rematch'}
+            {busy ? t('profile.saving') : t('profile.save')}
           </button>
         </form>
       </main>

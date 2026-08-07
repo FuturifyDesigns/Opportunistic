@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { AuthProvider } from './context/AuthContext'
 import { ConsentProvider } from './context/ConsentContext'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -17,6 +18,63 @@ import MatchDetail from './pages/MatchDetail'
 import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
 
+function AppRoutes() {
+  const { i18n } = useTranslation()
+  // Remount route tree on language change so every page updates instantly.
+  return (
+    <Routes key={i18n.language}>
+      <Route path="/" element={<Landing />} />
+      <Route path="/how-it-works" element={<HowItWorks />} />
+      <Route path="/features" element={<Features />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/auth" element={<Auth />} />
+      <Route path="/privacy" element={<Privacy />} />
+      <Route path="/terms" element={<Terms />} />
+      <Route
+        path="/onboarding"
+        element={
+          <ProtectedRoute>
+            <Onboarding />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute requireOnboarding>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute requireOnboarding>
+            <Profile />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute requireOnboarding>
+            <Settings />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/match/:kind/:id"
+        element={
+          <ProtectedRoute requireOnboarding>
+            <MatchDetail />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  )
+}
+
 export default function App() {
   return (
     <AuthProvider>
@@ -24,56 +82,7 @@ export default function App() {
         <BrowserRouter>
           <GlitchHeadings />
           <CookieConsent />
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/how-it-works" element={<HowItWorks />} />
-            <Route path="/features" element={<Features />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route
-              path="/onboarding"
-              element={
-                <ProtectedRoute>
-                  <Onboarding />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute requireOnboarding>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute requireOnboarding>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/settings"
-              element={
-                <ProtectedRoute requireOnboarding>
-                  <Settings />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/match/:kind/:id"
-              element={
-                <ProtectedRoute requireOnboarding>
-                  <MatchDetail />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+          <AppRoutes />
         </BrowserRouter>
       </ConsentProvider>
     </AuthProvider>

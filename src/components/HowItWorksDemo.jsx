@@ -1,68 +1,105 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { prefersReducedMotion } from '../lib/animations'
 
 gsap.registerPlugin(useGSAP)
 
-const PHASES = [
-  { id: 'ingest', label: 'INGEST', title: 'Feed your profile' },
-  { id: 'process', label: 'PROCESS', title: 'Opportunistic thinks' },
-  { id: 'output', label: 'OUTPUT', title: 'Matches with reasons' },
-]
-
-const LOG_LINES = {
-  ingest: [
-    '> awaiting profile stream…',
-    '> country=Botswana',
-    '> qual=BSc Computer Science',
-    '> skills=[React, AWS]',
-    '> profile hash locked ✓',
-  ],
-  process: [
-    '> building search vectors…',
-    '> query: CS scholarships Southern Africa 2026',
-    '> query: React junior jobs Botswana',
-    '> scoring candidates…',
-    '> writing fit reasons…',
-  ],
-  output: [
-    '> rank complete',
-    '> 3 high-confidence matches',
-    '> reasoning attached to each card',
-    '> ready for human review',
-  ],
-}
-
-const DEMO_MATCHES = [
-  {
-    title: 'Mastercard Foundation Scholars',
-    score: 94,
-    reason: 'Matches your BSc Computer Science + Southern Africa eligibility.',
-  },
-  {
-    title: 'React developer roles — LinkedIn',
-    score: 88,
-    reason: 'Aligned with React experience; filtered to your country.',
-  },
-  {
-    title: 'Chevening Scholarships',
-    score: 81,
-    reason: 'Fits postgraduate path and Commonwealth applicant profile.',
-  },
-]
-
 export default function HowItWorksDemo() {
   const root = useRef(null)
+  const { t, i18n } = useTranslation()
   const [phase, setPhase] = useState(0)
   const [logs, setLogs] = useState([])
   const auto = useRef(true)
+
+  const PHASES = useMemo(
+    () => [
+      {
+        id: 'ingest',
+        label: t('howDemo.phaseIngestLabel'),
+        title: t('howDemo.phaseIngestTitle'),
+        desc: t('howDemo.phaseIngestDesc'),
+      },
+      {
+        id: 'process',
+        label: t('howDemo.phaseProcessLabel'),
+        title: t('howDemo.phaseProcessTitle'),
+        desc: t('howDemo.phaseProcessDesc'),
+      },
+      {
+        id: 'output',
+        label: t('howDemo.phaseOutputLabel'),
+        title: t('howDemo.phaseOutputTitle'),
+        desc: t('howDemo.phaseOutputDesc'),
+      },
+    ],
+    [t, i18n.language],
+  )
+
+  const LOG_LINES = useMemo(
+    () => ({
+      ingest: [
+        t('howDemo.logIngest1'),
+        t('howDemo.logIngest2'),
+        t('howDemo.logIngest3'),
+        t('howDemo.logIngest4'),
+        t('howDemo.logIngest5'),
+      ],
+      process: [
+        t('howDemo.logProcess1'),
+        t('howDemo.logProcess2'),
+        t('howDemo.logProcess3'),
+        t('howDemo.logProcess4'),
+        t('howDemo.logProcess5'),
+      ],
+      output: [
+        t('howDemo.logOutput1'),
+        t('howDemo.logOutput2'),
+        t('howDemo.logOutput3'),
+        t('howDemo.logOutput4'),
+      ],
+    }),
+    [t, i18n.language],
+  )
+
+  const DEMO_MATCHES = useMemo(
+    () => [
+      {
+        title: t('howDemo.demoMatch1Title'),
+        score: 94,
+        reason: t('howDemo.demoMatch1Reason'),
+      },
+      {
+        title: t('howDemo.demoMatch2Title'),
+        score: 88,
+        reason: t('howDemo.demoMatch2Reason'),
+      },
+      {
+        title: t('howDemo.demoMatch3Title'),
+        score: 81,
+        reason: t('howDemo.demoMatch3Reason'),
+      },
+    ],
+    [t, i18n.language],
+  )
+
+  const feedChips = useMemo(
+    () => [
+      t('howDemo.feedChip1'),
+      t('howDemo.feedChip2'),
+      t('howDemo.feedChip3'),
+      t('howDemo.feedChip4'),
+      t('howDemo.feedChip5'),
+    ],
+    [t, i18n.language],
+  )
 
   useEffect(() => {
     if (prefersReducedMotion() || !auto.current) return undefined
     const id = window.setInterval(() => setPhase((p) => (p + 1) % PHASES.length), 5200)
     return () => window.clearInterval(id)
-  }, [])
+  }, [PHASES.length])
 
   useEffect(() => {
     const lines = LOG_LINES[PHASES[phase].id]
@@ -78,7 +115,7 @@ export default function HowItWorksDemo() {
       if (i >= lines.length) window.clearInterval(id)
     }, 420)
     return () => window.clearInterval(id)
-  }, [phase])
+  }, [phase, LOG_LINES, PHASES])
 
   useGSAP(
     () => {
@@ -130,18 +167,14 @@ export default function HowItWorksDemo() {
           >
             <span>{p.label}</span>
             <strong>{p.title}</strong>
-            <p>
-              {i === 0 && 'Country, qualifications, and skills — entered one step at a time.'}
-              {i === 1 && 'Builds queries, searches, scores candidates, and writes fit notes.'}
-              {i === 2 && 'Ranked cards with visible reasoning. Open the source link when ready.'}
-            </p>
+            <p>{p.desc}</p>
           </button>
         ))}
       </div>
 
       <div className="jarvis-screen" aria-live="polite">
         <div className="jarvis-chrome">
-          <p className="jarvis-title">OPPORTUNISTIC // MATCH CONSOLE</p>
+          <p className="jarvis-title">{t('howDemo.consoleTitle')}</p>
           <p className="jarvis-status">{PHASES[phase].label}</p>
         </div>
 
@@ -149,15 +182,13 @@ export default function HowItWorksDemo() {
           <div className="jarvis-stage">
             {phase === 0 && (
               <div className="jarvis-ingest">
-                <p className="jarvis-caption">Incoming profile feed</p>
+                <p className="jarvis-caption">{t('howDemo.feedCaption')}</p>
                 <div className="feed-chips">
-                  {['Country · Botswana', 'Degree · CS', 'Skill · React', 'Skill · AWS', 'Goal · Scholarships + jobs'].map(
-                    (c) => (
-                      <span key={c} className="feed-chip">
-                        {c}
-                      </span>
-                    ),
-                  )}
+                  {feedChips.map((c) => (
+                    <span key={c} className="feed-chip">
+                      {c}
+                    </span>
+                  ))}
                 </div>
                 <div className="ingest-beam" aria-hidden="true" />
               </div>
@@ -172,15 +203,15 @@ export default function HowItWorksDemo() {
                 </div>
                 <div className="hud-meters">
                   <div className="hud-meter">
-                    <label>Search</label>
+                    <label>{t('howDemo.meterSearch')}</label>
                     <span />
                   </div>
                   <div className="hud-meter">
-                    <label>Score</label>
+                    <label>{t('howDemo.meterScore')}</label>
                     <span />
                   </div>
                   <div className="hud-meter">
-                    <label>Reason</label>
+                    <label>{t('howDemo.meterReason')}</label>
                     <span />
                   </div>
                 </div>
@@ -203,7 +234,7 @@ export default function HowItWorksDemo() {
           </div>
 
           <aside className="jarvis-log">
-            <p className="jarvis-caption">System log</p>
+            <p className="jarvis-caption">{t('howDemo.systemLog')}</p>
             <div className="jarvis-log-lines">
               {logs.map((line, idx) => (
                 <p key={`${phase}-${idx}`}>{line}</p>

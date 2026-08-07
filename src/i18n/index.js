@@ -47,19 +47,9 @@ function buildResources() {
     if (code === 'en') continue
     const fromShell = prune(shellToNested(SHELL[code]))
     const fromOverlay = overlays[code] || {}
-    const merged = deepMerge(deepMerge({}, fromShell), fromOverlay)
-    resources[code] = { translation: merged }
-  }
-
-  // Ensure overlay-only codes also register (tn, es already in LANGUAGES)
-  for (const code of Object.keys(overlays)) {
-    if (resources[code]) {
-      resources[code].translation = deepMerge(
-        prune(shellToNested(SHELL[code])),
-        overlays[code],
-      )
-    } else {
-      resources[code] = { translation: overlays[code] }
+    // Full English base so every key resolves; overlays/shell replace what we translate.
+    resources[code] = {
+      translation: deepMerge(deepMerge(deepMerge({}, en), fromShell), fromOverlay),
     }
   }
 
@@ -75,6 +65,11 @@ i18n.use(initReactI18next).init({
   fallbackLng: 'en',
   interpolation: { escapeValue: false },
   returnNull: false,
+  react: {
+    useSuspense: false,
+    bindI18n: 'languageChanged loaded',
+    bindI18nStore: 'added removed',
+  },
 })
 
 export function applyDocumentLanguage(code = i18n.language) {
