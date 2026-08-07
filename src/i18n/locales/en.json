@@ -107,9 +107,9 @@
   },
   "intro": {
     "docTitle": "Opportunistic — Enter",
-    "booting": "Preparing your lane…",
-    "enterHint": "Click anywhere to enter",
+    "enterHint": "Enter site",
     "enter": "Enter Opportunistic",
+    "booting": "Preparing…",
     "cards": {
       "pathway": {
         "title": "Open pathway",

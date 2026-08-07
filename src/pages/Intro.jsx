@@ -25,7 +25,12 @@ export function markIntroSeen() {
   }
 }
 
-const CARD_KEYS = ['pathway', 'sync', 'reason', 'lane']
+const CARDS = [
+  { key: 'pathway', slot: 'tl' },
+  { key: 'sync', slot: 'tr' },
+  { key: 'reason', slot: 'ml' },
+  { key: 'lane', slot: 'mr' },
+]
 
 export default function Intro() {
   const { t } = useTranslation()
@@ -46,7 +51,7 @@ export default function Intro() {
 
   useEffect(() => {
     if (prefersReducedMotion()) {
-      setVisibleCount(CARD_KEYS.length)
+      setVisibleCount(CARDS.length)
       setReady(true)
       return undefined
     }
@@ -55,7 +60,7 @@ export default function Intro() {
     const id = window.setInterval(() => {
       i += 1
       setVisibleCount(i)
-      if (i >= CARD_KEYS.length) {
+      if (i >= CARDS.length) {
         window.clearInterval(id)
         setReady(true)
       }
@@ -66,16 +71,15 @@ export default function Intro() {
   useGSAP(
     () => {
       if (prefersReducedMotion()) {
-        if (sweepRef.current) gsap.set(sweepRef.current, { opacity: 0.28 })
+        if (sweepRef.current) gsap.set(sweepRef.current, { opacity: 0.22 })
         return
       }
 
       const tl = gsap.timeline({ defaults: { ease: 'power2.out' } })
-      tl.from('.intro-veil', { opacity: 0, duration: 0.55 })
-        .from('.intro-core', { scale: 0.88, opacity: 0, duration: 0.8 }, '-=0.2')
+      tl.from('.intro-core', { scale: 0.88, opacity: 0, duration: 0.8 })
         .from('.intro-rings span:not(.intro-sweep)', { scale: 0.75, opacity: 0, stagger: 0.08, duration: 0.5 }, '-=0.55')
         .from('.intro-word', { y: 16, opacity: 0, duration: 0.45 }, '-=0.25')
-        .from('.intro-enter', { y: 10, opacity: 0, duration: 0.35 }, '-=0.1')
+        .from('.intro-enter', { y: 12, opacity: 0, duration: 0.4 }, '-=0.1')
 
       gsap.to('.intro-rings .r2', {
         rotate: 360,
@@ -92,7 +96,7 @@ export default function Intro() {
 
       if (sweepRef.current) {
         gsap.set(sweepRef.current, {
-          opacity: 0.55,
+          opacity: 0.4,
           rotate: 0,
           force3D: true,
           transformOrigin: '50% 50%',
@@ -123,13 +127,13 @@ export default function Intro() {
       if (!cards?.length) return
       cards.forEach((el) => el.classList.add('is-shown'))
       if (prefersReducedMotion()) {
-        gsap.set(cards, { opacity: 1, y: 0, clearProps: 'transform' })
+        gsap.set(cards, { opacity: 1, clearProps: 'transform' })
         return
       }
       gsap.fromTo(
         cards,
-        { opacity: 0, y: 18 },
-        { opacity: 1, y: 0, duration: 0.45, stagger: 0.06, ease: 'power2.out' },
+        { opacity: 0, scale: 0.96 },
+        { opacity: 1, scale: 1, duration: 0.45, stagger: 0.06, ease: 'power2.out' },
       )
     },
     { scope: root, dependencies: [visibleCount] },
@@ -149,10 +153,9 @@ export default function Intro() {
     }
 
     const tl = gsap.timeline({ onComplete: go })
-    tl.to('.intro-enter, .intro-cards, .intro-word', { opacity: 0, y: -12, duration: 0.28, stagger: 0.04 })
+    tl.to('.intro-enter, .intro-card, .intro-word', { opacity: 0, duration: 0.28, stagger: 0.03 })
       .to('.intro-rings span', { scale: 1.35, opacity: 0, duration: 0.5, stagger: 0.04 }, '-=0.1')
       .to('.intro-core', { scale: 1.35, opacity: 0, duration: 0.5, ease: 'power2.in' }, '-=0.35')
-      .to('.intro-veil', { opacity: 0, duration: 0.3 }, '-=0.2')
   }
 
   return (
@@ -160,47 +163,50 @@ export default function Intro() {
       ref={root}
       className={`intro-page${ready ? ' is-ready' : ''}${exiting ? ' is-exiting' : ''}`}
     >
-      <div className="intro-veil" aria-hidden="true" />
       <button type="button" className="intro-hit" onClick={enter} aria-label={t('intro.enter')}>
         <div className="intro-stage">
-          <div className="intro-core">
-            <div className="intro-rings" aria-hidden="true">
-              <span className="r1" />
-              <span className="r2" />
-              <span className="r3" />
-              <span className="intro-sweep" ref={sweepRef} />
-            </div>
-            <div className="intro-mark-wrap">
-              <img
-                className="intro-mark"
-                src={`${import.meta.env.BASE_URL}logo.png`}
-                alt={t('common.brand')}
-                width="200"
-                height="200"
-              />
-            </div>
-          </div>
-
-          <p className="intro-word">{t('common.brand')}</p>
-
-          <div className="intro-cards" aria-live="polite">
-            {CARD_KEYS.map((key, index) => (
+          <div className="intro-orbit">
+            {CARDS.map((card, index) => (
               <article
-                key={key}
-                className={`intro-card${index < visibleCount ? ' is-on' : ''}`}
+                key={card.key}
+                className={`intro-card slot-${card.slot}${index < visibleCount ? ' is-on' : ''}`}
                 aria-hidden={index >= visibleCount}
               >
                 <span className="intro-card-index" aria-hidden="true">
                   {String(index + 1).padStart(2, '0')}
                 </span>
-                <h2>{t(`intro.cards.${key}.title`)}</h2>
-                <p>{t(`intro.cards.${key}.body`)}</p>
+                <h2>{t(`intro.cards.${card.key}.title`)}</h2>
+                <p>{t(`intro.cards.${card.key}.body`)}</p>
               </article>
             ))}
+
+            <div className="intro-center">
+              <div className="intro-core">
+                <div className="intro-rings" aria-hidden="true">
+                  <span className="r1" />
+                  <span className="r2" />
+                  <span className="r3" />
+                  <span className="intro-sweep" ref={sweepRef} />
+                </div>
+                <div className="intro-mark-wrap">
+                  <img
+                    className="intro-mark"
+                    src={`${import.meta.env.BASE_URL}logo.png`}
+                    alt={t('common.brand')}
+                    width="200"
+                    height="200"
+                  />
+                </div>
+              </div>
+              <p className="intro-word">{t('common.brand')}</p>
+            </div>
           </div>
 
           <span className={`intro-enter${ready ? ' show' : ''}`}>
-            {ready ? t('intro.enterHint') : t('intro.booting')}
+            <span className="intro-enter-label">{ready ? t('intro.enterHint') : t('intro.booting')}</span>
+            <span className="intro-enter-arrow" aria-hidden="true">
+              →
+            </span>
           </span>
         </div>
       </button>
