@@ -1,32 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" role="img" aria-label="Opportunity">
-  <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0b6e4f"/>
-      <stop offset="45%" stop-color="#0a3d2e"/>
-      <stop offset="100%" stop-color="#071a14"/>
-    </linearGradient>
-    <linearGradient id="sheen" x1="0%" y1="0%" x2="1" y2="1">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.16"/>
-      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
-    </linearGradient>
-    <radialGradient id="glow" cx="70%" cy="30%" r="50%">
-      <stop offset="0%" stop-color="#7dd3b0" stop-opacity="0.35"/>
-      <stop offset="100%" stop-color="#7dd3b0" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-  <rect width="1400" height="900" fill="url(#bg)"/>
-  <rect width="1400" height="900" fill="url(#glow)"/>
-  <path d="M0 620 C220 540 380 700 620 640 C860 580 980 480 1400 520 L1400 900 L0 900 Z" fill="#06241b" opacity="0.55"/>
-  <path d="M0 700 C260 640 420 780 680 720 C940 660 1100 600 1400 660 L1400 900 L0 900 Z" fill="#041811" opacity="0.45"/>
-  <circle cx="1080" cy="240" r="160" fill="url(#sheen)"/>
-  <g fill="none" stroke="#e6f2ed" stroke-opacity="0.28" stroke-width="3">
-    <circle cx="280" cy="260" r="70"/>
-    <circle cx="280" cy="260" r="110"/>
-    <path d="M280 150 V190 M280 330 V370 M170 260 H210 M350 260 H390"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="788" viewBox="0 0 1400 788" role="img" aria-label="Opportunistic">
+  <rect width="1400" height="788" fill="#ffffff"/>
+  <g transform="translate(590 168)" fill="#1a1c1e">
+    <path d="M110 0c49.3 0 89.3 40 89.3 89.3 0 34.4-19.5 64.2-47.9 79L131.3 128.4A48.1 48.1 0 0 0 158.1 89.3c0-26.5-21.5-48.1-48.1-48.1S61.9 62.8 61.9 89.3a48.1 48.1 0 0 0 26.8 39.1L68.6 168.3C40.2 153.5 20.7 123.7 20.7 89.3 20.7 40 60.7 0 110 0Z"/>
+    <path d="M83.2 178.6 110 125.4l26.8 53.2H83.2Z"/>
+    <path d="M98.3 178.6 110 155.3l11.7 23.3H98.3Z" opacity=".35"/>
   </g>
-  <g fill="#e6f2ed" fill-opacity="0.9">
-    <rect x="620" y="360" width="160" height="12" rx="6"/>
-    <rect x="580" y="396" width="240" height="10" rx="5" fill-opacity="0.45"/>
-    <rect x="600" y="424" width="200" height="10" rx="5" fill-opacity="0.28"/>
-  </g>
+  <text
+    x="700"
+    y="470"
+    text-anchor="middle"
+    font-family="Segoe UI, Helvetica Neue, Arial, sans-serif"
+    font-size="64"
+    font-weight="700"
+    letter-spacing="-1.2"
+    fill="#1a1c1e"
+  >Opportunistic</text>
 </svg>
