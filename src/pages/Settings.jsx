@@ -65,45 +65,14 @@ export default function Settings() {
     if (!window.confirm(t('settings.deleteConfirm'))) return
     setBusy(true)
     try {
-      const { data: sessionData } = await supabase.auth.getSession()
-      const token = sessionData.session?.access_token
-      const base = String(import.meta.env.VITE_SUPABASE_URL || '').replace(/\/$/, '')
-      const anon = import.meta.env.VITE_SUPABASE_ANON_KEY
-
-      if (token && base && anon) {
-        const res = await fetch(`${base}/functions/v1/delete-account`, {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            apikey: anon,
-            'Content-Type': 'application/json',
-          },
-          body: '{}',
-        })
-        const json = await res.json().catch(() => ({}))
-        if (!res.ok) {
-          // Fall back to client-side wipe if the function is not deployed yet
-          if (res.status !== 404) throw new Error(json.error || t('settings.deleteFailed'))
-          await Promise.all([
-            supabase.from('scholarship_matches').delete().eq('user_id', user.id),
-            supabase.from('job_matches').delete().eq('user_id', user.id),
-            supabase.from('qualifications').delete().eq('user_id', user.id),
-            supabase.from('skills').delete().eq('user_id', user.id),
-            supabase.from('search_runs').delete().eq('user_id', user.id),
-            supabase.from('profiles').delete().eq('user_id', user.id),
-          ])
-        }
-      } else {
-        await Promise.all([
-          supabase.from('scholarship_matches').delete().eq('user_id', user.id),
-          supabase.from('job_matches').delete().eq('user_id', user.id),
-          supabase.from('qualifications').delete().eq('user_id', user.id),
-          supabase.from('skills').delete().eq('user_id', user.id),
-          supabase.from('search_runs').delete().eq('user_id', user.id),
-          supabase.from('profiles').delete().eq('user_id', user.id),
-        ])
-      }
-
+      await Promise.all([
+        supabase.from('scholarship_matches').delete().eq('user_id', user.id),
+        supabase.from('job_matches').delete().eq('user_id', user.id),
+        supabase.from('qualifications').delete().eq('user_id', user.id),
+        supabase.from('skills').delete().eq('user_id', user.id),
+        supabase.from('search_runs').delete().eq('user_id', user.id),
+        supabase.from('profiles').delete().eq('user_id', user.id),
+      ])
       toast.success(t('settings.deleted'))
       await signOut()
       navigate('/home')

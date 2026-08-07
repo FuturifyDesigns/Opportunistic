@@ -14,7 +14,6 @@ dist-ssr
 .env
 .env.local
 .env.*.local
-.env.production
 .env.smtp
 .env.smtp.local
 secrets/
@@ -34,6 +33,7 @@ secrets/
 
 .env.cron.local
 .env.smtp.local
+
 
 supabase/.temp/
 
