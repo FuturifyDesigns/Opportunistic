@@ -1,99 +1,10 @@
-/** Profile-aware matching with detailed, factual reasoning. */
+/** Profile-aware matching: country-eligible scholarships + live/web job feeds. */
 
 import { LISTING_CATALOG } from './listingCatalog'
+import { SCHOLARSHIP_PROGRAMS, isScholarshipEligible } from './scholarshipPrograms'
+import { fetchLiveJobs, buildCountryJobBoards } from './jobFeed'
 
-const SCHOLARSHIP_SOURCES = [
-  {
-    listingId: 'chevening',
-    fields: ['any'],
-    regions: ['global', 'commonwealth'],
-    focus: 'one-year UK master’s funding for future leaders',
-  },
-  {
-    listingId: 'daad',
-    fields: ['engineering', 'science', 'computer', 'business', 'any'],
-    regions: ['global', 'africa', 'europe'],
-    focus: 'German-funded study and research awards across many disciplines',
-  },
-  {
-    listingId: 'mastercard',
-    fields: ['any'],
-    regions: ['africa', 'botswana', 'southern africa', 'global'],
-    focus: 'higher education pathways for young people from Africa',
-  },
-  {
-    listingId: 'fulbright',
-    fields: ['any'],
-    regions: ['global'],
-    focus: 'US graduate study and research for international applicants',
-  },
-  {
-    listingId: 'unesco',
-    fields: ['education', 'science', 'culture', 'any'],
-    regions: ['global'],
-    focus: 'short fellowships tied to education, science, and culture themes',
-  },
-  {
-    listingId: 'gates',
-    fields: ['any'],
-    regions: ['global'],
-    focus: 'full-cost postgraduate study at Cambridge for outstanding applicants',
-  },
-  {
-    listingId: 'african_union',
-    fields: ['any'],
-    regions: ['africa', 'botswana', 'southern africa'],
-    focus: 'continental education and mobility opportunities for African students',
-  },
-  {
-    listingId: 'scholarshipportal',
-    fields: ['any'],
-    regions: ['europe', 'global'],
-    focus: 'searchable European scholarship listings across universities',
-  },
-]
-
-const JOB_SOURCES = [
-  {
-    listingId: 'linkedin',
-    titleTemplate: '{field} roles — LinkedIn',
-    urlTemplate: 'https://www.linkedin.com/jobs/search/?keywords={query}',
-    channel: 'professional network listings',
-  },
-  {
-    listingId: 'indeed',
-    titleTemplate: '{field} jobs — Indeed',
-    urlTemplate: 'https://www.indeed.com/jobs?q={query}&l={country}',
-    channel: 'location-filtered job board',
-  },
-  {
-    listingId: 'remoteok',
-    titleTemplate: 'Remote {field} openings — Remote OK',
-    urlTemplate: 'https://remoteok.com/remote-{slug}-jobs',
-    channel: 'remote-first tech board',
-  },
-  {
-    listingId: 'glassdoor',
-    titleTemplate: '{field} careers — Glassdoor',
-    urlTemplate: 'https://www.glassdoor.com/Job/jobs.htm?sc.keyword={query}',
-    channel: 'employer-reviewed job listings',
-  },
-  {
-    listingId: 'reliefweb',
-    titleTemplate: '{country} opportunities — ReliefWeb Jobs',
-    urlTemplate: 'https://reliefweb.int/jobs',
-    channel: 'humanitarian and development roles',
-  },
-]
-
-function slugify(value) {
-  return String(value || 'jobs')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '') || 'jobs'
-}
-
-function regionHints(country = '') {
+export function regionHints(country = '') {
   const c = country.toLowerCase()
   const hints = ['global']
   if (
@@ -138,7 +49,7 @@ function detectGoal(profile = {}) {
   return 'both'
 }
 
-function summarizeProfile(profile, qualifications, skills) {
+export function summarizeProfile(profile, qualifications, skills) {
   const quals = (qualifications || []).filter((q) => q.field?.trim())
   const sk = (skills || []).filter((s) => s.skill_name?.trim())
   const primary = quals[0]
@@ -159,203 +70,119 @@ function summarizeProfile(profile, qualifications, skills) {
 
 function fieldOverlap(itemFields, profileField, skills) {
   const blob = `${profileField} ${skills.map((s) => s.skill_name).join(' ')}`.toLowerCase()
-  const specific = itemFields.filter((f) => f !== 'any')
+  const specific = (itemFields || []).filter((f) => f !== 'any')
   if (!specific.length) return 0
   return specific.some((f) => blob.includes(f)) ? 2 : 0
 }
 
 function scoreScholarship(item, summary) {
   const regions = regionHints(summary.country || '')
-  let score = 38
-  const regionHit = item.regions.filter((r) => regions.includes(r) && r !== 'global')
-  score += Math.min(24, regionHit.length * 8)
-  if (item.regions.includes('global')) score += 4
+  let score = 40
+  const regionHit = (item.regions || []).filter((r) => regions.includes(r) && r !== 'global')
+  score += Math.min(28, regionHit.length * 9)
+  if ((item.regions || []).includes('global')) score += 3
 
   const overlap = fieldOverlap(item.fields, summary.field, summary.skills)
   score += overlap * 10
-  if (!item.fields.includes('any') && overlap === 0) score -= 8
+  if (!(item.fields || []).includes('any') && overlap === 0) score -= 8
 
   score += Math.min(10, summary.quals.length * 3)
   score += Math.min(14, summary.skills.length * 2)
   score += Math.min(8, summary.advanced.length * 3)
-  if (summary.goal === 'scholarships') score += 4
+  if (summary.goal === 'scholarships') score += 5
   if (summary.goal === 'jobs') score -= 6
   if (summary.institution) score += 2
   if (!summary.skills.length) score -= 5
   if (!summary.quals.length) score -= 8
 
-  return Math.max(28, Math.min(96, Math.round(score)))
+  // Exact country list boost
+  const c = (summary.country || '').toLowerCase()
+  if ((item.countries || []).some((x) => x !== '*' && x !== '*africa' && c.includes(x))) score += 8
+
+  return Math.max(30, Math.min(97, Math.round(score)))
 }
 
-function scoreJob(item, summary, index) {
-  let score = 40
-  score += Math.min(18, summary.skills.length * 3)
-  score += Math.min(12, summary.quals.length * 4)
-  score += Math.min(10, summary.advanced.length * 3)
-  if (summary.country) score += 5
-  if (summary.goal === 'jobs') score += 5
-  if (summary.goal === 'scholarships') score -= 6
-  if (item.listingId === 'remoteok' && summary.skills.length >= 2) score += 5
-  if (item.listingId === 'reliefweb' && /public health|development|social|education|humanitarian/i.test(summary.field)) {
-    score += 8
-  } else if (item.listingId === 'reliefweb') {
-    score -= 6
-  }
-  if (!summary.skills.length) score -= 8
-  score -= index * 2
-  return Math.max(30, Math.min(95, Math.round(score)))
-}
-
-function reasonScholarship(item, listing, summary) {
+function reasonScholarship(item, summary) {
+  const listing = LISTING_CATALOG[item.id]
   const parts = []
   const regions = regionHints(summary.country || '')
 
-  parts.push(`${listing.title}: ${listing.summary}`)
+  parts.push(`${item.title}: ${item.focus}.`)
+  if (listing?.summary) parts.push(listing.summary)
 
   if (summary.primary) {
     const yearBit = summary.year ? ` (${summary.year})` : ''
     const instBit = summary.institution ? ` from ${summary.institution}` : ''
     parts.push(
-      `Your ${summary.primary.type === 'certificate' ? 'certificate' : 'degree'} in ${summary.primary.field}${yearBit}${instBit} aligns with ${item.focus}.`,
+      `Your ${summary.primary.type === 'certificate' ? 'certificate' : 'degree'} in ${summary.primary.field}${yearBit}${instBit} was used as the primary academic signal.`,
     )
   } else {
-    parts.push(`Your stated focus in ${summary.field} aligns with ${item.focus}.`)
-  }
-
-  if (summary.quals.length > 1) {
-    parts.push(
-      `Additional credentials factored in: ${summary.quals
-        .slice(1, 4)
-        .map((q) => `${q.field}${q.year ? ` (${q.year})` : ''}`)
-        .join('; ')}.`,
-    )
+    parts.push(`Focus field “${summary.field}” guided ranking for this award.`)
   }
 
   if (summary.skills.length) {
-    const top = summary.skills
-      .slice(0, 5)
-      .map((s) => `${s.skill_name} (${s.proficiency || 'intermediate'})`)
-      .join(', ')
-    parts.push(`Skills used in scoring: ${top}.`)
-    if (summary.advanced.length) {
-      parts.push(
-        `Advanced/expert depth (${summary.advanced.map((s) => s.skill_name).join(', ')}) raises confidence for competitive ${listing.source} applications.`,
-      )
-    }
-  } else {
-    parts.push('No skills selected yet — score leans on qualifications and country only. Add skills to sharpen this match.')
-  }
-
-  if (summary.country) {
-    const regional = item.regions.some((r) => regions.includes(r) && r !== 'global')
-    if (regional) {
-      parts.push(
-        `${listing.source} is a strong regional fit for applicants based in ${summary.country} (regions: ${item.regions.filter((r) => r !== 'global').slice(0, 3).join(', ')}).`,
-      )
-    } else {
-      parts.push(
-        `${listing.source} is open internationally; your country (${summary.country}) is context for eligibility checks, not a hard filter.`,
-      )
-    }
-  }
-
-  if (summary.headline) {
-    parts.push(`Your headline (“${summary.headline}”) was treated as a career-intent signal alongside formal credentials.`)
-  }
-
-  if (listing.deadlineLabel) {
-    parts.push(`Application timing note: ${listing.deadlineLabel}.`)
-  }
-
-  parts.push(
-    'This explanation is regenerated whenever you change country, qualifications, or skills so findings stay tied to your current profile.',
-  )
-  return parts.join(' ')
-}
-
-function reasonJob(item, listing, summary) {
-  const parts = []
-  const skillQuery = summary.skills.slice(0, 4).map((s) => s.skill_name)
-  const queryBits = [summary.field, ...skillQuery].filter(Boolean)
-
-  parts.push(`${listing.summary}`)
-  parts.push(`Search targets ${item.channel} with query terms: ${queryBits.join(', ') || summary.field}.`)
-
-  if (summary.primary) {
     parts.push(
-      `Qualification anchor: ${summary.primary.type} in ${summary.primary.field}${summary.year ? ` (${summary.year})` : ''}${summary.institution ? ` · ${summary.institution}` : ''}.`,
+      `Skills factored in: ${summary.skills
+        .slice(0, 5)
+        .map((s) => `${s.skill_name} (${s.proficiency || 'intermediate'})`)
+        .join(', ')}.`,
     )
   }
 
-  if (summary.skills.length) {
-    const advanced = summary.advanced.map((s) => s.skill_name)
-    parts.push(
-      advanced.length
-        ? `Higher weight given to advanced/expert skills (${advanced.join(', ')}); remaining skills still expand the search.`
-        : `Skills applied at equal baseline weight: ${summary.skills.map((s) => s.skill_name).slice(0, 6).join(', ')}.`,
-    )
-  } else {
-    parts.push('No skills on file — results are broader and less precise until you confirm skills from your degree.')
-  }
-
   if (summary.country) {
-    if (item.listingId === 'remoteok') {
-      parts.push(
-        `Remote board chosen so location (${summary.country}) does not block results, while skills still drive ranking.`,
-      )
-    } else {
-      parts.push(`Location bias set to ${summary.country} for this ${listing.source} query.`)
-    }
+    const regional = (item.regions || []).some((r) => regions.includes(r) && r !== 'global')
+    parts.push(
+      regional
+        ? `Eligibility signal: program targets regions that include applicants from ${summary.country}. Always confirm the current eligible-country list on the official site.`
+        : `Open internationally — still confirm that ${summary.country} is on this cycle’s eligible list before investing application time.`,
+    )
   }
 
-  if (summary.headline) {
-    parts.push(`Headline (“${summary.headline}”) helps disambiguate role family when field names are broad.`)
-  }
-
-  parts.push(
-    'Edit your profile and save to re-run matching — scores and reasons are rebuilt from the latest data, not cached guesses.',
-  )
+  if (item.deadlineLabel) parts.push(`Timing: ${item.deadlineLabel}.`)
+  parts.push('Official URL is linked — deadlines and nationality rules change by cycle.')
   return parts.join(' ')
 }
 
+/**
+ * Scholarships allowed for the user’s country (strict eligibility filter).
+ */
 export function buildScholarshipMatches(profile, qualifications, skills) {
   const summary = summarizeProfile(profile, qualifications || [], skills || [])
-  return SCHOLARSHIP_SOURCES.map((item) => {
-    const listing = LISTING_CATALOG[item.listingId]
-    if (!listing) return null
-    return {
-      title: listing.title,
-      url: listing.url,
-      source: listing.source,
-      reasoning: reasonScholarship(item, listing, summary),
-      match_score: scoreScholarship(item, summary),
-      deadline: null,
-    }
-  })
-    .filter(Boolean)
+  return SCHOLARSHIP_PROGRAMS.filter((p) => isScholarshipEligible(p, summary.country))
+    .map((item) => {
+      const listing = LISTING_CATALOG[item.id]
+      return {
+        title: item.title,
+        url: item.url || listing?.url,
+        source: item.source,
+        reasoning: reasonScholarship(item, summary),
+        match_score: scoreScholarship(item, summary),
+        deadline: null,
+        listingId: item.id,
+      }
+    })
     .sort((a, b) => b.match_score - a.match_score)
 }
 
+/** Sync fallback boards only (no network). */
 export function buildJobMatches(profile, qualifications, skills) {
   const summary = summarizeProfile(profile, qualifications || [], skills || [])
-  const query = encodeURIComponent(
-    [summary.field, ...summary.skills.slice(0, 2).map((s) => s.skill_name)].filter(Boolean).join(' '),
-  )
-  const country = encodeURIComponent(summary.country || '')
-  const slug = slugify(summary.skills[0]?.skill_name || summary.field)
+  return buildCountryJobBoards(summary).sort((a, b) => b.match_score - a.match_score)
+}
 
-  return JOB_SOURCES.map((item, index) => {
-    const listing = LISTING_CATALOG[item.listingId]
-    if (!listing) return null
+/**
+ * Live web jobs + country boards. Falls back to boards if APIs fail.
+ */
+export async function buildLiveJobMatches(profile, qualifications, skills) {
+  const summary = summarizeProfile(profile, qualifications || [], skills || [])
+  try {
+    const { jobs, meta } = await fetchLiveJobs(summary)
+    return { jobs, meta }
+  } catch (e) {
+    const boards = buildCountryJobBoards(summary)
     return {
-      title: item.titleTemplate.replace('{field}', summary.field).replace('{country}', summary.country || 'Local'),
-      url: item.urlTemplate.replace('{query}', query).replace('{country}', country).replace('{slug}', slug),
-      company: listing.company || null,
-      source: listing.source,
-      reasoning: reasonJob(item, listing, summary),
-      match_score: scoreJob(item, summary, index),
+      jobs: boards,
+      meta: { live: 0, boards: boards.length, errors: [e.message], country: summary.country },
     }
-  })
-    .filter(Boolean)
-    .sort((a, b) => b.match_score - a.match_score)
+  }
 }

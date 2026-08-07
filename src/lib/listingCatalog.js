@@ -515,8 +515,13 @@ export function getListingById(id) {
 export function getListingBySource(source) {
   if (!source) return null
   const key = String(source).toLowerCase()
+  const values = Object.values(LISTING_CATALOG)
   return (
-    Object.values(LISTING_CATALOG).find((item) => item.source.toLowerCase() === key) || null
+    values.find((item) => item.source.toLowerCase() === key) ||
+    values.find((item) => key.includes(item.source.toLowerCase())) ||
+    values.find((item) => key.includes(String(item.id).toLowerCase())) ||
+    values.find((item) => item.title.toLowerCase().includes(key) || key.includes(item.title.toLowerCase().slice(0, 12))) ||
+    null
   )
 }
 

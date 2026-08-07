@@ -1,14 +1,16 @@
 import { supabase } from './supabase'
-import { buildJobMatches, buildScholarshipMatches } from './matcher'
+import { buildScholarshipMatches, buildLiveJobMatches } from './matcher'
 
 function sourceKey(row) {
-  return String(row.source || '').toLowerCase()
+  return String(row.source || '').toLowerCase() + '|' + String(row.url || '').toLowerCase()
 }
 
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000
+
 /**
- * Rebuild matches from the live profile.
- * Preserves saved/dismissed flags by source so profile edits never leave stale scores,
- * and dismissed boards do not flood the dashboard again until restored.
+ * Rebuild matches from the live profile + web job feeds.
+ * Scholarships are filtered to programs eligible for the user’s country.
+ * Jobs prefer live API postings, scored to skills/field, with country board searches.
  */
 export async function runMatchingForUser(userId) {
   if (!userId) throw new Error('Missing user')
@@ -24,20 +26,34 @@ export async function runMatchingForUser(userId) {
   if (!profile) throw new Error('Profile not found')
 
   const scholarshipPayload = buildScholarshipMatches(profile, qualifications || [], skills || [])
-  const jobPayload = buildJobMatches(profile, qualifications || [], skills || [])
+  const { jobs: jobPayload, meta: jobMeta } = await buildLiveJobMatches(
+    profile,
+    qualifications || [],
+    skills || [],
+  )
 
   if (!scholarshipPayload.length && !jobPayload.length) {
     throw new Error('Matcher produced no results — check profile data')
   }
 
   await supabase.from('search_runs').insert([
-    { user_id: userId, type: 'scholarship', status: 'running' },
-    { user_id: userId, type: 'job', status: 'running' },
+    {
+      user_id: userId,
+      type: 'scholarship',
+      status: 'running',
+      notes: `country=${profile.country || 'n/a'}; programs=${scholarshipPayload.length}`,
+    },
+    {
+      user_id: userId,
+      type: 'job',
+      status: 'running',
+      notes: `live=${jobMeta?.live ?? 0}; boards=${jobMeta?.boards ?? 0}; q=${jobMeta?.query || ''}`,
+    },
   ])
 
   const [{ data: prevSch }, { data: prevJobs }] = await Promise.all([
-    supabase.from('scholarship_matches').select('title, source, saved, dismissed').eq('user_id', userId),
-    supabase.from('job_matches').select('title, source, saved, dismissed').eq('user_id', userId),
+    supabase.from('scholarship_matches').select('title, source, url, saved, dismissed').eq('user_id', userId),
+    supabase.from('job_matches').select('title, source, url, saved, dismissed').eq('user_id', userId),
   ])
 
   const savedSch = new Set((prevSch || []).filter((r) => r.saved).map(sourceKey))
@@ -45,7 +61,6 @@ export async function runMatchingForUser(userId) {
   const savedJobs = new Set((prevJobs || []).filter((r) => r.saved).map(sourceKey))
   const dismissedJobs = new Set((prevJobs || []).filter((r) => r.dismissed).map(sourceKey))
 
-  // Full replace so scores/reasons always match the current profile (no stale leftovers)
   await Promise.all([
     supabase.from('scholarship_matches').delete().eq('user_id', userId),
     supabase.from('job_matches').delete().eq('user_id', userId),
@@ -84,13 +99,61 @@ export async function runMatchingForUser(userId) {
     if (jErr) throw jErr
   }
 
+  const stamp = new Date().toISOString()
   await supabase.from('search_runs').insert([
-    { user_id: userId, type: 'scholarship', status: 'done' },
-    { user_id: userId, type: 'job', status: 'done' },
+    {
+      user_id: userId,
+      type: 'scholarship',
+      status: 'done',
+      notes: `saved=${scholarshipRows.length} @ ${stamp}`,
+    },
+    {
+      user_id: userId,
+      type: 'job',
+      status: 'done',
+      notes: `saved=${jobRows.length}; live=${jobMeta?.live ?? 0} @ ${stamp}`,
+    },
   ])
+
+  // Best-effort stamp for weekly auto-refresh (ignore if column missing until migration applied)
+  await supabase.from('profiles').update({ updated_at: stamp }).eq('user_id', userId)
+
+  try {
+    localStorage.setItem(`opp_last_match_${userId}`, stamp)
+    localStorage.setItem(`opp_last_match_meta_${userId}`, JSON.stringify(jobMeta || {}))
+  } catch {
+    /* ignore */
+  }
 
   return {
     scholarships: scholarshipRows.filter((r) => !r.dismissed).length,
     jobs: jobRows.filter((r) => !r.dismissed).length,
+    meta: jobMeta,
+    refreshedAt: stamp,
   }
+}
+
+export function getLastMatchAt(userId) {
+  try {
+    return localStorage.getItem(`opp_last_match_${userId}`)
+  } catch {
+    return null
+  }
+}
+
+export function getLastMatchMeta(userId) {
+  try {
+    const raw = localStorage.getItem(`opp_last_match_meta_${userId}`)
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
+
+/** True if matches are older than 7 days (or never run). */
+export function shouldWeeklyRefresh(userId) {
+  const last = getLastMatchAt(userId)
+  if (!last) return true
+  const age = Date.now() - new Date(last).getTime()
+  return Number.isNaN(age) || age >= WEEK_MS
 }
