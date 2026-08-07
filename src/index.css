@@ -550,11 +550,11 @@ textarea {
 }
 
 .hero-brand {
-  width: min(168px, 42vw);
+  width: min(112px, 28vw);
   height: auto;
   aspect-ratio: 1;
   object-fit: contain;
-  margin: 0 auto 1.15rem;
+  margin: 0 auto 1rem;
   border-radius: 0;
   background: transparent !important;
   display: block;
