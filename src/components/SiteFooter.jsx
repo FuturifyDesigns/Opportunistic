@@ -25,8 +25,8 @@ export default function SiteFooter() {
           </div>
           <div className="footer-col">
             <p className="footer-label">Legal</p>
-            <Link to="/privacy">Privacy</Link>
-            <Link to="/terms">Terms</Link>
+            <Link to="/privacy?section=overview">Privacy</Link>
+            <Link to="/terms?section=role">Terms</Link>
           </div>
         </nav>
       </div>
