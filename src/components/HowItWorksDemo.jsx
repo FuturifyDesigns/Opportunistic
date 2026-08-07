@@ -168,7 +168,7 @@ export default function HowItWorksDemo() {
                 <div className="scan-core" aria-hidden="true">
                   <span className="scan-ring" />
                   <span className="scan-ring" />
-                  <img src={`${import.meta.env.BASE_URL}mark.svg`} alt="" width="40" height="40" />
+                  <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" width="40" height="40" />
                 </div>
                 <div className="hud-meters">
                   <div className="hud-meter">

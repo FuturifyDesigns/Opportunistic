@@ -6,9 +6,10 @@ import { runMatchingForUser } from '../lib/matchingService'
 import { useAuth } from '../context/AuthContext'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
+import SkillPicker from '../components/SkillPicker'
+import { normalizeSkillName, suggestSkillsFromQualifications } from '../lib/skillCatalog'
 
 const emptyQual = { type: 'degree', field: '', institution: '', year: new Date().getFullYear() }
-const emptySkill = { skill_name: '', proficiency: 'intermediate' }
 
 export default function Profile() {
   const { user, profile, refreshProfile } = useAuth()
@@ -20,7 +21,7 @@ export default function Profile() {
     country: 'Botswana',
   })
   const [qualifications, setQualifications] = useState([{ ...emptyQual }])
-  const [skills, setSkills] = useState([{ ...emptySkill }])
+  const [skills, setSkills] = useState([])
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
 
@@ -40,7 +41,20 @@ export default function Profile() {
         supabase.from('skills').select('*').eq('user_id', user.id),
       ])
       if (q?.length) setQualifications(q)
-      if (s?.length) setSkills(s)
+      if (s?.length) {
+        const catalog = new Set(
+          suggestSkillsFromQualifications(q || []).map((name) => name.toLowerCase()),
+        )
+        setSkills(
+          s.map((row) => ({
+            skill_name: row.skill_name,
+            proficiency: row.proficiency || 'intermediate',
+            is_custom: !catalog.has((row.skill_name || '').trim().toLowerCase()),
+          })),
+        )
+      } else {
+        setSkills([])
+      }
     }
     load()
   }, [profile, user.id])
@@ -72,16 +86,17 @@ export default function Profile() {
         .filter((s) => s.skill_name?.trim())
         .map((s) => ({
           user_id: user.id,
-          skill_name: s.skill_name.trim(),
+          skill_name: normalizeSkillName(s.skill_name),
           proficiency: s.proficiency || 'intermediate',
         }))
+        .filter((s) => s.skill_name)
 
       if (qualRows.length) await supabase.from('qualifications').insert(qualRows)
       if (skillRows.length) await supabase.from('skills').insert(skillRows)
 
       await runMatchingForUser(user.id)
       await refreshProfile()
-      setMessage('Profile saved. Matches refreshed.')
+      setMessage('Profile saved. Matches re-scored from your latest qualifications and skills.')
       setTimeout(() => navigate('/dashboard'), 700)
     } catch (err) {
       setMessage(err.message || 'Save failed')
@@ -172,36 +187,8 @@ export default function Profile() {
           </button>
 
           <h2 className="form-section">Skills</h2>
-          {skills.map((s, i) => (
-            <div className="card-lite" key={i}>
-              <label>
-                Skill
-                <input
-                  value={s.skill_name || ''}
-                  onChange={(e) =>
-                    setSkills((rows) => rows.map((row, idx) => (idx === i ? { ...row, skill_name: e.target.value } : row)))
-                  }
-                />
-              </label>
-              <label>
-                Proficiency
-                <select
-                  value={s.proficiency || 'intermediate'}
-                  onChange={(e) =>
-                    setSkills((rows) => rows.map((row, idx) => (idx === i ? { ...row, proficiency: e.target.value } : row)))
-                  }
-                >
-                  <option value="beginner">Beginner</option>
-                  <option value="intermediate">Intermediate</option>
-                  <option value="advanced">Advanced</option>
-                  <option value="expert">Expert</option>
-                </select>
-              </label>
-            </div>
-          ))}
-          <button type="button" className="btn btn-ghost" onClick={() => setSkills((r) => [...r, { ...emptySkill }])}>
-            Add skill
-          </button>
+          <p className="muted">Tick skills that fit your degrees. Use Other for anything missing.</p>
+          <SkillPicker qualifications={qualifications} value={skills} onChange={setSkills} />
 
           {message ? <p className="form-message">{message}</p> : null}
           <button className="btn" type="submit" disabled={busy}>

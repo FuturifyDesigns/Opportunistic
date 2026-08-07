@@ -79,7 +79,7 @@ export default function Landing() {
 
             <div className="hero-visual" aria-hidden="true">
               <div className="orbit">
-                <img src={`${import.meta.env.BASE_URL}mark.svg`} alt="" />
+                <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" />
               </div>
               <InteractiveCard className="float-card float-a">
                 <p className="eyebrow">Scholarship</p>

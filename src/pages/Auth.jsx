@@ -270,7 +270,7 @@ export default function Auth() {
                     >
                       <span className="auth-orb-ring" aria-hidden="true" />
                       <span className="auth-orb-core">
-                        <img src={`${import.meta.env.BASE_URL}mark.svg`} alt="" />
+                        <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" />
                         <strong>{meta.code}</strong>
                         <em>{meta.label}</em>
                       </span>

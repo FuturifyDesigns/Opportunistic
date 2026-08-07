@@ -2,12 +2,15 @@ import { useRef } from 'react'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { prefersReducedMotion } from '../lib/animations'
+import { getListingBySource } from '../lib/listingCatalog'
 
 gsap.registerPlugin(useGSAP)
 
 export default function MatchCard({ match, kind, onSave, onDismiss, onOpen }) {
   const score = Math.round(Number(match.match_score) || 0)
   const ref = useRef(null)
+  const listing = getListingBySource(match.source)
+  const thumb = listing?.cover || listing?.gallery?.[0] || null
 
   useGSAP(
     () => {
@@ -50,6 +53,11 @@ export default function MatchCard({ match, kind, onSave, onDismiss, onOpen }) {
   return (
     <article ref={ref} className="match-card interactive">
       <button type="button" className="match-card-hit" onClick={() => onOpen?.(match)} aria-label={`Open ${match.title}`}>
+        {thumb ? (
+          <div className="match-card-media">
+            <img src={thumb} alt="" loading="lazy" />
+          </div>
+        ) : null}
         <div className="match-card-top">
           <div>
             <p className="eyebrow">{match.source || kind}</p>
@@ -60,15 +68,26 @@ export default function MatchCard({ match, kind, onSave, onDismiss, onOpen }) {
             {score}%
           </div>
         </div>
-        <p className="reasoning">{match.reasoning}</p>
+        <p className="reasoning">
+          {(match.reasoning || '')
+            .split(/(?<=\.)\s+/)
+            .slice(0, 2)
+            .join(' ')}
+        </p>
         <div className="match-meta">
-          {match.deadline ? <span>Deadline: {match.deadline}</span> : <span>Rolling / check source</span>}
+          {match.deadline ? (
+            <span>Deadline: {match.deadline}</span>
+          ) : listing?.deadlineLabel ? (
+            <span>{listing.deadlineLabel}</span>
+          ) : (
+            <span>Rolling / check source</span>
+          )}
           <span>Found {new Date(match.found_at || Date.now()).toLocaleDateString()}</span>
         </div>
       </button>
 
       <div className="match-actions">
-        <a className="btn btn-sm" href={match.url} target="_blank" rel="noreferrer">
+        <a className="btn btn-sm" href={match.url} target="_blank" rel="noreferrer noopener">
           Open listing
         </a>
         <button type="button" className="btn btn-ghost btn-sm" onClick={() => onSave?.(match)}>

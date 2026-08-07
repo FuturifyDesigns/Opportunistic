@@ -8,7 +8,7 @@ export default function SiteFooter() {
       <div className="container footer-grid">
         <div className="footer-brand">
           <Link to="/" className="footer-logo" aria-label="Opportunistic home">
-            <img src={`${import.meta.env.BASE_URL}mark.svg`} alt="" width="28" height="28" />
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" width="36" height="36" />
             <span>
               Opportunistic<sup>™</sup>
             </span>
@@ -37,7 +37,7 @@ export default function SiteFooter() {
         </p>
         <p className="footer-built">
           Built by{' '}
-          <a href="https://github.com/FuturifyDesigns" target="_blank" rel="noreferrer">
+          <a href="https://futurifydesigns.com" target="_blank" rel="noreferrer">
             Futurify Designs
           </a>
         </p>

@@ -20,27 +20,36 @@ export default function Dashboard() {
   const listRef = useRef(null)
 
   const load = useCallback(async () => {
+    if (!user?.id) return
     setLoading(true)
-    const today = new Date().toISOString().slice(0, 10)
-    const [{ data: s }, { data: j }] = await Promise.all([
-      supabase
-        .from('scholarship_matches')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('dismissed', false)
-        .or(`deadline.is.null,deadline.gte.${today}`)
-        .order('match_score', { ascending: false }),
-      supabase
-        .from('job_matches')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('dismissed', false)
-        .order('match_score', { ascending: false }),
-    ])
-    setScholarships(s || [])
-    setJobs(j || [])
-    setLoading(false)
-  }, [user.id])
+    try {
+      const today = new Date().toISOString().slice(0, 10)
+      const [{ data: s, error: sErr }, { data: j, error: jErr }] = await Promise.all([
+        supabase
+          .from('scholarship_matches')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('dismissed', false)
+          .or(`deadline.is.null,deadline.gte.${today}`)
+          .order('match_score', { ascending: false }),
+        supabase
+          .from('job_matches')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('dismissed', false)
+          .order('match_score', { ascending: false }),
+      ])
+      if (sErr) throw sErr
+      if (jErr) throw jErr
+      setScholarships(s || [])
+      setJobs(j || [])
+    } catch {
+      setScholarships([])
+      setJobs([])
+    } finally {
+      setLoading(false)
+    }
+  }, [user?.id])
 
   useEffect(() => {
     document.title = 'Dashboard — Opportunistic'

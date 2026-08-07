@@ -13,7 +13,13 @@ export default function SiteHeader() {
     <header className="site-header">
       <div className="container header-inner">
         <NavLink to="/" className="brand" aria-label="Opportunistic home" onClick={close} end>
-          <img src={`${import.meta.env.BASE_URL}mark.svg`} alt="" className="brand-mark" width="32" height="32" />
+          <img
+            src={`${import.meta.env.BASE_URL}logo.png`}
+            alt=""
+            className="brand-mark"
+            width="40"
+            height="40"
+          />
           <span className="brand-word">Opportunistic</span>
         </NavLink>
 

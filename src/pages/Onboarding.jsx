@@ -8,12 +8,13 @@ import { runMatchingForUser } from '../lib/matchingService'
 import { useAuth } from '../context/AuthContext'
 import SiteHeader from '../components/SiteHeader'
 import PageBackdrop from '../components/PageBackdrop'
+import SkillPicker from '../components/SkillPicker'
 import { prefersReducedMotion } from '../lib/animations'
+import { normalizeSkillName } from '../lib/skillCatalog'
 
 gsap.registerPlugin(useGSAP)
 
 const emptyQual = { type: 'degree', field: '', institution: '', year: new Date().getFullYear() }
-const emptySkill = { skill_name: '', proficiency: 'intermediate' }
 
 const GUIDE = [
   {
@@ -36,9 +37,9 @@ const GUIDE = [
   },
   {
     id: 'skills',
-    title: 'What can you do well?',
-    tip: 'List skills employers or programs care about. Proficiency tells us how strongly to weight each one.',
-    why: 'Skills sharpen job queries and raise match scores when they align.',
+    title: 'Confirm skills for your field',
+    tip: 'Tick skills that match your degree. Add anything missing under Other.',
+    why: 'Checked skills drive job queries and make scholarship reasoning specific — not generic.',
   },
   {
     id: 'process',
@@ -58,7 +59,7 @@ export default function Onboarding() {
   const [headline, setHeadline] = useState('')
   const [goal, setGoal] = useState('both')
   const [qualifications, setQualifications] = useState([{ ...emptyQual }])
-  const [skills, setSkills] = useState([{ ...emptySkill }])
+  const [skills, setSkills] = useState([])
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [processLogs, setProcessLogs] = useState([])
@@ -89,10 +90,6 @@ export default function Onboarding() {
 
   function updateQual(i, key, value) {
     setQualifications((rows) => rows.map((row, idx) => (idx === i ? { ...row, [key]: value } : row)))
-  }
-
-  function updateSkill(i, key, value) {
-    setSkills((rows) => rows.map((row, idx) => (idx === i ? { ...row, [key]: value } : row)))
   }
 
   function canContinue() {
@@ -154,9 +151,10 @@ export default function Onboarding() {
         .filter((s) => s.skill_name.trim())
         .map((s) => ({
           user_id: user.id,
-          skill_name: s.skill_name.trim(),
-          proficiency: s.proficiency,
+          skill_name: normalizeSkillName(s.skill_name),
+          proficiency: s.proficiency || 'intermediate',
         }))
+        .filter((s) => s.skill_name)
 
       if (qualRows.length) {
         const { error: qErr } = await supabase.from('qualifications').insert(qualRows)
@@ -293,30 +291,7 @@ export default function Onboarding() {
 
             {step === 3 && (
               <div className="stack-form">
-                {skills.map((s, i) => (
-                  <div className="card-lite" key={i}>
-                    <label>
-                      Skill name
-                      <input
-                        value={s.skill_name}
-                        onChange={(e) => updateSkill(i, 'skill_name', e.target.value)}
-                        placeholder="React"
-                      />
-                    </label>
-                    <label>
-                      How strong are you?
-                      <select value={s.proficiency} onChange={(e) => updateSkill(i, 'proficiency', e.target.value)}>
-                        <option value="beginner">Beginner — learning</option>
-                        <option value="intermediate">Intermediate — can ship</option>
-                        <option value="advanced">Advanced — deep experience</option>
-                        <option value="expert">Expert — lead / teach</option>
-                      </select>
-                    </label>
-                  </div>
-                ))}
-                <button type="button" className="btn btn-ghost" onClick={() => setSkills((r) => [...r, { ...emptySkill }])}>
-                  + Add another skill
-                </button>
+                <SkillPicker qualifications={qualifications} value={skills} onChange={setSkills} />
               </div>
             )}
 
@@ -325,7 +300,7 @@ export default function Onboarding() {
                 <div className="scan-core compact" aria-hidden="true">
                   <span className="scan-ring" />
                   <span className="scan-ring" />
-                  <img src={`${import.meta.env.BASE_URL}mark.svg`} alt="" width="36" height="36" />
+                  <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" width="40" height="40" />
                 </div>
                 <p className="ob-process-title">{busy ? 'Matching in progress…' : 'Ready to process your profile'}</p>
                 <div className="jarvis-log-lines ob-logs">
@@ -348,17 +323,15 @@ export default function Onboarding() {
               {step < 4 ? (
                 <button
                   type="button"
-                  className="btn btn-auth"
+                  className="btn"
                   disabled={!canContinue()}
                   onClick={() => setStep((s) => s + 1)}
                 >
-                  <span>{step === 3 ? 'Review & process' : 'Continue'}</span>
-                  <span className="btn-auth-shine" aria-hidden="true" />
+                  {step === 3 ? 'Review & process' : 'Continue'}
                 </button>
               ) : (
-                <button type="button" className="btn btn-auth" disabled={busy} onClick={finish}>
-                  <span>{busy ? 'Processing…' : 'Start matching'}</span>
-                  <span className="btn-auth-shine" aria-hidden="true" />
+                <button type="button" className="btn" disabled={busy} onClick={finish}>
+                  {busy ? 'Processing…' : 'Start matching'}
                 </button>
               )}
             </div>

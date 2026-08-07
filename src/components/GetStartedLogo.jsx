@@ -55,10 +55,10 @@ export default function GetStartedLogo({ onClick }) {
     >
       <img
         className="cta-logo-mark"
-        src={`${import.meta.env.BASE_URL}mark.svg`}
+        src={`${import.meta.env.BASE_URL}logo.png`}
         alt=""
-        width="34"
-        height="34"
+        width="36"
+        height="36"
       />
       <span className="cta-logo-text">
         <strong>Opportunistic</strong>
