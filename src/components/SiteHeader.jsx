@@ -74,7 +74,7 @@ export default function SiteHeader() {
               aria-label="Get started"
               title="Get started"
             >
-              <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" width="44" height="44" />
+              <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" width="52" height="52" />
             </NavLink>
           )}
         </nav>
