@@ -35,10 +35,10 @@ export default function About() {
           <section className="page-hero container">
             <div className="glass-panel hero-copy-block">
               <p className="eyebrow">About</p>
-              <h1>A worldwide path finder — not a local-only portal.</h1>
+              <h1>A matching layer for applications.</h1>
               <p className="lede">
-                Opportunistic helps people turn skills and qualifications into ranked scholarships and jobs, with the
-                reasoning shown up front.
+                Opportunistic turns qualifications and skills into ranked scholarship and job links, with the reason
+                shown up front.
               </p>
             </div>
           </section>

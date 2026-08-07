@@ -51,7 +51,7 @@ export default function Landing() {
   )
 
   useEffect(() => {
-    document.title = 'Opportunistic — Scholarships & jobs that fit'
+    document.title = 'Opportunistic'
   }, [])
 
   return (
@@ -63,17 +63,16 @@ export default function Landing() {
           <div className="container hero-grid">
             <div className="hero-copy glass-panel">
               <img className="hero-brand" src={`${import.meta.env.BASE_URL}logo.png`} alt="Opportunistic" />
-              <h1>Opportunities matched to who you actually are.</h1>
+              <h1>Match scholarships and jobs to a real profile.</h1>
               <p className="lede">
-                Build one profile. Get scholarships and jobs ranked with reasons you can read — not mystery lists.
+                Enter skills and qualifications. Opportunistic ranks openings and explains the fit on every card.
               </p>
               <div className="cta-row">
-                <Link className="btn btn-auth" to="/auth?mode=signup">
-                  <span>Create your profile</span>
-                  <span className="btn-auth-shine" aria-hidden="true" />
+                <Link className="btn" to="/auth?mode=signup">
+                  Create profile
                 </Link>
                 <Link className="btn btn-ghost" to="/how-it-works">
-                  Watch how it works
+                  See the system
                 </Link>
               </div>
             </div>
@@ -99,27 +98,27 @@ export default function Landing() {
         <section className="section">
           <div className="container teaser-grid">
             <InteractiveCard className="teaser" data-reveal="left">
-              <p className="eyebrow">Product tour</p>
-              <h2>See the matching flow</h2>
-              <p>An animated walkthrough: profile → search → reasoned results.</p>
+              <p className="eyebrow">System</p>
+              <h2>How matching runs</h2>
+              <p>Profile feed → search → scored results with reasons.</p>
               <Link className="text-link" to="/how-it-works">
-                Open how it works →
+                Open console →
               </Link>
             </InteractiveCard>
             <InteractiveCard className="teaser" data-reveal="right">
-              <p className="eyebrow">Capabilities</p>
-              <h2>What you get</h2>
-              <p>Two engines, visible scores, privacy-first deletion, worldwide by design.</p>
+              <p className="eyebrow">Modules</p>
+              <h2>What ships in v1</h2>
+              <p>Scholarships, jobs by country, profile editor, deletion.</p>
               <Link className="text-link" to="/features">
-                Explore features →
+                View modules →
               </Link>
             </InteractiveCard>
             <InteractiveCard className="teaser" data-reveal="up">
-              <p className="eyebrow">Story</p>
-              <h2>Why Opportunistic</h2>
-              <p>Built so applicants everywhere get fit explained — not noise.</p>
+              <p className="eyebrow">Brief</p>
+              <h2>Why this exists</h2>
+              <p>Link dumps ignore your record. We don’t.</p>
               <Link className="text-link" to="/about">
-                Read about us →
+                Read brief →
               </Link>
             </InteractiveCard>
           </div>
@@ -127,11 +126,10 @@ export default function Landing() {
 
         <section className="section">
           <div className="container cta-panel glass-panel" data-reveal="scale">
-            <h2>Start with your story.</h2>
-            <p>A few minutes to onboard. Matching begins when your profile is complete.</p>
-            <Link className="btn btn-auth" to="/auth?mode=signup">
-              <span>Get started free</span>
-              <span className="btn-auth-shine" aria-hidden="true" />
+            <h2>Start with your profile.</h2>
+            <p>Onboarding takes a few minutes. Matching runs when you finish.</p>
+            <Link className="btn" to="/auth?mode=signup">
+              Get started
             </Link>
           </div>
         </section>

@@ -35,10 +35,10 @@ export default function HowItWorks() {
           <section className="page-hero container">
             <div className="glass-panel hero-copy-block">
               <p className="eyebrow">How it works</p>
-              <h1>From profile to reasoned matches.</h1>
+              <h1>Feed the system. Get ranked matches.</h1>
               <p className="lede">
-                Feed Opportunistic like an assistant: profile in, processing on screen, reasoned matches out. Click the
-                steps or watch the console cycle.
+                Click each stage or watch the console cycle: ingest profile data, process queries, output reasoned
+                results.
               </p>
             </div>
           </section>

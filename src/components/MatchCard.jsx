@@ -21,8 +21,7 @@ export default function MatchCard({ match, kind, onSave, onDismiss, onOpen }) {
         gsap.to(el, {
           rotateY: x * 7,
           rotateX: -y * 6,
-          y: -6,
-          boxShadow: '0 22px 50px rgba(20,22,26,0.12)',
+          y: -4,
           duration: 0.3,
           ease: 'power2.out',
           transformPerspective: 900,
@@ -33,7 +32,6 @@ export default function MatchCard({ match, kind, onSave, onDismiss, onOpen }) {
           rotateY: 0,
           rotateX: 0,
           y: 0,
-          boxShadow: '0 18px 40px rgba(20, 22, 26, 0.06)',
           duration: 0.4,
           ease: 'power3.out',
         })

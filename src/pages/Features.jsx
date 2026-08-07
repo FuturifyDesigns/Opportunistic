@@ -91,9 +91,9 @@ export default function Features() {
           <section className="page-hero container">
             <div className="glass-panel hero-copy-block">
               <p className="eyebrow">Features</p>
-              <h1>Two engines. One profile. Clear reasons.</h1>
+              <h1>Two matchers. One profile.</h1>
               <p className="lede">
-                Scroll the capabilities — cards tilt as you explore, and each block slides in from alternating sides.
+                Scholarships worldwide. Jobs by country. Scores and reasons stay on the card.
               </p>
             </div>
           </section>

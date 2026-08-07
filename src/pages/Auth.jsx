@@ -215,9 +215,8 @@ export default function Auth() {
 
             {message ? <p className={`form-message ${hasErrors && message.includes('fix') ? 'warn' : ''}`}>{message}</p> : null}
 
-            <button className="btn btn-auth" type="submit" disabled={busy}>
-              <span>{busy ? 'Please wait…' : mode === 'signup' ? 'Create account' : 'Sign in'}</span>
-              <span className="btn-auth-shine" aria-hidden="true" />
+            <button className="btn" type="submit" disabled={busy}>
+              {busy ? 'Please wait…' : mode === 'signup' ? 'Create account' : 'Sign in'}
             </button>
           </form>
 

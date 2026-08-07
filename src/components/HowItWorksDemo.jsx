@@ -131,9 +131,9 @@ export default function HowItWorksDemo() {
             <span>{p.label}</span>
             <strong>{p.title}</strong>
             <p>
-              {i === 0 && 'You feed Opportunistic your country, qualifications, and skills — one clear step at a time.'}
-              {i === 1 && 'It builds queries from your profile, searches, scores, and writes why each result fits.'}
-              {i === 2 && 'You get ranked cards with visible reasoning — like a brief from an assistant, not a dump of links.'}
+              {i === 0 && 'Country, qualifications, and skills — entered one step at a time.'}
+              {i === 1 && 'Builds queries, searches, scores candidates, and writes fit notes.'}
+              {i === 2 && 'Ranked cards with visible reasoning. Open the source link when ready.'}
             </p>
           </button>
         ))}
