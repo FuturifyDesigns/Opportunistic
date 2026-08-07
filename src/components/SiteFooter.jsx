@@ -9,9 +9,11 @@ export default function SiteFooter() {
           <p>Scholarships and jobs matched to your real qualifications — with reasons, not just lists.</p>
         </div>
         <div className="footer-links">
+          <Link to="/how-it-works">How it works</Link>
+          <Link to="/features">Features</Link>
+          <Link to="/about">About</Link>
           <Link to="/privacy">Privacy</Link>
           <Link to="/terms">Terms</Link>
-          <a href="mailto:hello@opportunistic.online">Contact</a>
         </div>
       </div>
       <div className="container footer-note">

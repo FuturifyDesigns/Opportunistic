@@ -2,6 +2,9 @@ import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import Landing from './pages/Landing'
+import HowItWorks from './pages/HowItWorks'
+import Features from './pages/Features'
+import About from './pages/About'
 import Auth from './pages/Auth'
 import Onboarding from './pages/Onboarding'
 import Dashboard from './pages/Dashboard'
@@ -17,6 +20,9 @@ export default function App() {
       <HashRouter>
         <Routes>
           <Route path="/" element={<Landing />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/features" element={<Features />} />
+          <Route path="/about" element={<About />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />

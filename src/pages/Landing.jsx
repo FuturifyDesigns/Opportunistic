@@ -5,58 +5,46 @@ import { useGSAP } from '@gsap/react'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
+import InteractiveCard from '../components/InteractiveCard'
+import { prefersReducedMotion, revealOnScroll } from '../lib/animations'
 
 gsap.registerPlugin(useGSAP, ScrollTrigger)
-
-const FEATURES = [
-  {
-    title: 'One profile, two engines',
-    body: 'Build your qualifications and skills once. We match scholarships and jobs from the same living profile.',
-  },
-  {
-    title: 'Reasoning you can read',
-    body: 'Every result shows why it fits — field, experience, country eligibility — not a black-box ranking.',
-  },
-  {
-    title: 'Fresh on change, not on spam',
-    body: 'Matches refresh when you edit your profile and on a weekly cadence. No pointless re-search button.',
-  },
-]
 
 export default function Landing() {
   const root = useRef(null)
 
   useGSAP(
     () => {
-      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      if (reduce) return
+      if (prefersReducedMotion()) return
 
-      gsap.from('.hero-brand', { y: 24, opacity: 0, duration: 0.55, ease: 'power2.out' })
-      gsap.from('.hero-copy > *', {
-        y: 28,
-        opacity: 0,
-        duration: 0.5,
-        stagger: 0.08,
-        delay: 0.12,
-        ease: 'power2.out',
-      })
-      gsap.from('.hero-visual', {
-        scale: 0.94,
-        opacity: 0,
-        duration: 0.7,
-        delay: 0.15,
-        ease: 'power2.out',
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
+      tl.from('.hero-brand', { y: 28, opacity: 0, duration: 0.55 })
+        .from('.hero-copy h1', { y: 36, opacity: 0, duration: 0.55 }, '-=0.25')
+        .from('.hero-copy .lede', { y: 24, opacity: 0, duration: 0.45 }, '-=0.28')
+        .from('.hero-copy .cta-row', { y: 18, opacity: 0, duration: 0.4 }, '-=0.25')
+        .from(
+          '.float-card',
+          { x: 50, opacity: 0, stagger: 0.12, duration: 0.55, ease: 'power2.out' },
+          '-=0.35',
+        )
+
+      gsap.to('.float-card', {
+        y: '+=12',
+        duration: 2.4,
+        yoyo: true,
+        repeat: -1,
+        ease: 'sine.inOut',
+        stagger: 0.35,
       })
 
-      gsap.utils.toArray('.feature-block').forEach((el) => {
-        gsap.from(el, {
-          scrollTrigger: { trigger: el, start: 'top 85%' },
-          y: 36,
-          opacity: 0,
-          duration: 0.45,
-          ease: 'power2.out',
-        })
+      gsap.to('.orbit', {
+        rotate: 360,
+        duration: 48,
+        repeat: -1,
+        ease: 'none',
       })
+
+      revealOnScroll(root.current)
     },
     { scope: root },
   )
@@ -72,65 +60,72 @@ export default function Landing() {
       <section className="hero">
         <div className="container hero-grid">
           <div className="hero-copy">
-            <img
-              className="hero-brand"
-              src={`${import.meta.env.BASE_URL}logo.png`}
-              alt="Opportunistic"
-            />
+            <img className="hero-brand" src={`${import.meta.env.BASE_URL}logo.png`} alt="Opportunistic" />
             <h1>Opportunities matched to who you actually are.</h1>
-            <p>
-              Build a profile of your skills and qualifications. We surface scholarships and jobs worldwide —
-              with a clear reason for every match.
+            <p className="lede">
+              Build one profile. Get scholarships and jobs ranked with reasons you can read — not mystery lists.
             </p>
             <div className="cta-row">
               <Link className="btn" to="/auth?mode=signup">
                 Create your profile
               </Link>
-              <a className="btn btn-ghost" href="#how">
-                See how it works
-              </a>
+              <Link className="btn btn-ghost" to="/how-it-works">
+                Watch how it works
+              </Link>
             </div>
           </div>
+
           <div className="hero-visual" aria-hidden="true">
             <div className="orbit">
               <img src={`${import.meta.env.BASE_URL}mark.svg`} alt="" />
             </div>
+            <InteractiveCard className="float-card float-a">
+              <p className="eyebrow">Scholarship</p>
+              <strong>94% match</strong>
+              <p>Fits your CS degree + region</p>
+            </InteractiveCard>
+            <InteractiveCard className="float-card float-b">
+              <p className="eyebrow">Job</p>
+              <strong>React · Junior</strong>
+              <p>Reasoning on every card</p>
+            </InteractiveCard>
           </div>
-        </div>
-      </section>
-
-      <section id="how" className="section">
-        <div className="container">
-          <p className="eyebrow">How it works</p>
-          <h2>Profile in. Fit explained. Links you can trust.</h2>
-          <div className="feature-stack">
-            {FEATURES.map((f) => (
-              <article key={f.title} className="feature-block">
-                <h3>{f.title}</h3>
-                <p>{f.body}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="section section-band">
-        <div className="container split">
-          <div>
-            <p className="eyebrow">Worldwide by design</p>
-            <h2>Built for applicants everywhere — not locked to one country TLD.</h2>
-          </div>
-          <p>
-            Pick your country, add degrees and skills, and get ranked scholarship and job links with reasoning
-            visible by default. Mobile-first, privacy-aware, and honest about third-party listings.
-          </p>
         </div>
       </section>
 
       <section className="section">
-        <div className="container cta-panel">
+        <div className="container teaser-grid">
+          <InteractiveCard className="teaser" data-reveal="left">
+            <p className="eyebrow">Product tour</p>
+            <h2>See the matching flow</h2>
+            <p>An animated walkthrough: profile → search → reasoned results.</p>
+            <Link className="text-link" to="/how-it-works">
+              Open how it works →
+            </Link>
+          </InteractiveCard>
+          <InteractiveCard className="teaser" data-reveal="right">
+            <p className="eyebrow">Capabilities</p>
+            <h2>What you get</h2>
+            <p>Two engines, visible scores, privacy-first deletion, worldwide by design.</p>
+            <Link className="text-link" to="/features">
+              Explore features →
+            </Link>
+          </InteractiveCard>
+          <InteractiveCard className="teaser" data-reveal="up">
+            <p className="eyebrow">Story</p>
+            <h2>Why Opportunistic</h2>
+            <p>Built so applicants everywhere get fit explained — not noise.</p>
+            <Link className="text-link" to="/about">
+              Read about us →
+            </Link>
+          </InteractiveCard>
+        </div>
+      </section>
+
+      <section className="section section-band">
+        <div className="container cta-panel" data-reveal="scale">
           <h2>Start with your story.</h2>
-          <p>It takes a few minutes. Matching begins when your profile is complete.</p>
+          <p>A few minutes to onboard. Matching begins when your profile is complete.</p>
           <Link className="btn" to="/auth?mode=signup">
             Get started free
           </Link>
