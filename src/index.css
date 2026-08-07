@@ -4637,6 +4637,8 @@ a.btn-auth {
   z-index: 2000;
   display: grid;
   place-items: center;
+  align-content: center;
+  padding-top: min(22vh, 10rem);
   overflow: hidden;
   color: var(--ink);
 }
@@ -4653,8 +4655,9 @@ a.btn-auth {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 18vh;
+  gap: 1.15rem;
+  width: min(34rem, calc(100% - 2rem));
+  margin: 0;
 }
 
 .mb-core {
@@ -4742,15 +4745,7 @@ a.btn-auth {
 }
 
 .mb-footer {
-  position: absolute;
-  z-index: 2;
-  left: 50%;
-  bottom: max(1.75rem, env(safe-area-inset-bottom));
-  transform: translateX(-50%);
-  width: min(34rem, calc(100% - 2rem));
-  display: grid;
-  justify-items: center;
-  gap: 0.65rem;
+  display: none;
 }
 
 .mb-status {
@@ -4758,6 +4753,7 @@ a.btn-auth {
   min-height: 3.25rem;
   display: grid;
   place-items: center;
+  margin-top: 0.35rem;
 }
 
 .mb-pill {
@@ -4857,11 +4853,15 @@ a.btn-auth {
   }
 
   .mb-stage {
-    margin-bottom: 22vh;
+    gap: 1rem;
   }
 
   .mb-core {
     width: min(180px, 48vw);
+  }
+
+  .match-beacon {
+    padding-top: min(16vh, 6rem);
   }
 
   .mb-pill {

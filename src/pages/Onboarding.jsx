@@ -274,7 +274,7 @@ export default function Onboarding() {
       window.clearInterval(lineTimer)
       setProcessLogs(lines)
       setBeaconDone(true)
-      toast.success(t('onboarding.doneToast'))
+      // Status lives on the matching screen pill — skip the bottom toast overlap
       window.setTimeout(() => navigate('/dashboard'), prefersReducedMotion() ? 700 : 2200)
     } catch (err) {
       window.clearInterval(lineTimer)

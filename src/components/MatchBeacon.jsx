@@ -174,9 +174,6 @@ export default function MatchBeacon({ active, lines = [], done = false, error = 
           </div>
         </div>
         <p className="mb-word">{t('common.brand')}</p>
-      </div>
-
-      <div className="mb-footer">
         <div className="mb-status">
           <p className={pillClass} ref={pillRef}>
             {pillText || t('onboarding.beaconWorking')}
