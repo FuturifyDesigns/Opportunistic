@@ -1218,6 +1218,131 @@ sup {
   font-size: 0.94rem;
 }
 
+/* Language switcher */
+.lang-switch {
+  position: relative;
+  z-index: 40;
+}
+
+.lang-switch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.lang-switch-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.lang-switch-code {
+  font-weight: 700;
+}
+
+.lang-switch-name {
+  max-width: 9ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: inherit;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.78rem;
+}
+
+.lang-switch.compact .lang-switch-name {
+  display: none;
+}
+
+.lang-switch-panel {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  right: 0;
+  width: min(280px, 78vw);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.14);
+  padding: 0.65rem;
+}
+
+.footer-lang .lang-switch-panel,
+.settings-lang .lang-switch-panel {
+  left: 0;
+  right: auto;
+}
+
+.lang-switch-search {
+  width: 100%;
+  margin-bottom: 0.45rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) - 2px);
+  font: inherit;
+  font-size: 0.88rem;
+}
+
+.lang-switch-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 240px;
+  overflow: auto;
+}
+
+.lang-switch-list button {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: baseline;
+  padding: 0.45rem 0.5rem;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  color: var(--ink);
+}
+
+.lang-switch-list button em {
+  font-style: normal;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.lang-switch-list button:hover,
+.lang-switch-list button.active {
+  background: rgba(11, 110, 79, 0.08);
+}
+
+.lang-switch-empty {
+  padding: 0.75rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.footer-lang,
+.settings-lang {
+  margin-top: 0.85rem;
+}
+
+html[dir='rtl'] .lang-switch-panel {
+  right: auto;
+  left: 0;
+}
+
 @media (max-width: 860px) {
   .legal-layout {
     grid-template-columns: 1fr;

@@ -1,10 +1,13 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import GetStartedLogo from './GetStartedLogo'
+import LanguageSwitcher from './LanguageSwitcher'
 
 export default function SiteHeader() {
   const { user, signOut } = useAuth()
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
 
   const close = () => setOpen(false)
@@ -12,7 +15,7 @@ export default function SiteHeader() {
   return (
     <header className="site-header">
       <div className="container header-inner">
-        <NavLink to="/" className="brand" aria-label="Opportunistic home" onClick={close} end>
+        <NavLink to="/" className="brand" aria-label={`${t('common.brand')} ${t('common.home')}`} onClick={close} end>
           <img
             src={`${import.meta.env.BASE_URL}logo.png`}
             alt=""
@@ -20,14 +23,14 @@ export default function SiteHeader() {
             width="56"
             height="56"
           />
-          <span className="brand-word">Opportunistic</span>
+          <span className="brand-word">{t('common.brand')}</span>
         </NavLink>
 
         <button
           type="button"
           className="nav-toggle"
           aria-expanded={open}
-          aria-label="Menu"
+          aria-label={t('common.menu')}
           onClick={() => setOpen((v) => !v)}
         >
           <span />
@@ -36,25 +39,27 @@ export default function SiteHeader() {
 
         <nav className={`nav ${open ? 'open' : ''}`}>
           <NavLink to="/how-it-works" onClick={close}>
-            How it works
+            {t('nav.howItWorks')}
           </NavLink>
           <NavLink to="/features" onClick={close}>
-            Features
+            {t('nav.features')}
           </NavLink>
           <NavLink to="/about" onClick={close}>
-            About
+            {t('nav.about')}
           </NavLink>
+
+          <LanguageSwitcher compact />
 
           {user ? (
             <>
               <NavLink to="/dashboard" onClick={close}>
-                Dashboard
+                {t('nav.dashboard')}
               </NavLink>
               <NavLink to="/profile" onClick={close}>
-                Profile
+                {t('nav.profile')}
               </NavLink>
               <NavLink to="/settings" onClick={close}>
-                Settings
+                {t('nav.settings')}
               </NavLink>
               <button
                 type="button"
@@ -64,7 +69,7 @@ export default function SiteHeader() {
                   signOut()
                 }}
               >
-                Sign out
+                {t('nav.signOut')}
               </button>
             </>
           ) : (

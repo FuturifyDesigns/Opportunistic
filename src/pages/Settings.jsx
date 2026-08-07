@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { COUNTRIES } from '../lib/countries'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { openCookiePreferences } from '../lib/consent'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
+import LanguageSwitcher from '../components/LanguageSwitcher'
 
 export default function Settings() {
   const { user, profile, refreshProfile, signOut } = useAuth()
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [digest, setDigest] = useState('weekly')
   const [country, setCountry] = useState('Botswana')
@@ -16,12 +19,12 @@ export default function Settings() {
   const [busy, setBusy] = useState(false)
 
   useEffect(() => {
-    document.title = 'Settings — Opportunistic'
+    document.title = t('settings.docTitle')
     if (profile) {
       setDigest(profile.digest_frequency || 'weekly')
       setCountry(profile.country || 'Botswana')
     }
-  }, [profile])
+  }, [profile, t])
 
   async function save() {
     setBusy(true)
@@ -33,15 +36,14 @@ export default function Settings() {
     setBusy(false)
     if (error) setMessage(error.message)
     else {
-      setMessage('Settings saved.')
+      setMessage(t('settings.saved'))
       refreshProfile()
     }
   }
 
   async function deleteAccount() {
-    if (!window.confirm('Delete your account and all matches permanently?')) return
+    if (!window.confirm(t('settings.deleteConfirm'))) return
     setBusy(true)
-    // Client can delete profile cascade via RPC; without service role we delete owned rows then sign out.
     await Promise.all([
       supabase.from('scholarship_matches').delete().eq('user_id', user.id),
       supabase.from('job_matches').delete().eq('user_id', user.id),
@@ -50,7 +52,7 @@ export default function Settings() {
       supabase.from('search_runs').delete().eq('user_id', user.id),
       supabase.from('profiles').delete().eq('user_id', user.id),
     ])
-    setMessage('Your data was removed from the app. Contact support if you also need the auth account purged.')
+    setMessage(t('settings.deleted'))
     await signOut()
     navigate('/')
   }
@@ -59,50 +61,56 @@ export default function Settings() {
     <div className="page">
       <SiteHeader />
       <main className="container narrow">
-        <p className="eyebrow">Settings</p>
-        <h1>Account settings</h1>
+        <p className="eyebrow">{t('nav.settings')}</p>
+        <h1>{t('settings.title')}</h1>
 
         <div className="stack-form">
           <label>
-            Email digest frequency
+            {t('common.language')}
+            <div className="settings-lang">
+              <LanguageSwitcher />
+            </div>
+          </label>
+
+          <label>
+            {t('settings.emailDigest')}
             <select value={digest} onChange={(e) => setDigest(e.target.value)}>
-              <option value="off">Off</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
+              <option value="off">{t('settings.digestOff')}</option>
+              <option value="weekly">{t('settings.digestWeekly')}</option>
+              <option value="monthly">{t('settings.digestMonthly')}</option>
             </select>
           </label>
-          <p className="muted">Digests will send via Brevo once email is connected. Unsubscribe is always included.</p>
 
           <label>
             Country
             <select value={country} onChange={(e) => setCountry(e.target.value)}>
               {COUNTRIES.map((c) => (
-                <option key={c} value={c}>{c}</option>
+                <option key={c} value={c}>
+                  {c}
+                </option>
               ))}
             </select>
           </label>
 
           {message ? <p className="form-message">{message}</p> : null}
           <button type="button" className="btn" disabled={busy} onClick={save}>
-            Save settings
+            {t('settings.saveSettings')}
           </button>
 
           <hr className="divider" />
 
-          <h2 className="form-section">Privacy & cookies</h2>
-          <p className="muted">
-            Manage optional cookies anytime. Necessary cookies stay on for security and to remember this choice.
-          </p>
+          <h2 className="form-section">{t('settings.privacyCookies')}</h2>
+          <p className="muted">{t('settings.privacyCookiesBody')}</p>
           <button type="button" className="btn btn-ghost" onClick={() => openCookiePreferences()}>
-            Cookie settings
+            {t('nav.cookieSettings')}
           </button>
 
           <hr className="divider" />
 
-          <h2 className="form-section">Danger zone</h2>
-          <p className="muted">Account deletion removes your profile, qualifications, skills, and matches (cascade).</p>
+          <h2 className="form-section">{t('settings.dangerZone')}</h2>
+          <p className="muted">{t('settings.dangerBody')}</p>
           <button type="button" className="btn btn-danger" disabled={busy} onClick={deleteAccount}>
-            Delete my data
+            {t('settings.deleteData')}
           </button>
         </div>
       </main>

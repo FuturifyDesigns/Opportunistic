@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { supabase } from '../lib/supabase'
@@ -12,6 +13,7 @@ gsap.registerPlugin(useGSAP)
 
 export default function Dashboard() {
   const { user, profile } = useAuth()
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [tab, setTab] = useState('scholarships')
   const [scholarships, setScholarships] = useState([])
@@ -52,9 +54,9 @@ export default function Dashboard() {
   }, [user?.id])
 
   useEffect(() => {
-    document.title = 'Dashboard — Opportunistic'
+    document.title = t('dashboard.title')
     load()
-  }, [load])
+  }, [load, t])
 
   useGSAP(
     () => {
@@ -90,23 +92,27 @@ export default function Dashboard() {
       <main className="container dashboard">
         <div className="dashboard-head">
           <div>
-            <p className="eyebrow">Dashboard</p>
-            <h1>Hello{profile?.full_name ? `, ${profile.full_name.split(' ')[0]}` : ''}.</h1>
+            <p className="eyebrow">{t('nav.dashboard')}</p>
+            <h1>
+              {profile?.full_name
+                ? t('dashboard.hello', { name: profile.full_name.split(' ')[0] })
+                : t('dashboard.helloGuest')}
+            </h1>
             <p className="muted">
-              Ranked matches for {profile?.country || 'your country'} — reasoning shown on every card.
+              {t('dashboard.lede', { country: profile?.country || '—' })}
             </p>
           </div>
           <Link className="btn btn-ghost" to="/profile">
-            Edit profile
+            {t('dashboard.updateProfile')}
           </Link>
         </div>
 
         <div className="segmented">
           <button type="button" className={tab === 'scholarships' ? 'active' : ''} onClick={() => setTab('scholarships')}>
-            Scholarships ({scholarships.length})
+            {t('dashboard.scholarships', { count: scholarships.length })}
           </button>
           <button type="button" className={tab === 'jobs' ? 'active' : ''} onClick={() => setTab('jobs')}>
-            Jobs ({jobs.length})
+            {t('dashboard.jobs', { count: jobs.length })}
           </button>
         </div>
 
@@ -116,9 +122,9 @@ export default function Dashboard() {
               <div className="page-center"><div className="spinner" /></div>
             ) : rows.length === 0 ? (
               <div className="empty-state">
-                <h3>No matches yet</h3>
-                <p>Complete or update your profile to generate scholarship and job matches.</p>
-                <Link className="btn" to="/profile">Update profile</Link>
+                <h3>{t('dashboard.empty')}</h3>
+                <p>{t('dashboard.emptyBody')}</p>
+                <Link className="btn" to="/profile">{t('dashboard.updateProfile')}</Link>
               </div>
             ) : (
               rows.map((match) => (

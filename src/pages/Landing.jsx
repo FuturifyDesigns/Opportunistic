@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -13,6 +14,7 @@ gsap.registerPlugin(useGSAP, ScrollTrigger)
 
 export default function Landing() {
   const root = useRef(null)
+  const { t } = useTranslation()
 
   useGSAP(
     () => {
@@ -51,8 +53,8 @@ export default function Landing() {
   )
 
   useEffect(() => {
-    document.title = 'Opportunistic'
-  }, [])
+    document.title = t('landing.title')
+  }, [t])
 
   return (
     <PageBackdrop image="home.jpg" className="landing">
@@ -62,17 +64,15 @@ export default function Landing() {
         <section className="hero">
           <div className="container hero-grid">
             <div className="hero-copy glass-panel">
-              <img className="hero-brand" src={`${import.meta.env.BASE_URL}logo.png`} alt="Opportunistic" />
-              <h1>Match scholarships and jobs to a real profile.</h1>
-              <p className="lede">
-                Enter skills and qualifications. Opportunistic ranks openings and explains the fit on every card.
-              </p>
+              <img className="hero-brand" src={`${import.meta.env.BASE_URL}logo.png`} alt={t('common.brand')} />
+              <h1>{t('landing.headline')}</h1>
+              <p className="lede">{t('landing.lede')}</p>
               <div className="cta-row">
                 <Link className="btn" to="/auth?mode=signup">
-                  Create profile
+                  {t('landing.createProfile')}
                 </Link>
                 <Link className="btn btn-ghost" to="/how-it-works">
-                  See the system
+                  {t('landing.seeSystem')}
                 </Link>
               </div>
             </div>
@@ -82,14 +82,14 @@ export default function Landing() {
                 <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" />
               </div>
               <InteractiveCard className="float-card float-a">
-                <p className="eyebrow">Scholarship</p>
-                <strong>94% match</strong>
-                <p>Fits your CS degree + region</p>
+                <p className="eyebrow">{t('landing.scholarship')}</p>
+                <strong>{t('landing.matchPct')}</strong>
+                <p>{t('landing.floatA')}</p>
               </InteractiveCard>
               <InteractiveCard className="float-card float-b">
-                <p className="eyebrow">Job</p>
-                <strong>React · Junior</strong>
-                <p>Reasoning on every card</p>
+                <p className="eyebrow">{t('landing.job')}</p>
+                <strong>{t('landing.floatBTitle')}</strong>
+                <p>{t('landing.floatB')}</p>
               </InteractiveCard>
             </div>
           </div>
@@ -98,27 +98,27 @@ export default function Landing() {
         <section className="section">
           <div className="container teaser-grid">
             <InteractiveCard className="teaser" data-reveal="left">
-              <p className="eyebrow">System</p>
-              <h2>How matching runs</h2>
-              <p>Profile feed → search → scored results with reasons.</p>
+              <p className="eyebrow">{t('landing.system')}</p>
+              <h2>{t('landing.howMatching')}</h2>
+              <p>{t('landing.howMatchingBody')}</p>
               <Link className="text-link" to="/how-it-works">
-                Open console →
+                {t('landing.openConsole')}
               </Link>
             </InteractiveCard>
             <InteractiveCard className="teaser" data-reveal="right">
-              <p className="eyebrow">Modules</p>
-              <h2>What ships in v1</h2>
-              <p>Scholarships, jobs by country, profile editor, deletion.</p>
+              <p className="eyebrow">{t('landing.modules')}</p>
+              <h2>{t('landing.whatShips')}</h2>
+              <p>{t('landing.whatShipsBody')}</p>
               <Link className="text-link" to="/features">
-                View modules →
+                {t('landing.viewModules')}
               </Link>
             </InteractiveCard>
             <InteractiveCard className="teaser" data-reveal="up">
-              <p className="eyebrow">Brief</p>
-              <h2>Why this exists</h2>
-              <p>Link dumps ignore your record. We don’t.</p>
+              <p className="eyebrow">{t('landing.brief')}</p>
+              <h2>{t('landing.whyExists')}</h2>
+              <p>{t('landing.whyExistsBody')}</p>
               <Link className="text-link" to="/about">
-                Read brief →
+                {t('landing.readBrief')}
               </Link>
             </InteractiveCard>
           </div>
@@ -126,10 +126,10 @@ export default function Landing() {
 
         <section className="section">
           <div className="container cta-panel glass-panel" data-reveal="scale">
-            <h2>Start with your profile.</h2>
-            <p>Onboarding takes a few minutes. Matching runs when you finish.</p>
+            <h2>{t('landing.ctaTitle')}</h2>
+            <p>{t('landing.ctaBody')}</p>
             <Link className="btn" to="/auth?mode=signup">
-              Get started
+              {t('common.getStarted')}
             </Link>
           </div>
         </section>

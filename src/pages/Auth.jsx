@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+﻿import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { supabase } from '../lib/supabase'
@@ -11,47 +12,48 @@ import { prefersReducedMotion } from '../lib/animations'
 
 gsap.registerPlugin(useGSAP)
 
-const SIDES = {
-  login: {
-    label: 'Sign in',
-    code: 'RETURN',
-    title: 'Continue your path',
-    points: ['Open saved matches', 'Update profile data', 'Resume where you left off'],
-  },
-  signup: {
-    label: 'Sign up',
-    code: 'BEGIN',
-    title: 'Open a new lane',
-    points: ['Build a living profile', 'Run first match cycle', 'Scholarships + jobs, ranked'],
-  },
-}
-
-function validate(mode, { fullName, email, password, confirm }) {
+function validate(mode, { fullName, email, password, confirm }, t) {
   const errors = {}
   if (mode === 'signup') {
-    if (!fullName.trim()) errors.fullName = 'Enter your full name.'
-    else if (fullName.trim().length < 2) errors.fullName = 'Name must be at least 2 characters.'
+    if (!fullName.trim()) errors.fullName = t('auth.errNameRequired')
+    else if (fullName.trim().length < 2) errors.fullName = t('auth.errNameShort')
   }
-  if (!email.trim()) errors.email = 'Email is required.'
-  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) errors.email = 'Enter a valid email address.'
-  if (!password) errors.password = 'Password is required.'
-  else if (password.length < 8) errors.password = 'Use at least 8 characters.'
-  else if (mode === 'signup' && !/[A-Za-z]/.test(password)) errors.password = 'Include at least one letter.'
-  else if (mode === 'signup' && !/[0-9]/.test(password)) errors.password = 'Include at least one number.'
+  if (!email.trim()) errors.email = t('auth.errEmailRequired')
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) errors.email = t('auth.errEmailInvalid')
+  if (!password) errors.password = t('auth.errPasswordRequired')
+  else if (password.length < 8) errors.password = t('auth.errPasswordShort')
+  else if (mode === 'signup' && !/[A-Za-z]/.test(password)) errors.password = t('auth.errPasswordLetter')
+  else if (mode === 'signup' && !/[0-9]/.test(password)) errors.password = t('auth.errPasswordNumber')
   if (mode === 'signup') {
-    if (!confirm) errors.confirm = 'Confirm your password.'
-    else if (confirm !== password) errors.confirm = 'Passwords do not match.'
+    if (!confirm) errors.confirm = t('auth.errConfirmRequired')
+    else if (confirm !== password) errors.confirm = t('auth.errPasswordMismatch')
   }
   return errors
 }
 
 export default function Auth() {
+  const { t } = useTranslation()
   const [params] = useSearchParams()
   const navigate = useNavigate()
   const { user, profile, loading } = useAuth()
   const root = useRef(null)
   const formRef = useRef(null)
   const floatTweens = useRef({})
+
+  const SIDES = {
+    login: {
+      label: t('auth.signIn'),
+      code: 'RETURN',
+      title: t('auth.continuePath'),
+      points: [t('auth.loginPoint1'), t('auth.loginPoint2'), t('auth.loginPoint3')],
+    },
+    signup: {
+      label: t('auth.signUp'),
+      code: 'BEGIN',
+      title: t('auth.openLane'),
+      points: [t('auth.signupPoint1'), t('auth.signupPoint2'), t('auth.signupPoint3')],
+    },
+  }
 
   const paramMode = params.get('mode') === 'signup' ? 'signup' : 'login'
   const [phase, setPhase] = useState('choose')
@@ -66,10 +68,10 @@ export default function Auth() {
   const [busy, setBusy] = useState(false)
   const [showPass, setShowPass] = useState(false)
 
-  const title = mode === 'signup' ? 'Create account' : 'Sign in'
+  const title = mode === 'signup' ? t('auth.createAccount') : t('auth.signIn')
   const errors = useMemo(
-    () => validate(mode, { fullName, email, password, confirm }),
-    [mode, fullName, email, password, confirm],
+    () => validate(mode, { fullName, email, password, confirm }, t),
+    [mode, fullName, email, password, confirm, t],
   )
   const hasErrors = Object.keys(errors).length > 0
   const activeSide = hover || (phase === 'form' ? mode : null)
@@ -105,11 +107,7 @@ export default function Auth() {
         gsap.set(panel, { clearProps: 'all' })
         return
       }
-      gsap.fromTo(
-        panel,
-        { opacity: 0, y: 24 },
-        { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' },
-      )
+      gsap.fromTo(panel, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' })
       gsap.fromTo(
         panel.querySelectorAll('.auth-field'),
         { opacity: 0, y: 12 },
@@ -127,15 +125,13 @@ export default function Auth() {
     if (!core) return
     floatTweens.current[side] = [
       gsap.to(core, { y: -10, duration: 1.1, yoyo: true, repeat: -1, ease: 'sine.inOut' }),
-      ring
-        ? gsap.to(ring, { rotate: '+=360', duration: 10, repeat: -1, ease: 'none' })
-        : null,
+      ring ? gsap.to(ring, { rotate: '+=360', duration: 10, repeat: -1, ease: 'none' }) : null,
     ].filter(Boolean)
   }
 
   function stopFloat(side) {
     const list = floatTweens.current[side] || []
-    list.forEach((t) => t.kill())
+    list.forEach((tw) => tw.kill())
     floatTweens.current[side] = []
     const el = root.current?.querySelector(`.orb-${side}`)
     if (!el) return
@@ -162,19 +158,15 @@ export default function Auth() {
     setHover(next)
     setTouched({})
     setMessage('')
-
-    // Always switch to the form — animation is optional polish
     if (prefersReducedMotion()) {
       setPhase('form')
       return
     }
-
     const choose = root.current?.querySelector('.auth-choose')
     if (!choose) {
       setPhase('form')
       return
     }
-
     gsap.to(choose, {
       opacity: 0,
       y: -12,
@@ -197,14 +189,14 @@ export default function Auth() {
   }
 
   function markTouched(field) {
-    setTouched((t) => ({ ...t, [field]: true }))
+    setTouched((prev) => ({ ...prev, [field]: true }))
   }
 
   async function onSubmit(e) {
     e.preventDefault()
     setTouched({ fullName: true, email: true, password: true, confirm: true })
     if (hasErrors) {
-      setMessage('Please fix the highlighted fields.')
+      setMessage(t('auth.errEmailRequired'))
       return
     }
     setBusy(true)
@@ -218,16 +210,13 @@ export default function Auth() {
         })
         if (error) throw error
         if (!data.session) {
-          setMessage('Check your email to confirm your account, then sign in.')
+          setMessage(t('auth.checkEmail'))
           setMode('login')
         } else {
           navigate('/onboarding')
         }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password,
-        })
+        const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
         if (error) throw error
         navigate('/dashboard')
       }
@@ -242,17 +231,14 @@ export default function Auth() {
     <PageBackdrop image="auth.jpg" className={`auth-page side-${activeSide || 'neutral'}`}>
       <div ref={root} className="auth-root">
         <SiteHeader />
-
         <main className="auth-gateway">
           {phase === 'choose' ? (
             <section className="auth-choose">
               <div className="auth-choose-copy">
                 <p className="eyebrow">Access</p>
-                <h1>Choose a portal.</h1>
-                <p className="lede">Hover a sphere. Click to open the form.</p>
+                <h1>{t('auth.choosePortal')}</h1>
               </div>
-
-              <div className="auth-orbs" role="group" aria-label="Sign in or sign up">
+              <div className="auth-orbs" role="group" aria-label={`${t('auth.signIn')} / ${t('auth.signUp')}`}>
                 {(['login', 'signup']).map((side) => {
                   const meta = SIDES[side]
                   const isHot = hover === side
@@ -281,7 +267,7 @@ export default function Auth() {
                             <li key={p}>{p}</li>
                           ))}
                         </ul>
-                        <span className="orb-cta">Click to continue</span>
+                        <span className="orb-cta">{t('common.continue')}</span>
                       </span>
                     </button>
                   )
@@ -291,17 +277,16 @@ export default function Auth() {
           ) : (
             <section className="auth-form-stage" ref={formRef}>
               <button type="button" className="auth-back" onClick={backToChoose}>
-                ← Portals
+                ← {t('auth.backToChoose')}
               </button>
               <div className="auth-card">
                 <p className="eyebrow">{SIDES[mode].code}</p>
                 <h1>{title}</h1>
                 <p className="muted">{SIDES[mode].title}</p>
-
                 <form className="stack-form" onSubmit={onSubmit} noValidate>
                   {mode === 'signup' ? (
                     <label className={`auth-field ${touched.fullName && errors.fullName ? 'invalid' : ''}`}>
-                      Full name
+                      {t('auth.fullName')}
                       <input
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
@@ -309,14 +294,11 @@ export default function Auth() {
                         autoComplete="name"
                         aria-invalid={Boolean(touched.fullName && errors.fullName)}
                       />
-                      {touched.fullName && errors.fullName ? (
-                        <span className="field-error">{errors.fullName}</span>
-                      ) : null}
+                      {touched.fullName && errors.fullName ? <span className="field-error">{errors.fullName}</span> : null}
                     </label>
                   ) : null}
-
                   <label className={`auth-field ${touched.email && errors.email ? 'invalid' : ''}`}>
-                    Email
+                    {t('auth.email')}
                     <input
                       type="email"
                       value={email}
@@ -327,9 +309,8 @@ export default function Auth() {
                     />
                     {touched.email && errors.email ? <span className="field-error">{errors.email}</span> : null}
                   </label>
-
                   <label className={`auth-field ${touched.password && errors.password ? 'invalid' : ''}`}>
-                    Password
+                    {t('auth.password')}
                     <div className="password-field">
                       <input
                         type={showPass ? 'text' : 'password'}
@@ -340,20 +321,14 @@ export default function Auth() {
                         aria-invalid={Boolean(touched.password && errors.password)}
                       />
                       <button type="button" className="ghost-toggle" onClick={() => setShowPass((v) => !v)}>
-                        {showPass ? 'Hide' : 'Show'}
+                        {showPass ? t('auth.hidePassword') : t('auth.showPassword')}
                       </button>
                     </div>
-                    {touched.password && errors.password ? (
-                      <span className="field-error">{errors.password}</span>
-                    ) : null}
-                    {mode === 'signup' ? (
-                      <span className="field-hint">At least 8 characters, with a letter and a number.</span>
-                    ) : null}
+                    {touched.password && errors.password ? <span className="field-error">{errors.password}</span> : null}
                   </label>
-
                   {mode === 'signup' ? (
                     <label className={`auth-field ${touched.confirm && errors.confirm ? 'invalid' : ''}`}>
-                      Confirm password
+                      {t('auth.confirmPassword')}
                       <input
                         type={showPass ? 'text' : 'password'}
                         value={confirm}
@@ -362,30 +337,22 @@ export default function Auth() {
                         autoComplete="new-password"
                         aria-invalid={Boolean(touched.confirm && errors.confirm)}
                       />
-                      {touched.confirm && errors.confirm ? (
-                        <span className="field-error">{errors.confirm}</span>
-                      ) : null}
+                      {touched.confirm && errors.confirm ? <span className="field-error">{errors.confirm}</span> : null}
                     </label>
                   ) : null}
-
-                  {message ? (
-                    <p className={`form-message ${hasErrors && message.includes('fix') ? 'warn' : ''}`}>{message}</p>
-                  ) : null}
-
+                  {message ? <p className="form-message">{message}</p> : null}
                   <button className="btn auth-field" type="submit" disabled={busy}>
-                    {busy ? 'Please wait…' : mode === 'signup' ? 'Create account' : 'Sign in'}
+                    {busy ? t('common.loading') : mode === 'signup' ? t('auth.submitSignUp') : t('auth.submitSignIn')}
                   </button>
                 </form>
-
                 <p className="legal-inline">
-                  By continuing you agree to our <Link to="/terms">Terms</Link> and{' '}
-                  <Link to="/privacy">Privacy Policy</Link>.
+                  {t('auth.agreePrefix')} <Link to="/terms">{t('nav.terms')}</Link> {t('auth.and')}{' '}
+                  <Link to="/privacy">{t('nav.privacy')}</Link>.
                 </p>
               </div>
             </section>
           )}
         </main>
-
         <SiteFooter />
       </div>
     </PageBackdrop>

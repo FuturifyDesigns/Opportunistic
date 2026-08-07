@@ -216,6 +216,10 @@ export default function Privacy() {
                 View Terms of Use →
               </Link>
             </div>
+            <p className="muted" style={{ marginTop: '0.75rem', maxWidth: '48ch' }}>
+              Legal pages stay in English for accuracy. UI chrome follows your language — use the language control in
+              the header or footer (includes Setswana and 100+ languages).
+            </p>
           </div>
         </section>
 

@@ -1,36 +1,44 @@
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { openCookiePreferences } from '../lib/consent'
+import LanguageSwitcher from './LanguageSwitcher'
 
 const year = new Date().getFullYear()
 
 export default function SiteFooter() {
+  const { t } = useTranslation()
+
   return (
     <footer className="site-footer">
       <div className="container footer-grid">
         <div className="footer-brand">
-          <Link to="/" className="footer-logo" aria-label="Opportunistic home">
+          <Link to="/" className="footer-logo" aria-label={`${t('common.brand')} ${t('common.home')}`}>
             <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" width="44" height="44" />
             <span>
-              Opportunistic<sup>™</sup>
+              {t('common.brand')}
+              <sup>™</sup>
             </span>
           </Link>
-          <p>Scholarships and jobs matched to your qualifications — with reasons on every card.</p>
+          <p>{t('footer.tagline')}</p>
+          <div className="footer-lang">
+            <LanguageSwitcher />
+          </div>
         </div>
 
         <nav className="footer-nav" aria-label="Footer">
           <div className="footer-col">
-            <p className="footer-label">Product</p>
-            <Link to="/how-it-works">How it works</Link>
-            <Link to="/features">Features</Link>
-            <Link to="/about">About</Link>
+            <p className="footer-label">{t('nav.product')}</p>
+            <Link to="/how-it-works">{t('nav.howItWorks')}</Link>
+            <Link to="/features">{t('nav.features')}</Link>
+            <Link to="/about">{t('nav.about')}</Link>
           </div>
           <div className="footer-col">
-            <p className="footer-label">Legal</p>
-            <Link to="/privacy?section=overview">Privacy</Link>
-            <Link to="/privacy?section=cookies">Cookies</Link>
-            <Link to="/terms?section=role">Terms</Link>
+            <p className="footer-label">{t('nav.legal')}</p>
+            <Link to="/privacy?section=overview">{t('nav.privacy')}</Link>
+            <Link to="/privacy?section=cookies">{t('nav.cookies')}</Link>
+            <Link to="/terms?section=role">{t('nav.terms')}</Link>
             <button type="button" className="footer-linkish" onClick={() => openCookiePreferences()}>
-              Cookie settings
+              {t('nav.cookieSettings')}
             </button>
           </div>
         </nav>
@@ -38,10 +46,11 @@ export default function SiteFooter() {
 
       <div className="container footer-bar">
         <p className="footer-copy">
-          © {year} Opportunistic<sup>™</sup>. All rights reserved.
+          © {year} {t('common.brand')}
+          <sup>™</sup>. {t('common.allRights')}
         </p>
         <p className="footer-built">
-          Built by{' '}
+          {t('common.builtBy')}{' '}
           <a href="https://futurifydesigns.com" target="_blank" rel="noreferrer">
             Futurify Designs
           </a>
@@ -49,11 +58,7 @@ export default function SiteFooter() {
       </div>
 
       <div className="container footer-disclaimer">
-        <p>
-          Opportunistic™ surfaces third-party listings and is not the issuer of any scholarship or job. Verify deadlines
-          and eligibility on the source site. We apply a GDPR-style privacy baseline globally; cookie and analytics tools
-          load only with your consent.
-        </p>
+        <p>{t('footer.disclaimer')}</p>
       </div>
     </footer>
   )

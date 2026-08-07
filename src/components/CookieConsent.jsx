@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useConsent } from '../context/ConsentContext'
 
 export default function CookieConsent() {
+  const { t } = useTranslation()
   const {
     consent,
     bannerOpen,
@@ -35,20 +37,19 @@ export default function CookieConsent() {
   return (
     <>
       {bannerOpen ? (
-        <div className="cookie-banner" role="dialog" aria-label="Cookie consent" aria-live="polite">
+        <div className="cookie-banner" role="dialog" aria-label={t('cookies.title')} aria-live="polite">
           <div className="cookie-banner-inner">
             <div className="cookie-banner-copy">
-              <p className="jarvis-caption">Privacy controls</p>
-              <h2 className="cookie-title">Cookies & data use</h2>
+              <p className="jarvis-caption">{t('cookies.caption')}</p>
+              <h2 className="cookie-title">{t('cookies.title')}</h2>
               <p>
-                We use necessary cookies to keep you signed in and remember this choice. Optional cookies help preferences,
-                analytics, and marketing — only if you allow them. Aligns with GDPR-style rights worldwide.{' '}
-                <Link to="/privacy?section=cookies">Cookie policy</Link>
+                {t('cookies.body')}{' '}
+                <Link to="/privacy?section=cookies">{t('cookies.policyLink')}</Link>
               </p>
             </div>
             <div className="cookie-banner-actions">
               <button type="button" className="btn btn-ghost btn-sm" onClick={rejectExtras}>
-                Necessary only
+                {t('cookies.necessaryOnly')}
               </button>
               <button
                 type="button"
@@ -58,10 +59,10 @@ export default function CookieConsent() {
                   setBannerOpen(false)
                 }}
               >
-                Customize
+                {t('cookies.customize')}
               </button>
               <button type="button" className="btn btn-sm" onClick={acceptEverything}>
-                Accept all
+                {t('cookies.acceptAll')}
               </button>
             </div>
           </div>
@@ -77,18 +78,16 @@ export default function CookieConsent() {
             aria-labelledby="cookie-prefs-title"
             onClick={(e) => e.stopPropagation()}
           >
-            <p className="jarvis-caption">Preferences</p>
-            <h2 id="cookie-prefs-title">Cookie settings</h2>
-            <p className="muted">
-              Change anytime. Necessary cookies can’t be turned off — they power auth, security, and storing this choice.
-            </p>
+            <p className="jarvis-caption">{t('cookies.prefsCaption')}</p>
+            <h2 id="cookie-prefs-title">{t('cookies.prefsTitle')}</h2>
+            <p className="muted">{t('cookies.prefsBody')}</p>
 
             <div className="cookie-cats">
               <label className="cookie-cat locked">
                 <input type="checkbox" checked disabled readOnly />
                 <span>
-                  <strong>Necessary</strong>
-                  <em>Sign-in session, security, consent record</em>
+                  <strong>{t('cookies.necessary')}</strong>
+                  <em>{t('cookies.necessaryDesc')}</em>
                 </span>
               </label>
               <label className="cookie-cat">
@@ -98,8 +97,8 @@ export default function CookieConsent() {
                   onChange={(e) => setDraft((d) => ({ ...d, preferences: e.target.checked }))}
                 />
                 <span>
-                  <strong>Preferences</strong>
-                  <em>Remember UI choices beyond the consent cookie</em>
+                  <strong>{t('cookies.preferences')}</strong>
+                  <em>{t('cookies.preferencesDesc')}</em>
                 </span>
               </label>
               <label className="cookie-cat">
@@ -109,8 +108,8 @@ export default function CookieConsent() {
                   onChange={(e) => setDraft((d) => ({ ...d, analytics: e.target.checked }))}
                 />
                 <span>
-                  <strong>Analytics</strong>
-                  <em>Understand usage (loaded only after you opt in)</em>
+                  <strong>{t('cookies.analytics')}</strong>
+                  <em>{t('cookies.analyticsDesc')}</em>
                 </span>
               </label>
               <label className="cookie-cat">
@@ -120,15 +119,15 @@ export default function CookieConsent() {
                   onChange={(e) => setDraft((d) => ({ ...d, marketing: e.target.checked }))}
                 />
                 <span>
-                  <strong>Marketing</strong>
-                  <em>Ads / remarketing tags — never without consent</em>
+                  <strong>{t('cookies.marketing')}</strong>
+                  <em>{t('cookies.marketingDesc')}</em>
                 </span>
               </label>
             </div>
 
             <div className="cookie-modal-actions">
               <button type="button" className="btn btn-ghost" onClick={rejectExtras}>
-                Necessary only
+                {t('cookies.necessaryOnly')}
               </button>
               <button
                 type="button"
@@ -141,12 +140,12 @@ export default function CookieConsent() {
                   })
                 }
               >
-                Save choices
+                {t('cookies.saveChoices')}
               </button>
             </div>
             <p className="cookie-legal-note">
-              Details: <Link to="/privacy?section=cookies">Privacy · Cookies</Link> ·{' '}
-              <Link to="/privacy?section=rights">Your rights</Link>
+              {t('cookies.details')}: <Link to="/privacy?section=cookies">{t('nav.privacy')} · {t('nav.cookies')}</Link> ·{' '}
+              <Link to="/privacy?section=rights">{t('legal.privacyTitle')}</Link>
             </p>
           </div>
         </div>

@@ -1,16 +1,19 @@
 import { NavLink } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 /** Futuristic glitch / synth Get started mark */
 export default function GetStartedLogo({ onClick }) {
+  const { t } = useTranslation()
   const src = `${import.meta.env.BASE_URL}logo.png`
+  const label = t('common.getStarted')
 
   return (
     <NavLink
       to="/auth?mode=signup"
       className="nav-start-logo"
       onClick={onClick}
-      aria-label="Get started"
-      title="Get started"
+      aria-label={label}
+      title={label}
     >
       <span className="glitch-mark" aria-hidden="true">
         <img className="glitch-base" src={src} alt="" width="52" height="52" />
