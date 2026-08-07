@@ -366,11 +366,6 @@ export default function Onboarding() {
 
           <aside className="ob-assistant jarvis-screen">
             <div className="jarvis-chrome">
-              <div className="jarvis-dots" aria-hidden="true">
-                <span />
-                <span />
-                <span />
-              </div>
               <p className="jarvis-title">OPPORTUNISTIC // GUIDE</p>
               <p className="jarvis-status">STEP {step + 1}</p>
             </div>

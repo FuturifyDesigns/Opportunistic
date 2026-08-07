@@ -1380,28 +1380,6 @@ a.btn-auth {
   background: #f7f8fa;
 }
 
-.jarvis-dots {
-  display: flex;
-  gap: 0.35rem;
-}
-
-.jarvis-dots span {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #c5cad3;
-}
-
-.jarvis-dots span:nth-child(1) {
-  background: #e57373;
-}
-.jarvis-dots span:nth-child(2) {
-  background: #ffd54f;
-}
-.jarvis-dots span:nth-child(3) {
-  background: #81c784;
-}
-
 .jarvis-title {
   margin: 0;
   font-size: 0.7rem;

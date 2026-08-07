@@ -141,11 +141,6 @@ export default function HowItWorksDemo() {
 
       <div className="jarvis-screen" aria-live="polite">
         <div className="jarvis-chrome">
-          <div className="jarvis-dots" aria-hidden="true">
-            <span />
-            <span />
-            <span />
-          </div>
           <p className="jarvis-title">OPPORTUNISTIC // MATCH CONSOLE</p>
           <p className="jarvis-status">{PHASES[phase].label}</p>
         </div>
