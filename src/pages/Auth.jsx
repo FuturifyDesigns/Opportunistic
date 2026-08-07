@@ -108,6 +108,7 @@ export default function Auth() {
   const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
   const [showPass, setShowPass] = useState(false)
+  const [oauthBusy, setOauthBusy] = useState(false)
 
   const title = mode === 'signup' ? t('auth.createAccount') : t('auth.signIn')
   const errors = useMemo(
@@ -121,6 +122,35 @@ export default function Auth() {
   useEffect(() => {
     document.title = `${title} — Opportunistic`
   }, [title])
+
+  useEffect(() => {
+    const err =
+      params.get('error_description') ||
+      params.get('error') ||
+      (typeof window !== 'undefined'
+        ? new URLSearchParams(window.location.hash.replace(/^#/, '')).get('error_description')
+        : null)
+    if (err) {
+      const msg = decodeURIComponent(err.replace(/\+/g, ' '))
+      setMessage(msg)
+      toast.error(msg)
+    }
+  }, [params, toast])
+
+  useEffect(() => {
+    function clearOauthBusy() {
+      setOauthBusy(false)
+    }
+    function onPageShow(e) {
+      if (e.persisted) clearOauthBusy()
+    }
+    window.addEventListener('pageshow', onPageShow)
+    window.addEventListener('focus', clearOauthBusy)
+    return () => {
+      window.removeEventListener('pageshow', onPageShow)
+      window.removeEventListener('focus', clearOauthBusy)
+    }
+  }, [])
 
   useEffect(() => {
     if (loading || !user) return
@@ -278,6 +308,62 @@ export default function Auth() {
     }
   }
 
+  async function continueWithGoogle() {
+    if (oauthBusy || busy) return
+    setOauthBusy(true)
+    setMessage('')
+    try {
+      const redirectTo = `${window.location.origin}/auth`
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'select_account',
+          },
+        },
+      })
+      if (error) throw error
+    } catch (err) {
+      const msg = err.message || t('auth.googleError')
+      setMessage(msg)
+      toast.error(msg)
+      setOauthBusy(false)
+    }
+  }
+
+  function GoogleButton({ className = '' }) {
+    return (
+      <button
+        type="button"
+        className={`btn-google ${className}`.trim()}
+        onClick={continueWithGoogle}
+        disabled={oauthBusy || busy}
+      >
+        <svg className="btn-google-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            fill="#4285F4"
+            d="M23.49 12.27c0-.79-.07-1.54-.2-2.27H12v4.3h6.44a5.5 5.5 0 0 1-2.39 3.61v3h3.86c2.26-2.08 3.58-5.15 3.58-8.64Z"
+          />
+          <path
+            fill="#34A853"
+            d="M12 24c3.24 0 5.96-1.07 7.95-2.9l-3.86-3a7.2 7.2 0 0 1-10.78-3.78H1.32v3.09A12 12 0 0 0 12 24Z"
+          />
+          <path
+            fill="#FBBC05"
+            d="M5.31 14.32A7.2 7.2 0 0 1 4.9 12c0-.8.14-1.59.4-2.32V6.59H1.32A12 12 0 0 0 0 12c0 1.94.46 3.77 1.32 5.41l3.99-3.09Z"
+          />
+          <path
+            fill="#EA4335"
+            d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0 7.31 0 3.25 2.69 1.32 6.59l3.99 3.09A7.18 7.18 0 0 1 12 4.75Z"
+          />
+        </svg>
+        <span>{oauthBusy ? t('auth.googleRedirecting') : t('auth.continueWithGoogle')}</span>
+      </button>
+    )
+  }
+
   return (
     <PageBackdrop image="auth.jpg" className={`auth-page side-${activeSide || 'neutral'}`}>
       <div ref={root} className="auth-root">
@@ -334,6 +420,10 @@ export default function Auth() {
                 <p className="eyebrow">{SIDES[mode].code}</p>
                 <h1>{title}</h1>
                 <p className="muted">{SIDES[mode].title}</p>
+                <GoogleButton className="auth-field" />
+                <p className="auth-divider">
+                  <span>{t('auth.orEmail')}</span>
+                </p>
                 <form className="stack-form" onSubmit={onSubmit} noValidate>
                   {mode === 'signup' ? (
                     <label className={`auth-field ${touched.fullName && errors.fullName ? 'invalid' : ''}`}>

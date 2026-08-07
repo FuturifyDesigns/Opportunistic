@@ -29,6 +29,7 @@ export default function Intro() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const root = useRef(null)
+  const sweepRef = useRef(null)
   const [ready, setReady] = useState(false)
   const [exiting, setExiting] = useState(false)
   const [logs, setLogs] = useState([])
@@ -63,36 +64,57 @@ export default function Intro() {
         window.clearInterval(id)
         setReady(true)
       }
-    }, 480)
+    }, 520)
     return () => window.clearInterval(id)
   }, [t])
 
   useGSAP(
     () => {
-      if (prefersReducedMotion()) return
+      if (prefersReducedMotion()) {
+        if (sweepRef.current) gsap.set(sweepRef.current, { opacity: 0.35 })
+        return
+      }
+
       const tl = gsap.timeline({ defaults: { ease: 'power2.out' } })
-      tl.from('.intro-veil', { opacity: 0, duration: 0.6 })
-        .from('.intro-mark-wrap', { scale: 0.72, opacity: 0, duration: 0.85 }, '-=0.2')
-        .from('.intro-rings span', { scale: 0.6, opacity: 0, stagger: 0.1, duration: 0.55 }, '-=0.55')
-        .from('.intro-word', { y: 24, opacity: 0, duration: 0.5 }, '-=0.25')
-        .from('.intro-log', { y: 16, opacity: 0, duration: 0.4 }, '-=0.2')
-        .from('.intro-enter', { y: 12, opacity: 0, duration: 0.35 }, '-=0.05')
+      tl.from('.intro-veil', { opacity: 0, duration: 0.7 })
+        .from('.intro-core', { scale: 0.82, opacity: 0, duration: 0.9 }, '-=0.25')
+        .from('.intro-rings span:not(.intro-sweep)', { scale: 0.7, opacity: 0, stagger: 0.1, duration: 0.6 }, '-=0.6')
+        .from('.intro-word', { y: 20, opacity: 0, duration: 0.55 }, '-=0.3')
+        .from('.intro-log', { y: 14, opacity: 0, duration: 0.45 }, '-=0.2')
+        .from('.intro-enter', { y: 10, opacity: 0, duration: 0.4 }, '-=0.1')
 
       gsap.to('.intro-rings .r2', {
         rotate: 360,
-        duration: 42,
+        duration: 48,
         repeat: -1,
         ease: 'none',
       })
       gsap.to('.intro-rings .r3', {
         rotate: -360,
-        duration: 64,
+        duration: 72,
         repeat: -1,
         ease: 'none',
       })
+
+      if (sweepRef.current) {
+        gsap.set(sweepRef.current, {
+          opacity: 0.72,
+          rotate: 0,
+          force3D: true,
+          transformOrigin: '50% 50%',
+        })
+        gsap.to(sweepRef.current, {
+          rotate: 360,
+          duration: 6.5,
+          repeat: -1,
+          ease: 'none',
+          force3D: true,
+        })
+      }
+
       gsap.to('.intro-mark', {
-        scale: 1.04,
-        duration: 2.4,
+        scale: 1.035,
+        duration: 2.6,
         yoyo: true,
         repeat: -1,
         ease: 'sine.inOut',
@@ -115,9 +137,9 @@ export default function Intro() {
     }
 
     const tl = gsap.timeline({ onComplete: go })
-    tl.to('.intro-enter, .intro-log, .intro-word', { opacity: 0, y: -12, duration: 0.28, stagger: 0.04 })
-      .to('.intro-rings span', { scale: 1.35, opacity: 0, duration: 0.55, stagger: 0.05 }, '-=0.1')
-      .to('.intro-mark-wrap', { scale: 1.5, opacity: 0, duration: 0.55, ease: 'power2.in' }, '-=0.4')
+    tl.to('.intro-enter, .intro-log, .intro-word', { opacity: 0, y: -14, duration: 0.3, stagger: 0.04 })
+      .to('.intro-rings span', { scale: 1.4, opacity: 0, duration: 0.55, stagger: 0.04 }, '-=0.1')
+      .to('.intro-core', { scale: 1.45, opacity: 0, duration: 0.55, ease: 'power2.in' }, '-=0.4')
       .to('.intro-veil', { opacity: 0, duration: 0.35 }, '-=0.2')
   }
 
@@ -129,21 +151,22 @@ export default function Intro() {
       <div className="intro-veil" aria-hidden="true" />
       <button type="button" className="intro-hit" onClick={enter} aria-label={t('intro.enter')}>
         <div className="intro-stage">
-          <div className="intro-rings" aria-hidden="true">
-            <span className="r1" />
-            <span className="r2" />
-            <span className="r3" />
-            <span className="intro-sweep" />
-          </div>
-
-          <div className="intro-mark-wrap">
-            <img
-              className="intro-mark"
-              src={`${import.meta.env.BASE_URL}logo.png`}
-              alt={t('common.brand')}
-              width="160"
-              height="160"
-            />
+          <div className="intro-core">
+            <div className="intro-rings" aria-hidden="true">
+              <span className="r1" />
+              <span className="r2" />
+              <span className="r3" />
+              <span className="intro-sweep" ref={sweepRef} />
+            </div>
+            <div className="intro-mark-wrap">
+              <img
+                className="intro-mark"
+                src={`${import.meta.env.BASE_URL}logo.png`}
+                alt={t('common.brand')}
+                width="200"
+                height="200"
+              />
+            </div>
           </div>
 
           <p className="intro-word">{t('common.brand')}</p>
@@ -159,10 +182,6 @@ export default function Intro() {
             {ready ? t('intro.enterHint') : t('intro.booting')}
           </span>
         </div>
-      </button>
-
-      <button type="button" className="intro-skip" onClick={enter}>
-        {t('intro.skip')}
       </button>
     </div>
   )
