@@ -11,8 +11,10 @@ import { useToast } from '../context/ToastContext'
 import SiteHeader from '../components/SiteHeader'
 import PageBackdrop from '../components/PageBackdrop'
 import SkillPicker from '../components/SkillPicker'
+import MatchBeacon from '../components/MatchBeacon'
 import { prefersReducedMotion } from '../lib/animations'
 import { normalizeSkillName } from '../lib/skillCatalog'
+import { validateOnboardingStep } from '../lib/fieldValidation'
 
 gsap.registerPlugin(useGSAP)
 
@@ -33,7 +35,11 @@ export default function Onboarding() {
   const [skills, setSkills] = useState([])
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [fieldErrors, setFieldErrors] = useState({})
+  const [touched, setTouched] = useState({})
   const [processLogs, setProcessLogs] = useState([])
+  const [beaconOpen, setBeaconOpen] = useState(false)
+  const [beaconDone, setBeaconDone] = useState(false)
 
   const GUIDE = useMemo(
     () => [
@@ -73,6 +79,10 @@ export default function Onboarding() {
 
   const guide = GUIDE[step]
   const progress = ((step + 1) / GUIDE.length) * 100
+  const formData = useMemo(
+    () => ({ country, fullName, headline, qualifications, skills }),
+    [country, fullName, headline, qualifications, skills],
+  )
 
   const feedPreview = useMemo(() => {
     const items = [t('onboarding.feedCountry', { country })]
@@ -91,13 +101,31 @@ export default function Onboarding() {
     return items.slice(0, 6)
   }, [country, fullName, headline, qualifications, skills, t, i18n.language])
 
+  const summary = useMemo(() => {
+    const qualCount = qualifications.filter((q) => q.field.trim()).length
+    const skillCount = skills.filter((s) => s.skill_name.trim()).length
+    const goalLabel =
+      goal === 'scholarships'
+        ? t('onboarding.goalScholarships')
+        : goal === 'jobs'
+          ? t('onboarding.goalJobs')
+          : t('onboarding.goalBoth')
+    return [
+      { label: t('onboarding.summaryCountry'), value: country },
+      { label: t('onboarding.summaryName'), value: fullName.trim() || '—' },
+      { label: t('onboarding.summaryGoal'), value: goalLabel },
+      { label: t('onboarding.summaryQuals'), value: String(qualCount) },
+      { label: t('onboarding.summarySkills'), value: String(skillCount) },
+    ]
+  }, [country, fullName, goal, qualifications, skills, t])
+
   useGSAP(
     () => {
       if (prefersReducedMotion()) return
       gsap.fromTo(
         '.ob-panel, .ob-assistant',
-        { opacity: 0, y: 18 },
-        { opacity: 1, y: 0, duration: 0.45, stagger: 0.06, ease: 'power2.out' },
+        { opacity: 0, y: 16 },
+        { opacity: 1, y: 0, duration: 0.4, stagger: 0.05, ease: 'power2.out' },
       )
     },
     { scope: root, dependencies: [step], revertOnUpdate: true },
@@ -105,20 +133,64 @@ export default function Onboarding() {
 
   function updateQual(i, key, value) {
     setQualifications((rows) => rows.map((row, idx) => (idx === i ? { ...row, [key]: value } : row)))
+    setFieldErrors((prev) => {
+      const next = { ...prev }
+      delete next[`qualField_${i}`]
+      delete next[`qualInstitution_${i}`]
+      delete next[`qualYear_${i}`]
+      delete next.qualifications
+      return next
+    })
   }
 
-  function canContinue() {
-    if (step === 0) return Boolean(country)
-    if (step === 1) return fullName.trim().length >= 2
-    if (step === 2) return qualifications.some((q) => q.field.trim())
-    if (step === 3) return skills.some((s) => s.skill_name.trim())
-    return true
+  function markTouched(key) {
+    setTouched((prev) => ({ ...prev, [key]: true }))
+  }
+
+  function validateCurrent(showAll = false) {
+    const { ok, errors } = validateOnboardingStep(step, formData)
+    setFieldErrors(errors)
+    if (showAll) {
+      const keys = Object.keys(errors)
+      if (keys.length) {
+        setTouched((prev) => {
+          const next = { ...prev }
+          keys.forEach((k) => {
+            next[k] = true
+          })
+          return next
+        })
+      }
+    }
+    return ok
+  }
+
+  function errMsg(key) {
+    const code = fieldErrors[key]
+    if (!code) return null
+    if (!(touched[key] || touched._attempt)) return null
+    return t(`onboarding.${code}`)
+  }
+
+  function goNext() {
+    setTouched((prev) => ({ ...prev, _attempt: true }))
+    if (!validateCurrent(true)) {
+      setError(t('onboarding.errFixFields'))
+      return
+    }
+    setError('')
+    setTouched({})
+    setFieldErrors({})
+    setStep((s) => s + 1)
   }
 
   async function finish() {
     setBusy(true)
     setError('')
+    setBeaconDone(false)
+    setBeaconOpen(true)
     setProcessLogs([])
+
     const lines = [
       t('onboarding.logLock'),
       t('onboarding.logCountry', { country }),
@@ -128,9 +200,17 @@ export default function Onboarding() {
       t('onboarding.logScoring'),
       t('onboarding.logPush'),
     ]
-    lines.forEach((line, i) => {
-      window.setTimeout(() => setProcessLogs((prev) => [...prev, line]), i * 380)
-    })
+
+    let lineTimer = null
+    let i = 0
+    lineTimer = window.setInterval(() => {
+      if (i >= lines.length) {
+        window.clearInterval(lineTimer)
+        return
+      }
+      setProcessLogs((prev) => [...prev, lines[i]])
+      i += 1
+    }, 420)
 
     try {
       const bio =
@@ -182,13 +262,20 @@ export default function Onboarding() {
 
       await runMatchingForUser(user.id)
       await refreshProfile()
+
+      window.clearInterval(lineTimer)
+      setProcessLogs(lines)
+      setBeaconDone(true)
       toast.success(t('onboarding.doneToast'))
-      window.setTimeout(() => navigate('/dashboard'), Math.max(2800, lines.length * 380))
+      window.setTimeout(() => navigate('/dashboard'), prefersReducedMotion() ? 700 : 2200)
     } catch (err) {
+      window.clearInterval(lineTimer)
       const msg = err.message || t('onboarding.saveError')
       setError(msg)
       toast.error(msg)
       setBusy(false)
+      setBeaconOpen(false)
+      setBeaconDone(false)
     }
   }
 
@@ -203,27 +290,38 @@ export default function Onboarding() {
         <main className="container onboarding-layout">
           <section className="ob-panel glass-panel">
             <div className="ob-progress-head">
-              <p className="eyebrow">
-                {t('onboarding.setupEyebrow', { step: step + 1, total: GUIDE.length })}
-              </p>
-              <div className="progress">
+              <div className="ob-progress-meta">
+                <p className="eyebrow">
+                  {t('onboarding.setupEyebrow', { step: step + 1, total: GUIDE.length })}
+                </p>
+                <span className="ob-step-label">{guide.id}</span>
+              </div>
+              <div className="progress ob-progress">
                 <div style={{ width: `${progress}%` }} />
               </div>
             </div>
 
-            <h1>{guide.title}</h1>
+            <h1 key={guide.id}>{guide.title}</h1>
 
             {step === 0 && (
               <div className="stack-form">
-                <label>
+                <label className={errMsg('country') ? 'invalid' : ''}>
                   {t('onboarding.countryLabel')}
-                  <select value={country} onChange={(e) => setCountry(e.target.value)}>
+                  <select
+                    value={country}
+                    onChange={(e) => {
+                      setCountry(e.target.value)
+                      setFieldErrors((p) => ({ ...p, country: undefined }))
+                    }}
+                    onBlur={() => markTouched('country')}
+                  >
                     {COUNTRIES.map((c) => (
                       <option key={c} value={c}>
                         {c}
                       </option>
                     ))}
                   </select>
+                  {errMsg('country') ? <span className="field-error">{errMsg('country')}</span> : null}
                 </label>
                 <div className="choice-pills" role="group" aria-label={t('onboarding.goalAria')}>
                   {[
@@ -246,22 +344,40 @@ export default function Onboarding() {
 
             {step === 1 && (
               <div className="stack-form">
-                <label>
+                <label className={errMsg('fullName') ? 'invalid' : ''}>
                   {t('onboarding.fullName')}
                   <input
                     value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
+                    onChange={(e) => {
+                      setFullName(e.target.value)
+                      setFieldErrors((p) => ({ ...p, fullName: undefined }))
+                    }}
+                    onBlur={() => {
+                      markTouched('fullName')
+                      validateCurrent()
+                    }}
                     placeholder={t('onboarding.fullNamePlaceholder')}
                     autoComplete="name"
+                    aria-invalid={Boolean(errMsg('fullName'))}
                   />
+                  {errMsg('fullName') ? <span className="field-error">{errMsg('fullName')}</span> : null}
                 </label>
-                <label>
+                <label className={errMsg('headline') ? 'invalid' : ''}>
                   {t('onboarding.headline')} <span className="optional">{t('onboarding.optional')}</span>
                   <input
                     value={headline}
-                    onChange={(e) => setHeadline(e.target.value)}
+                    onChange={(e) => {
+                      setHeadline(e.target.value)
+                      setFieldErrors((p) => ({ ...p, headline: undefined }))
+                    }}
+                    onBlur={() => {
+                      markTouched('headline')
+                      validateCurrent()
+                    }}
                     placeholder={t('onboarding.headlinePlaceholder')}
+                    aria-invalid={Boolean(errMsg('headline'))}
                   />
+                  {errMsg('headline') ? <span className="field-error">{errMsg('headline')}</span> : null}
                 </label>
               </div>
             )}
@@ -269,7 +385,7 @@ export default function Onboarding() {
             {step === 2 && (
               <div className="stack-form">
                 {qualifications.map((q, i) => (
-                  <div className="card-lite" key={i}>
+                  <div className="ob-qual-card" key={i}>
                     <div className="inline-fields">
                       <label>
                         {t('onboarding.qualType')}
@@ -278,30 +394,53 @@ export default function Onboarding() {
                           <option value="certificate">{t('onboarding.qualCertificate')}</option>
                         </select>
                       </label>
-                      <label>
+                      <label className={errMsg(`qualYear_${i}`) ? 'invalid' : ''}>
                         {t('onboarding.qualYear')}
-                        <input type="number" value={q.year} onChange={(e) => updateQual(i, 'year', e.target.value)} />
+                        <input
+                          type="number"
+                          value={q.year}
+                          onChange={(e) => updateQual(i, 'year', e.target.value)}
+                          onBlur={() => markTouched(`qualYear_${i}`)}
+                        />
+                        {errMsg(`qualYear_${i}`) ? (
+                          <span className="field-error">{errMsg(`qualYear_${i}`)}</span>
+                        ) : null}
                       </label>
                     </div>
-                    <label>
+                    <label className={errMsg(`qualField_${i}`) || errMsg('qualifications') ? 'invalid' : ''}>
                       {t('onboarding.qualField')}
                       <input
                         value={q.field}
                         onChange={(e) => updateQual(i, 'field', e.target.value)}
+                        onBlur={() => markTouched(`qualField_${i}`)}
                         placeholder={t('onboarding.qualFieldPlaceholder')}
                       />
+                      {errMsg(`qualField_${i}`) ? (
+                        <span className="field-error">{errMsg(`qualField_${i}`)}</span>
+                      ) : null}
+                      {!errMsg(`qualField_${i}`) && errMsg('qualifications') && i === 0 ? (
+                        <span className="field-error">{errMsg('qualifications')}</span>
+                      ) : null}
                     </label>
-                    <label>
+                    <label className={errMsg(`qualInstitution_${i}`) ? 'invalid' : ''}>
                       {t('onboarding.qualInstitution')} <span className="optional">{t('onboarding.optional')}</span>
                       <input
                         value={q.institution}
                         onChange={(e) => updateQual(i, 'institution', e.target.value)}
+                        onBlur={() => markTouched(`qualInstitution_${i}`)}
                         placeholder={t('onboarding.qualInstitutionPlaceholder')}
                       />
+                      {errMsg(`qualInstitution_${i}`) ? (
+                        <span className="field-error">{errMsg(`qualInstitution_${i}`)}</span>
+                      ) : null}
                     </label>
                   </div>
                 ))}
-                <button type="button" className="btn btn-ghost" onClick={() => setQualifications((r) => [...r, { ...emptyQual }])}>
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  onClick={() => setQualifications((r) => [...r, { ...emptyQual }])}
+                >
                   {t('onboarding.addQual')}
                 </button>
               </div>
@@ -310,45 +449,48 @@ export default function Onboarding() {
             {step === 3 && (
               <div className="stack-form">
                 <SkillPicker qualifications={qualifications} value={skills} onChange={setSkills} />
+                {errMsg('skills') ? <span className="field-error">{errMsg('skills')}</span> : null}
               </div>
             )}
 
             {step === 4 && (
-              <div className="ob-process">
-                <div className="scan-core compact" aria-hidden="true">
-                  <span className="scan-ring" />
-                  <span className="scan-ring" />
-                  <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" width="40" height="40" />
-                </div>
-                <p className="ob-process-title">{busy ? t('onboarding.processBusy') : t('onboarding.processReady')}</p>
-                <div className="jarvis-log-lines ob-logs">
-                  {processLogs.map((line) => (
-                    <p key={line}>{line}</p>
+              <div className="ob-review">
+                <p className="ob-review-lede">{t('onboarding.reviewLede')}</p>
+                <ul className="ob-summary">
+                  {summary.map((row) => (
+                    <li key={row.label}>
+                      <span>{row.label}</span>
+                      <strong>{row.value}</strong>
+                    </li>
                   ))}
-                  {busy ? <span className="log-cursor" aria-hidden="true" /> : null}
-                </div>
+                </ul>
               </div>
             )}
 
-            {error ? <p className="form-message">{error}</p> : null}
+            {error && !beaconOpen ? <p className="form-message">{error}</p> : null}
 
             <div className="cta-row ob-actions">
               {step > 0 && step < 4 ? (
-                <button type="button" className="btn btn-ghost" onClick={() => setStep((s) => s - 1)} disabled={busy}>
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  onClick={() => {
+                    setError('')
+                    setFieldErrors({})
+                    setTouched({})
+                    setStep((s) => s - 1)
+                  }}
+                  disabled={busy}
+                >
                   {t('onboarding.back')}
                 </button>
               ) : null}
               {step < 4 ? (
-                <button
-                  type="button"
-                  className="btn"
-                  disabled={!canContinue()}
-                  onClick={() => setStep((s) => s + 1)}
-                >
+                <button type="button" className="btn" onClick={goNext}>
                   {step === 3 ? t('onboarding.review') : t('onboarding.continue')}
                 </button>
               ) : (
-                <button type="button" className="btn" disabled={busy} onClick={finish}>
+                <button type="button" className="btn btn-match" disabled={busy} onClick={finish}>
                   {busy ? t('onboarding.processing') : t('onboarding.startMatching')}
                 </button>
               )}
@@ -382,6 +524,8 @@ export default function Onboarding() {
           </aside>
         </main>
       </div>
+
+      <MatchBeacon active={beaconOpen} lines={processLogs} done={beaconDone} error="" />
     </PageBackdrop>
   )
 }
