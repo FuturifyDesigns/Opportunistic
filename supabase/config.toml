@@ -1,0 +1,8 @@
+# A string used to distinguish different Supabase projects on the same host. Recommended: $PROJECT_ID
+project_id = "xtvrjamnorcaevnvvnez"
+
+[api]
+enabled = true
+
+[functions.opportunity-engine]
+verify_jwt = false
