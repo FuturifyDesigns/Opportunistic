@@ -58,9 +58,11 @@ Under **Google Auth Platform → Audience / Branding**:
 
 ## 4. Test
 
-1. Open https://opportunistic.online/auth
+1. Open https://opportunistic.online/auth → Sign in or Sign up form
 2. Click **Continue with Google**
-3. New Google users get a profile row via `handle_new_user` and go to onboarding if incomplete
+3. After Google, you should land on **onboarding** (new account) or **dashboard** (existing, completed onboarding) — not “Choose a portal”
+
+If you bounce back to Choose a portal with no session, confirm Redirect URLs include `https://opportunistic.online/auth` and hard-refresh after deploy (OAuth `?code=` must survive the GitHub Pages SPA redirect).
 
 ## Notes
 

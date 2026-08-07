@@ -14,6 +14,31 @@ function oauthDisplayName(user) {
   )
 }
 
+function hasAuthCallbackParams() {
+  if (typeof window === 'undefined') return false
+  const url = new URL(window.location.href)
+  if (url.searchParams.get('code')) return true
+  if (url.searchParams.get('error') || url.searchParams.get('error_description')) return true
+  const hash = url.hash?.replace(/^#/, '')
+  if (!hash) return false
+  const hp = new URLSearchParams(hash)
+  return Boolean(hp.get('access_token') || hp.get('error') || hp.get('error_description'))
+}
+
+function cleanAuthParamsFromUrl() {
+  if (typeof window === 'undefined') return
+  const url = new URL(window.location.href)
+  const before = url.href
+  ;['code', 'state', 'error', 'error_description', 'error_code'].forEach((k) => url.searchParams.delete(k))
+  if (url.hash && /access_token|error|refresh_token|provider_token/.test(url.hash)) {
+    url.hash = ''
+  }
+  const next = `${url.pathname}${url.search}${url.hash}`
+  if (before !== `${url.origin}${next}`) {
+    window.history.replaceState({}, '', next)
+  }
+}
+
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
   const [profile, setProfile] = useState(null)
@@ -54,13 +79,30 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     let mounted = true
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (!mounted) return
-      setSession(data.session)
-      refreshProfile(data.session?.user?.id, data.session?.user).finally(() => {
+    async function initAuth() {
+      try {
+        if (hasAuthCallbackParams()) {
+          const url = new URL(window.location.href)
+          const code = url.searchParams.get('code')
+          if (code) {
+            const { error } = await supabase.auth.exchangeCodeForSession(code)
+            if (error) console.error('OAuth code exchange failed:', error.message)
+          }
+          cleanAuthParamsFromUrl()
+        }
+
+        const { data } = await supabase.auth.getSession()
+        if (!mounted) return
+        setSession(data.session ?? null)
+        await refreshProfile(data.session?.user?.id, data.session?.user)
+      } catch (err) {
+        console.error(err)
+      } finally {
         if (mounted) setLoading(false)
-      })
-    })
+      }
+    }
+
+    initAuth()
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
       setSession(next)

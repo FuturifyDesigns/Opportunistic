@@ -154,8 +154,11 @@ export default function Auth() {
 
   useEffect(() => {
     if (loading || !user) return
-    if (profile && !profile.onboarding_complete) navigate('/onboarding', { replace: true })
-    else navigate('/dashboard', { replace: true })
+    if (!profile || !profile.onboarding_complete) {
+      navigate('/onboarding', { replace: true })
+      return
+    }
+    navigate('/dashboard', { replace: true })
   }, [user, profile, loading, navigate])
 
   useGSAP(
@@ -313,11 +316,13 @@ export default function Auth() {
     setOauthBusy(true)
     setMessage('')
     try {
+      // Must be allowlisted in Supabase Auth → URL configuration
       const redirectTo = `${window.location.origin}/auth`
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo,
+          skipBrowserRedirect: false,
           queryParams: {
             access_type: 'offline',
             prompt: 'select_account',
@@ -361,6 +366,29 @@ export default function Auth() {
         </svg>
         <span>{oauthBusy ? t('auth.googleRedirecting') : t('auth.continueWithGoogle')}</span>
       </button>
+    )
+  }
+
+  if (loading) {
+    const oauthReturn =
+      typeof window !== 'undefined' &&
+      (new URLSearchParams(window.location.search).has('code') ||
+        /access_token|error_description/.test(window.location.hash))
+    return (
+      <PageBackdrop image="auth.jpg" className="auth-page side-neutral">
+        <div className="auth-root">
+          <SiteHeader />
+          <main className="auth-gateway">
+            <div className="page-center">
+              <div className="spinner" aria-label={t('common.loading')} />
+              <p className="muted" style={{ marginTop: '1rem' }}>
+                {oauthReturn ? t('auth.googleRedirecting') : t('common.loading')}
+              </p>
+            </div>
+          </main>
+          <SiteFooter />
+        </div>
+      </PageBackdrop>
     )
   }
 
