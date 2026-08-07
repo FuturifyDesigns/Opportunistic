@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { openCookiePreferences } from '../lib/consent'
 
 const year = new Date().getFullYear()
 
@@ -26,7 +27,11 @@ export default function SiteFooter() {
           <div className="footer-col">
             <p className="footer-label">Legal</p>
             <Link to="/privacy?section=overview">Privacy</Link>
+            <Link to="/privacy?section=cookies">Cookies</Link>
             <Link to="/terms?section=role">Terms</Link>
+            <button type="button" className="footer-linkish" onClick={() => openCookiePreferences()}>
+              Cookie settings
+            </button>
           </div>
         </nav>
       </div>
@@ -46,7 +51,8 @@ export default function SiteFooter() {
       <div className="container footer-disclaimer">
         <p>
           Opportunistic™ surfaces third-party listings and is not the issuer of any scholarship or job. Verify deadlines
-          and eligibility on the source site.
+          and eligibility on the source site. We apply a GDPR-style privacy baseline globally; cookie and analytics tools
+          load only with your consent.
         </p>
       </div>
     </footer>

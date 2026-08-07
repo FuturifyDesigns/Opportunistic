@@ -65,6 +65,18 @@ const ITEMS = [
     ),
   },
   {
+    id: 'privacy',
+    title: 'Privacy & cookies',
+    content: (
+      <p>
+        Our <Link to="/privacy">Privacy Policy</Link> explains what we collect and your rights. Optional cookies and
+        similar technologies load only after you consent via the cookie banner or Cookie settings. Necessary cookies for
+        security, sign-in, and remembering that choice remain on. See{' '}
+        <Link to="/privacy?section=cookies">Cookies</Link> for categories.
+      </p>
+    ),
+  },
+  {
     id: 'changes',
     title: 'Changes',
     content: (

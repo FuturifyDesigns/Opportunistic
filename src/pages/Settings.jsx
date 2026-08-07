@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { COUNTRIES } from '../lib/countries'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
+import { openCookiePreferences } from '../lib/consent'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
 
@@ -84,6 +85,16 @@ export default function Settings() {
           {message ? <p className="form-message">{message}</p> : null}
           <button type="button" className="btn" disabled={busy} onClick={save}>
             Save settings
+          </button>
+
+          <hr className="divider" />
+
+          <h2 className="form-section">Privacy & cookies</h2>
+          <p className="muted">
+            Manage optional cookies anytime. Necessary cookies stay on for security and to remember this choice.
+          </p>
+          <button type="button" className="btn btn-ghost" onClick={() => openCookiePreferences()}>
+            Cookie settings
           </button>
 
           <hr className="divider" />

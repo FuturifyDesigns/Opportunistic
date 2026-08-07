@@ -1,7 +1,9 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
+import { ConsentProvider } from './context/ConsentContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import GlitchHeadings from './components/GlitchHeadings'
+import CookieConsent from './components/CookieConsent'
 import Landing from './pages/Landing'
 import HowItWorks from './pages/HowItWorks'
 import Features from './pages/Features'
@@ -18,59 +20,62 @@ import Terms from './pages/Terms'
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <GlitchHeadings />
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/how-it-works" element={<HowItWorks />} />
-          <Route path="/features" element={<Features />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route
-            path="/onboarding"
-            element={
-              <ProtectedRoute>
-                <Onboarding />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute requireOnboarding>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute requireOnboarding>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <ProtectedRoute requireOnboarding>
-                <Settings />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/match/:kind/:id"
-            element={
-              <ProtectedRoute requireOnboarding>
-                <MatchDetail />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
+      <ConsentProvider>
+        <BrowserRouter>
+          <GlitchHeadings />
+          <CookieConsent />
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/how-it-works" element={<HowItWorks />} />
+            <Route path="/features" element={<Features />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route
+              path="/onboarding"
+              element={
+                <ProtectedRoute>
+                  <Onboarding />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute requireOnboarding>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute requireOnboarding>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute requireOnboarding>
+                  <Settings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/match/:kind/:id"
+              element={
+                <ProtectedRoute requireOnboarding>
+                  <MatchDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </ConsentProvider>
     </AuthProvider>
   )
 }
