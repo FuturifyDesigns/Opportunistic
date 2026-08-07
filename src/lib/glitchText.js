@@ -8,17 +8,19 @@ function prefersReducedMotion() {
   return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
-/** Freeze the rendered box so scramble glyphs can’t reflow parents / cards. */
+/** Freeze horizontal size so scramble glyphs can’t reflow parents / cards.
+ *  Never lock height — that clips descenders (g, y, etc.). */
 function lockWordBox(span) {
   if (!span || span.dataset.locked === '1') return
   const rect = span.getBoundingClientRect()
   if (rect.width <= 0) return
-  span.style.setProperty('--gt-w', `${Math.ceil(rect.width)}px`)
-  span.style.setProperty('--gt-h', `${Math.ceil(rect.height)}px`)
-  span.style.width = `${Math.ceil(rect.width)}px`
-  span.style.minWidth = `${Math.ceil(rect.width)}px`
-  span.style.maxWidth = `${Math.ceil(rect.width)}px`
-  span.style.height = `${Math.ceil(rect.height)}px`
+  const w = `${Math.ceil(rect.width + 1)}px`
+  span.style.setProperty('--gt-w', w)
+  span.style.width = w
+  span.style.minWidth = w
+  span.style.maxWidth = w
+  span.style.height = 'auto'
+  span.style.minHeight = '0'
   span.dataset.locked = '1'
 }
 
