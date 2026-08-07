@@ -336,6 +336,20 @@ textarea {
   }
 }
 
+/* Futurify-style heading scramble (word hover) */
+.gt-heading .gt-word {
+  display: inline-block;
+  cursor: default;
+  transition: color 0.18s ease, text-shadow 0.18s ease;
+}
+
+.gt-heading .gt-word:hover {
+  color: var(--accent);
+  text-shadow:
+    -1px 0 rgba(45, 226, 230, 0.55),
+    1px 0 rgba(11, 110, 79, 0.45);
+}
+
 .btn {
   display: inline-flex;
   align-items: center;

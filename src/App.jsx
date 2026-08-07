@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
+import GlitchHeadings from './components/GlitchHeadings'
 import Landing from './pages/Landing'
 import HowItWorks from './pages/HowItWorks'
 import Features from './pages/Features'
@@ -18,6 +19,7 @@ export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <GlitchHeadings />
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
