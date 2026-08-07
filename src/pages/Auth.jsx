@@ -154,12 +154,24 @@ export default function Auth() {
 
   useEffect(() => {
     if (loading || !user) return
+    try {
+      const intent = sessionStorage.getItem('opp_oauth_intent')
+      if (intent) {
+        sessionStorage.removeItem('opp_oauth_intent')
+        const createdAt = user.created_at ? Date.parse(user.created_at) : 0
+        const isFreshAccount =
+          Number.isFinite(createdAt) && Date.now() - createdAt < 10 * 60 * 1000
+        toast.success(isFreshAccount ? t('auth.googleWelcomeNew') : t('auth.googleWelcomeBack'))
+      }
+    } catch {
+      /* ignore */
+    }
     if (!profile || !profile.onboarding_complete) {
       navigate('/onboarding', { replace: true })
       return
     }
     navigate('/dashboard', { replace: true })
-  }, [user, profile, loading, navigate])
+  }, [user, profile, loading, navigate, toast, t])
 
   useGSAP(
     () => {
@@ -316,7 +328,13 @@ export default function Auth() {
     setOauthBusy(true)
     setMessage('')
     try {
+      try {
+        sessionStorage.setItem('opp_oauth_intent', mode === 'signup' ? 'signup' : 'login')
+      } catch {
+        /* ignore */
+      }
       // Must be allowlisted in Supabase Auth → URL configuration
+      // signInWithOAuth creates the auth user on first visit, then signs them in.
       const redirectTo = `${window.location.origin}/auth`
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -339,33 +357,40 @@ export default function Auth() {
   }
 
   function GoogleButton({ className = '' }) {
+    const label =
+      mode === 'signup' ? t('auth.signUpWithGoogle') : t('auth.signInWithGoogle')
     return (
-      <button
-        type="button"
-        className={`btn-google ${className}`.trim()}
-        onClick={continueWithGoogle}
-        disabled={oauthBusy || busy}
-      >
-        <svg className="btn-google-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            fill="#4285F4"
-            d="M23.49 12.27c0-.79-.07-1.54-.2-2.27H12v4.3h6.44a5.5 5.5 0 0 1-2.39 3.61v3h3.86c2.26-2.08 3.58-5.15 3.58-8.64Z"
-          />
-          <path
-            fill="#34A853"
-            d="M12 24c3.24 0 5.96-1.07 7.95-2.9l-3.86-3a7.2 7.2 0 0 1-10.78-3.78H1.32v3.09A12 12 0 0 0 12 24Z"
-          />
-          <path
-            fill="#FBBC05"
-            d="M5.31 14.32A7.2 7.2 0 0 1 4.9 12c0-.8.14-1.59.4-2.32V6.59H1.32A12 12 0 0 0 0 12c0 1.94.46 3.77 1.32 5.41l3.99-3.09Z"
-          />
-          <path
-            fill="#EA4335"
-            d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0 7.31 0 3.25 2.69 1.32 6.59l3.99 3.09A7.18 7.18 0 0 1 12 4.75Z"
-          />
-        </svg>
-        <span>{oauthBusy ? t('auth.googleRedirecting') : t('auth.continueWithGoogle')}</span>
-      </button>
+      <div className={`auth-google-block ${className}`.trim()}>
+        <button
+          type="button"
+          className="btn-google"
+          onClick={continueWithGoogle}
+          disabled={oauthBusy || busy}
+        >
+          <svg className="btn-google-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              fill="#4285F4"
+              d="M23.49 12.27c0-.79-.07-1.54-.2-2.27H12v4.3h6.44a5.5 5.5 0 0 1-2.39 3.61v3h3.86c2.26-2.08 3.58-5.15 3.58-8.64Z"
+            />
+            <path
+              fill="#34A853"
+              d="M12 24c3.24 0 5.96-1.07 7.95-2.9l-3.86-3a7.2 7.2 0 0 1-10.78-3.78H1.32v3.09A12 12 0 0 0 12 24Z"
+            />
+            <path
+              fill="#FBBC05"
+              d="M5.31 14.32A7.2 7.2 0 0 1 4.9 12c0-.8.14-1.59.4-2.32V6.59H1.32A12 12 0 0 0 0 12c0 1.94.46 3.77 1.32 5.41l3.99-3.09Z"
+            />
+            <path
+              fill="#EA4335"
+              d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0 7.31 0 3.25 2.69 1.32 6.59l3.99 3.09A7.18 7.18 0 0 1 12 4.75Z"
+            />
+          </svg>
+          <span>{oauthBusy ? t('auth.googleRedirecting') : label}</span>
+        </button>
+        <p className="auth-google-hint">
+          {mode === 'signup' ? t('auth.googleHintSignUp') : t('auth.googleHintSignIn')}
+        </p>
+      </div>
     )
   }
 
@@ -450,7 +475,7 @@ export default function Auth() {
                 <p className="muted">{SIDES[mode].title}</p>
                 <GoogleButton className="auth-field" />
                 <p className="auth-divider">
-                  <span>{t('auth.orEmail')}</span>
+                  <span>{mode === 'signup' ? t('auth.orEmailSignUp') : t('auth.orEmailSignIn')}</span>
                 </p>
                 <form className="stack-form" onSubmit={onSubmit} noValidate>
                   {mode === 'signup' ? (

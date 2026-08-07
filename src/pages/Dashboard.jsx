@@ -12,6 +12,7 @@ import {
   runMatchingForUser,
   shouldWeeklyRefresh,
 } from '../lib/matchingService'
+import { goalLabelKey, resolveGoal } from '../lib/goal'
 import MatchCard from '../components/MatchCard'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
@@ -35,6 +36,23 @@ export default function Dashboard() {
   const [meta, setMeta] = useState(null)
   const listRef = useRef(null)
   const autoRan = useRef(false)
+  const tabSeeded = useRef(false)
+
+  const goal = useMemo(() => resolveGoal(profile || {}), [profile])
+  const goalLabel = t(goalLabelKey(goal))
+
+  useEffect(() => {
+    if (!profile) return
+    if (goal === 'jobs') setTab('jobs')
+    else if (goal === 'scholarships') setTab('scholarships')
+    else if (!tabSeeded.current) {
+      tabSeeded.current = true
+      setTab('scholarships')
+    }
+  }, [profile, goal])
+
+  const showScholarships = goal !== 'jobs'
+  const showJobs = goal !== 'scholarships'
 
   const load = useCallback(async () => {
     if (!user?.id) return
@@ -115,12 +133,14 @@ export default function Dashboard() {
   // Auto weekly refresh + empty dashboard bootstrap
   useEffect(() => {
     if (!user?.id || loading || autoRan.current) return
-    const empty = scholarships.length === 0 && jobs.length === 0
+    const empty =
+      (showScholarships ? scholarships.length === 0 : true) &&
+      (showJobs ? jobs.length === 0 : true)
     if (empty || shouldWeeklyRefresh(user.id)) {
       autoRan.current = true
       refreshEngine(empty ? 'manual' : 'weekly')
     }
-  }, [user?.id, loading, scholarships.length, jobs.length, refreshEngine])
+  }, [user?.id, loading, scholarships.length, jobs.length, refreshEngine, showScholarships, showJobs])
 
   useGSAP(
     () => {
@@ -206,8 +226,16 @@ export default function Dashboard() {
                 : t('dashboard.helloGuest')}
             </h1>
             <p className="muted">
-              {t('dashboard.lede', { country: profile?.country || '—' })}
+              {goal === 'scholarships'
+                ? t('dashboard.ledeScholarships', { country: profile?.country || '—' })
+                : goal === 'jobs'
+                  ? t('dashboard.ledeJobs', { country: profile?.country || '—' })
+                  : t('dashboard.ledeBoth', { country: profile?.country || '—' })}
             </p>
+            <div className="dash-focus-chip" aria-label={t('dashboard.focusLabel')}>
+              <span>{t('dashboard.focusLabel')}</span>
+              <strong>{goalLabel}</strong>
+            </div>
             <div className="dash-engine">
               <span className={`dash-engine-dot ${refreshing ? 'pulse' : ''}`} />
               <div>
@@ -215,6 +243,8 @@ export default function Dashboard() {
                 <p>
                   {t('dashboard.engineCountry')}{' '}
                   <em>{profile?.country || t('dashboard.engineSetProfile')}</em>
+                  {` ${t('dashboard.engineGoal')} `}
+                  <em>{goalLabel}</em>
                   {meta?.live != null ? ` ${t('dashboard.engineLastLive', { live: meta.live })}` : ''}
                   {` ${t('dashboard.engineRefreshed', { when: lastLabel })}`}
                 </p>
@@ -238,16 +268,20 @@ export default function Dashboard() {
         </section>
 
         <section className="dash-stats">
-          <article className="dash-stat">
-            <p className="dash-stat-label">{t('dashboard.statScholarships')}</p>
-            <p className="dash-stat-value">{scholarships.length}</p>
-            <p className="dash-stat-hint">{t('dashboard.statEligible', { country: countryLabel })}</p>
-          </article>
-          <article className="dash-stat">
-            <p className="dash-stat-label">{t('dashboard.statJobs')}</p>
-            <p className="dash-stat-value">{jobs.length}</p>
-            <p className="dash-stat-hint">{t('dashboard.statJobsHint')}</p>
-          </article>
+          {showScholarships ? (
+            <article className="dash-stat">
+              <p className="dash-stat-label">{t('dashboard.statScholarships')}</p>
+              <p className="dash-stat-value">{scholarships.length}</p>
+              <p className="dash-stat-hint">{t('dashboard.statEligible', { country: countryLabel })}</p>
+            </article>
+          ) : null}
+          {showJobs ? (
+            <article className="dash-stat">
+              <p className="dash-stat-label">{t('dashboard.statJobs')}</p>
+              <p className="dash-stat-value">{jobs.length}</p>
+              <p className="dash-stat-hint">{t('dashboard.statJobsHint')}</p>
+            </article>
+          ) : null}
           <article className="dash-stat">
             <p className="dash-stat-label">{t('dashboard.statAvg')}</p>
             <p className="dash-stat-value">{avgScore || '—'}%</p>
@@ -261,18 +295,28 @@ export default function Dashboard() {
         </section>
 
         <div className="dash-toolbar">
-          <div className="segmented">
-            <button
-              type="button"
-              className={tab === 'scholarships' ? 'active' : ''}
-              onClick={() => setTab('scholarships')}
-            >
-              {t('dashboard.scholarships', { count: scholarships.length })}
-            </button>
-            <button type="button" className={tab === 'jobs' ? 'active' : ''} onClick={() => setTab('jobs')}>
-              {t('dashboard.jobs', { count: jobs.length })}
-            </button>
-          </div>
+          {goal === 'both' ? (
+            <div className="segmented">
+              <button
+                type="button"
+                className={tab === 'scholarships' ? 'active' : ''}
+                onClick={() => setTab('scholarships')}
+              >
+                {t('dashboard.scholarships', { count: scholarships.length })}
+              </button>
+              <button type="button" className={tab === 'jobs' ? 'active' : ''} onClick={() => setTab('jobs')}>
+                {t('dashboard.jobs', { count: jobs.length })}
+              </button>
+            </div>
+          ) : (
+            <div className="segmented">
+              <button type="button" className="active" disabled>
+                {goal === 'jobs'
+                  ? t('dashboard.jobs', { count: jobs.length })
+                  : t('dashboard.scholarships', { count: scholarships.length })}
+              </button>
+            </div>
+          )}
 
           <div className="dash-filters">
             <button type="button" className={filter === 'all' ? 'chip active' : 'chip'} onClick={() => setFilter('all')}>
@@ -342,22 +386,28 @@ export default function Dashboard() {
             <p className="jarvis-caption">{t('dashboard.sideCaption')}</p>
             <h2>{t('dashboard.sideTitle')}</h2>
             <ul className="dash-side-list">
-              <li>
-                <strong>{t('dashboard.sideSchTitle')}</strong>
-                <span>{t('dashboard.sideSchBody', { country: countryLabel })}</span>
-              </li>
-              <li>
-                <strong>{t('dashboard.sideJobTitle')}</strong>
-                <span>{t('dashboard.sideJobBody')}</span>
-              </li>
+              {showScholarships ? (
+                <li>
+                  <strong>{t('dashboard.sideSchTitle')}</strong>
+                  <span>{t('dashboard.sideSchBody', { country: countryLabel })}</span>
+                </li>
+              ) : null}
+              {showJobs ? (
+                <li>
+                  <strong>{t('dashboard.sideJobTitle')}</strong>
+                  <span>{t('dashboard.sideJobBody')}</span>
+                </li>
+              ) : null}
               <li>
                 <strong>{t('dashboard.sideWeekTitle')}</strong>
                 <span>{t('dashboard.sideWeekBody')}</span>
               </li>
             </ul>
-            <a className="text-link" href="https://remotive.com/remote-jobs" target="_blank" rel="noreferrer">
-              {t('dashboard.remotiveLink')}
-            </a>
+            {showJobs ? (
+              <a className="text-link" href="https://remotive.com/remote-jobs" target="_blank" rel="noreferrer">
+                {t('dashboard.remotiveLink')}
+              </a>
+            ) : null}
           </aside>
         </div>
       </main>

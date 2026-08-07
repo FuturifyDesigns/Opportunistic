@@ -15,6 +15,7 @@ import MatchBeacon from '../components/MatchBeacon'
 import { prefersReducedMotion } from '../lib/animations'
 import { normalizeSkillName } from '../lib/skillCatalog'
 import { validateOnboardingStep } from '../lib/fieldValidation'
+import { defaultBioForGoal, goalLabelKey, normalizeGoal, upsertProfile } from '../lib/goal'
 
 gsap.registerPlugin(useGSAP)
 
@@ -85,7 +86,10 @@ export default function Onboarding() {
   )
 
   const feedPreview = useMemo(() => {
-    const items = [t('onboarding.feedCountry', { country })]
+    const items = [
+      t('onboarding.feedCountry', { country }),
+      t('onboarding.feedGoal', { goal: t(goalLabelKey(goal)) }),
+    ]
     if (fullName) items.push(t('onboarding.feedName', { name: fullName.split(' ')[0] }))
     if (headline) {
       items.push(
@@ -99,7 +103,7 @@ export default function Onboarding() {
       .filter((s) => s.skill_name.trim())
       .forEach((s) => items.push(t('onboarding.feedSkill', { skill: s.skill_name })))
     return items.slice(0, 6)
-  }, [country, fullName, headline, qualifications, skills, t, i18n.language])
+  }, [country, fullName, goal, headline, qualifications, skills, t, i18n.language])
 
   const summary = useMemo(() => {
     const qualCount = qualifications.filter((q) => q.field.trim()).length
@@ -194,6 +198,7 @@ export default function Onboarding() {
     const lines = [
       t('onboarding.logLock'),
       t('onboarding.logCountry', { country }),
+      t('onboarding.logGoal', { goal: t(goalLabelKey(goal)) }),
       t('onboarding.logQuals', { count: qualifications.filter((q) => q.field.trim()).length }),
       t('onboarding.logSkills', { count: skills.filter((s) => s.skill_name.trim()).length }),
       t('onboarding.logQueries'),
@@ -213,22 +218,25 @@ export default function Onboarding() {
     }, 420)
 
     try {
-      const bio =
-        goal === 'scholarships'
-          ? t('onboarding.bioScholarships')
-          : goal === 'jobs'
-            ? t('onboarding.bioJobs')
-            : t('onboarding.bioBoth')
+      const focus = normalizeGoal(goal)
+      const bio = defaultBioForGoal(focus, t)
 
-      const { error: pErr } = await supabase.from('profiles').upsert({
+      const { error: pErr } = await upsertProfile(supabase, {
         user_id: user.id,
         full_name: fullName.trim(),
         headline: headline.trim() || `${fullName.trim()} · ${country}`,
         bio,
         country,
+        goal: focus,
         onboarding_complete: true,
       })
       if (pErr) throw pErr
+
+      try {
+        localStorage.setItem(`opp_goal_${user.id}`, focus)
+      } catch {
+        /* ignore */
+      }
 
       await supabase.from('qualifications').delete().eq('user_id', user.id)
       await supabase.from('skills').delete().eq('user_id', user.id)
@@ -333,12 +341,14 @@ export default function Onboarding() {
                       key={value}
                       type="button"
                       className={`choice-pill ${goal === value ? 'active' : ''}`}
+                      aria-pressed={goal === value}
                       onClick={() => setGoal(value)}
                     >
                       {label}
                     </button>
                   ))}
                 </div>
+                <p className="ob-goal-hint muted">{t('onboarding.goalHint')}</p>
               </div>
             )}
 

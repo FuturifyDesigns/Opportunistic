@@ -1919,6 +1919,35 @@ sup {
   animation: dash-pulse 1s ease-in-out infinite;
 }
 
+.dash-focus-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 0.85rem;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.dash-focus-chip strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.ob-goal-hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+}
+
+.settings-goal-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.45rem;
+}
+
 @keyframes dash-pulse {
   0%,
   100% {
@@ -3702,6 +3731,20 @@ button.linkish {
   width: 1.15rem;
   height: 1.15rem;
   flex: 0 0 auto;
+}
+
+.auth-google-block {
+  width: 100%;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.auth-google-hint {
+  margin: 0;
+  text-align: center;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: var(--muted);
 }
 
 .auth-divider {

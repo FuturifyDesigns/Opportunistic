@@ -1,11 +1,21 @@
 import { supabase } from './supabase'
 import { buildScholarshipMatches, buildLiveJobMatches } from './matcher'
+import { resolveGoal } from './goal'
 
 function sourceKey(row) {
   return String(row.source || '').toLowerCase() + '|' + String(row.url || '').toLowerCase()
 }
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000
+
+/** Strict focus: only keep the match types the user asked for. */
+function applyGoalFocus(goal, scholarships, jobs) {
+  const sortedSch = [...scholarships].sort((a, b) => b.match_score - a.match_score)
+  const sortedJobs = [...jobs].sort((a, b) => b.match_score - a.match_score)
+  if (goal === 'scholarships') return { scholarships: sortedSch, jobs: [] }
+  if (goal === 'jobs') return { scholarships: [], jobs: sortedJobs }
+  return { scholarships: sortedSch, jobs: sortedJobs }
+}
 
 /**
  * Rebuild matches from the live profile + web job feeds.
@@ -25,14 +35,20 @@ export async function runMatchingForUser(userId) {
   if (pErr) throw pErr
   if (!profile) throw new Error('Profile not found')
 
-  const scholarshipPayload = buildScholarshipMatches(profile, qualifications || [], skills || [])
-  const { jobs: jobPayload, meta: jobMeta } = await buildLiveJobMatches(
-    profile,
-    qualifications || [],
-    skills || [],
-  )
+  const goal = resolveGoal(profile)
+  const wantScholarships = goal !== 'jobs'
+  const wantJobs = goal !== 'scholarships'
 
-  if (!scholarshipPayload.length && !jobPayload.length) {
+  const scholarshipPayload = wantScholarships
+    ? buildScholarshipMatches(profile, qualifications || [], skills || [])
+    : []
+  const { jobs: jobPayload, meta: jobMeta } = wantJobs
+    ? await buildLiveJobMatches(profile, qualifications || [], skills || [])
+    : { jobs: [], meta: { live: 0, boards: 0, skipped: true, goal } }
+
+  const focused = applyGoalFocus(goal, scholarshipPayload, jobPayload)
+
+  if (!focused.scholarships.length && !focused.jobs.length) {
     throw new Error('Matcher produced no results — check profile data')
   }
 
@@ -41,13 +57,13 @@ export async function runMatchingForUser(userId) {
       user_id: userId,
       type: 'scholarship',
       status: 'running',
-      notes: `country=${profile.country || 'n/a'}; programs=${scholarshipPayload.length}`,
+      notes: `goal=${goal}; country=${profile.country || 'n/a'}; programs=${focused.scholarships.length}`,
     },
     {
       user_id: userId,
       type: 'job',
       status: 'running',
-      notes: `live=${jobMeta?.live ?? 0}; boards=${jobMeta?.boards ?? 0}; dropped=${jobMeta?.dropped ?? 0}; country=${jobMeta?.country || profile.country || ''}; q=${jobMeta?.query || ''}`,
+      notes: `goal=${goal}; live=${jobMeta?.live ?? 0}; boards=${jobMeta?.boards ?? 0}; dropped=${jobMeta?.dropped ?? 0}; country=${jobMeta?.country || profile.country || ''}; q=${jobMeta?.query || ''}`,
     },
   ])
 
@@ -66,7 +82,7 @@ export async function runMatchingForUser(userId) {
     supabase.from('job_matches').delete().eq('user_id', userId),
   ])
 
-  const scholarshipRows = scholarshipPayload.map((m) => ({
+  const scholarshipRows = focused.scholarships.map((m) => ({
     user_id: userId,
     title: m.title,
     url: m.url,
@@ -78,7 +94,7 @@ export async function runMatchingForUser(userId) {
     dismissed: dismissedSch.has(sourceKey(m)),
   }))
 
-  const jobRows = jobPayload.map((m) => ({
+  const jobRows = focused.jobs.map((m) => ({
     user_id: userId,
     title: m.title,
     url: m.url,
@@ -108,13 +124,13 @@ export async function runMatchingForUser(userId) {
       user_id: userId,
       type: 'scholarship',
       status: 'done',
-      notes: `saved=${scholarshipRows.length} @ ${stamp}`,
+      notes: `goal=${goal}; saved=${scholarshipRows.length} @ ${stamp}`,
     },
     {
       user_id: userId,
       type: 'job',
       status: 'done',
-      notes: `saved=${jobRows.length}; live=${jobMeta?.live ?? 0} @ ${stamp}`,
+      notes: `goal=${goal}; saved=${jobRows.length}; live=${jobMeta?.live ?? 0} @ ${stamp}`,
     },
   ])
 
@@ -123,7 +139,8 @@ export async function runMatchingForUser(userId) {
 
   try {
     localStorage.setItem(`opp_last_match_${userId}`, stamp)
-    localStorage.setItem(`opp_last_match_meta_${userId}`, JSON.stringify(jobMeta || {}))
+    localStorage.setItem(`opp_last_match_meta_${userId}`, JSON.stringify({ ...(jobMeta || {}), goal }))
+    localStorage.setItem(`opp_goal_${userId}`, goal)
   } catch {
     /* ignore */
   }
@@ -131,7 +148,7 @@ export async function runMatchingForUser(userId) {
   return {
     scholarships: scholarshipRows.filter((r) => !r.dismissed).length,
     jobs: jobRows.filter((r) => !r.dismissed).length,
-    meta: jobMeta,
+    meta: { ...(jobMeta || {}), goal },
     refreshedAt: stamp,
   }
 }

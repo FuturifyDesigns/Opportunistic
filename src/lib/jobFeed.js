@@ -36,8 +36,8 @@ function mapRemotive(job, profile) {
   const skillHits = overlapScore(text, blob)
   const locHits = countryFitScore(location, country)
   let score = 42 + Math.min(30, skillHits * 4) + locHits * 8
-  if (profile.goal === 'jobs') score += 4
-  if (profile.goal === 'scholarships') score -= 4
+  if (profile.goal === 'jobs') score += 10
+  if (profile.goal === 'scholarships') score -= 12
   score = Math.max(32, Math.min(96, Math.round(score)))
 
   const reasons = []
@@ -83,7 +83,8 @@ function mapArbeitnow(job, profile) {
   const skillHits = overlapScore(text, blob)
   const locHits = countryFitScore(location, country)
   let score = 40 + Math.min(28, skillHits * 4) + locHits * 9
-  if (profile.goal === 'jobs') score += 3
+  if (profile.goal === 'jobs') score += 8
+  if (profile.goal === 'scholarships') score -= 10
   score = Math.max(30, Math.min(94, Math.round(score)))
 
   const reasons = []

@@ -4,6 +4,13 @@ import { useTranslation } from 'react-i18next'
 import { COUNTRIES } from '../lib/countries'
 import { supabase } from '../lib/supabase'
 import { runMatchingForUser } from '../lib/matchingService'
+import {
+  defaultBioForGoal,
+  normalizeGoal,
+  resolveGoal,
+  stripGoalTag,
+  updateProfile,
+} from '../lib/goal'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import SiteHeader from '../components/SiteHeader'
@@ -23,6 +30,7 @@ export default function Profile() {
     headline: '',
     bio: '',
     country: 'Botswana',
+    goal: 'both',
   })
   const [qualifications, setQualifications] = useState([{ ...emptyQual }])
   const [skills, setSkills] = useState([])
@@ -38,8 +46,9 @@ export default function Profile() {
         setForm({
           full_name: profile.full_name || '',
           headline: profile.headline || '',
-          bio: profile.bio || '',
+          bio: stripGoalTag(profile.bio || ''),
           country: profile.country || 'Botswana',
+          goal: resolveGoal(profile),
         })
       }
       const [{ data: q }, { data: s }] = await Promise.all([
@@ -69,11 +78,24 @@ export default function Profile() {
     e.preventDefault()
     setBusy(true)
     try {
-      const { error: pErr } = await supabase
-        .from('profiles')
-        .update({ ...form, onboarding_complete: true, updated_at: new Date().toISOString() })
-        .eq('user_id', user.id)
+      const focus = normalizeGoal(form.goal)
+      const bioText = stripGoalTag(form.bio).trim() || stripGoalTag(defaultBioForGoal(focus, t))
+      const { error: pErr } = await updateProfile(supabase, user.id, {
+        full_name: form.full_name,
+        headline: form.headline,
+        bio: bioText,
+        country: form.country,
+        goal: focus,
+        onboarding_complete: true,
+        updated_at: new Date().toISOString(),
+      })
       if (pErr) throw pErr
+
+      try {
+        localStorage.setItem(`opp_goal_${user.id}`, focus)
+      } catch {
+        /* ignore */
+      }
 
       await supabase.from('qualifications').delete().eq('user_id', user.id)
       await supabase.from('skills').delete().eq('user_id', user.id)
@@ -139,6 +161,27 @@ export default function Profile() {
               ))}
             </select>
           </label>
+
+          <div className="choice-pills" role="group" aria-label={t('onboarding.goalAria')}>
+            {[
+              ['both', t('onboarding.goalBoth')],
+              ['scholarships', t('onboarding.goalScholarships')],
+              ['jobs', t('onboarding.goalJobs')],
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                className={`choice-pill ${form.goal === value ? 'active' : ''}`}
+                aria-pressed={form.goal === value}
+                onClick={() => setForm({ ...form, goal: value })}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <p className="muted" style={{ marginTop: '-0.35rem' }}>
+            {t('profile.goalHint')}
+          </p>
 
           <h2 className="form-section">{t('profile.qualsTitle')}</h2>
           {qualifications.map((q, i) => (

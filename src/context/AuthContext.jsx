@@ -61,7 +61,24 @@ export function AuthProvider({ children }) {
 
     let next = data
     const displayName = oauthDisplayName(user)
-    if (next && displayName && !String(next.full_name || '').trim()) {
+
+    // Google (and other OAuth) may create auth.users before the profile trigger lands —
+    // ensure a profiles row always exists so sign-in can continue to onboarding/dashboard.
+    if (!next) {
+      const { data: created, error: createErr } = await supabase
+        .from('profiles')
+        .upsert(
+          {
+            user_id: userId,
+            full_name: displayName || '',
+          },
+          { onConflict: 'user_id' },
+        )
+        .select('*')
+        .maybeSingle()
+      if (createErr) console.error(createErr)
+      next = created
+    } else if (displayName && !String(next.full_name || '').trim()) {
       const { data: updated } = await supabase
         .from('profiles')
         .update({ full_name: displayName })

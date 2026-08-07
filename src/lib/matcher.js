@@ -43,12 +43,7 @@ export function regionHints(country = '') {
   return hints
 }
 
-function detectGoal(profile = {}) {
-  const bio = `${profile.bio || ''} ${profile.headline || ''}`.toLowerCase()
-  if (bio.includes('mostly scholarships') || bio.includes('primarily for scholarships')) return 'scholarships'
-  if (bio.includes('mostly jobs') || bio.includes('primarily for jobs')) return 'jobs'
-  return 'both'
-}
+import { resolveGoal } from './goal'
 
 export function summarizeProfile(profile, qualifications, skills) {
   const quals = (qualifications || []).filter((q) => q.field?.trim())
@@ -58,7 +53,7 @@ export function summarizeProfile(profile, qualifications, skills) {
   return {
     country: profile?.country || null,
     headline: profile?.headline?.trim() || null,
-    goal: detectGoal(profile || {}),
+    goal: resolveGoal(profile || {}),
     quals,
     skills: sk,
     primary,
@@ -90,8 +85,8 @@ function scoreScholarship(item, summary) {
   score += Math.min(10, summary.quals.length * 3)
   score += Math.min(14, summary.skills.length * 2)
   score += Math.min(8, summary.advanced.length * 3)
-  if (summary.goal === 'scholarships') score += 5
-  if (summary.goal === 'jobs') score -= 6
+  if (summary.goal === 'scholarships') score += 12
+  if (summary.goal === 'jobs') score -= 14
   if (summary.institution) score += 2
   if (!summary.skills.length) score -= 5
   if (!summary.quals.length) score -= 8

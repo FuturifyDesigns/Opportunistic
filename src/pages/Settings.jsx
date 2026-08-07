@@ -6,6 +6,8 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import { openCookiePreferences } from '../lib/consent'
+import { normalizeGoal, resolveGoal, updateProfile, withGoalTag, stripGoalTag } from '../lib/goal'
+import { runMatchingForUser } from '../lib/matchingService'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
 import LanguageSwitcher from '../components/LanguageSwitcher'
@@ -17,6 +19,7 @@ export default function Settings() {
   const navigate = useNavigate()
   const [digest, setDigest] = useState('weekly')
   const [country, setCountry] = useState('Botswana')
+  const [goal, setGoal] = useState('both')
   const [busy, setBusy] = useState(false)
 
   useEffect(() => {
@@ -24,21 +27,38 @@ export default function Settings() {
     if (profile) {
       setDigest(profile.digest_frequency || 'weekly')
       setCountry(profile.country || 'Botswana')
+      setGoal(resolveGoal(profile))
     }
   }, [profile, t])
 
   async function save() {
     setBusy(true)
-    const { error } = await supabase
-      .from('profiles')
-      .update({ digest_frequency: digest, country })
-      .eq('user_id', user.id)
-    setBusy(false)
-    if (error) toast.error(error.message || t('common.toast.genericError'))
-    else {
-      toast.success(t('settings.saved'))
-      refreshProfile()
+    const focus = normalizeGoal(goal)
+    const bio = withGoalTag(stripGoalTag(profile?.bio || ''), focus)
+    const { error } = await updateProfile(supabase, user.id, {
+      digest_frequency: digest,
+      country,
+      goal: focus,
+      bio,
+    })
+    if (error) {
+      setBusy(false)
+      toast.error(error.message || t('common.toast.genericError'))
+      return
     }
+    try {
+      localStorage.setItem(`opp_goal_${user.id}`, focus)
+    } catch {
+      /* ignore */
+    }
+    try {
+      await runMatchingForUser(user.id)
+    } catch {
+      /* rematch best-effort */
+    }
+    setBusy(false)
+    toast.success(t('settings.saved'))
+    refreshProfile()
   }
 
   async function deleteAccount() {
@@ -97,6 +117,28 @@ export default function Settings() {
               ))}
             </select>
           </label>
+
+          <div>
+            <span className="settings-goal-label">{t('settings.goal')}</span>
+            <div className="choice-pills" role="group" aria-label={t('onboarding.goalAria')}>
+              {[
+                ['both', t('onboarding.goalBoth')],
+                ['scholarships', t('onboarding.goalScholarships')],
+                ['jobs', t('onboarding.goalJobs')],
+              ].map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={`choice-pill ${goal === value ? 'active' : ''}`}
+                  aria-pressed={goal === value}
+                  onClick={() => setGoal(value)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <p className="muted">{t('settings.goalHint')}</p>
+          </div>
 
           <button type="button" className="btn" disabled={busy} onClick={save}>
             {t('settings.saveSettings')}
