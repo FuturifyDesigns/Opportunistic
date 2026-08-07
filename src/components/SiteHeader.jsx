@@ -67,8 +67,14 @@ export default function SiteHeader() {
               </button>
             </>
           ) : (
-            <NavLink to="/auth?mode=signup" className="btn btn-sm" onClick={close}>
-              Get started
+            <NavLink
+              to="/auth?mode=signup"
+              className="nav-start-logo"
+              onClick={close}
+              aria-label="Get started"
+              title="Get started"
+            >
+              <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" width="44" height="44" />
             </NavLink>
           )}
         </nav>
