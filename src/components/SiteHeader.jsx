@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import GetStartedLogo from './GetStartedLogo'
 
 export default function SiteHeader() {
   const { user, signOut } = useAuth()
@@ -17,8 +16,8 @@ export default function SiteHeader() {
             src={`${import.meta.env.BASE_URL}logo.png`}
             alt=""
             className="brand-mark"
-            width="40"
-            height="40"
+            width="36"
+            height="36"
           />
           <span className="brand-word">Opportunistic</span>
         </NavLink>
@@ -68,7 +67,9 @@ export default function SiteHeader() {
               </button>
             </>
           ) : (
-            <GetStartedLogo onClick={close} />
+            <NavLink to="/auth?mode=signup" className="btn btn-sm" onClick={close}>
+              Get started
+            </NavLink>
           )}
         </nav>
       </div>

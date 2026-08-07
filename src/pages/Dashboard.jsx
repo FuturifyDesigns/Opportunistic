@@ -135,11 +135,6 @@ export default function Dashboard() {
               ))
             )}
           </div>
-
-          <aside className="ad-slot" aria-label="Sponsored">
-            <p className="eyebrow">Sponsored</p>
-            <p className="muted">Ad placement reserved (AdSense). Max 1–2 units; never inside forms.</p>
-          </aside>
         </div>
       </main>
       <SiteFooter />

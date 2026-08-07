@@ -101,13 +101,14 @@ textarea {
 }
 
 .brand-mark {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
   border-radius: 0;
   display: block;
-  background: transparent;
+  background: transparent !important;
   filter: none;
+  box-shadow: none;
 }
 
 .nav {
@@ -187,15 +188,16 @@ textarea {
 }
 
 .hero-brand {
-  width: min(160px, 42vw);
+  width: min(88px, 22vw);
   height: auto;
   aspect-ratio: 1;
   object-fit: contain;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
   border-radius: 0;
-  background: transparent;
+  background: transparent !important;
   display: block;
   filter: none;
+  box-shadow: none;
 }
 
 .hero-copy h1 {
@@ -583,9 +585,10 @@ sup {
 
 .dashboard-layout {
   display: grid;
-  grid-template-columns: 1fr 240px;
+  grid-template-columns: 1fr;
   gap: 1.25rem;
   align-items: start;
+  max-width: 820px;
 }
 
 .match-list {
