@@ -3,6 +3,8 @@
  * Sources: Remotive (remote), Arbeitnow (EU board). Results are real postings with official URLs.
  */
 
+import i18n from '../i18n'
+
 function skillBlob(skills = [], field = '') {
   return `${field} ${(skills || []).map((s) => s.skill_name || s).join(' ')}`.toLowerCase()
 }
@@ -47,18 +49,22 @@ function mapRemotive(job, profile) {
   score = Math.max(32, Math.min(96, Math.round(score)))
 
   const reasons = []
-  reasons.push(`Live posting from Remotive · ${job.company_name || 'Employer'}.`)
-  if (skillHits) reasons.push(`Matched ${skillHits} term(s) from your skills/field against the job text.`)
+  reasons.push(
+    i18n.t('reasons.remotiveLive', {
+      company: job.company_name || i18n.t('reasons.employer'),
+    }),
+  )
+  if (skillHits) reasons.push(i18n.t('reasons.matchedTerms', { count: skillHits }))
   if (country) {
     reasons.push(
       locHits >= 3
-        ? `Location explicitly references ${country}.`
+        ? i18n.t('reasons.locationExplicit', { country })
         : locHits >= 1
-          ? `Remote/worldwide role — workable from ${country} if employer allows your region.`
-          : `Verify the employer accepts applicants based in ${country} before applying.`,
+          ? i18n.t('reasons.locationRemote', { country })
+          : i18n.t('reasons.locationVerify', { country }),
     )
   }
-  reasons.push('Fetched from the public Remotive API — open the official URL to confirm it’s still live.')
+  reasons.push(i18n.t('reasons.remotiveFetched'))
 
   return {
     title: job.title,
@@ -84,16 +90,23 @@ function mapArbeitnow(job, profile) {
   score = Math.max(30, Math.min(94, Math.round(score)))
 
   const reasons = []
-  reasons.push(`Live posting from Arbeitnow · ${job.company_name || 'Employer'}.`)
-  if (skillHits) reasons.push(`Skills/field overlap score: ${skillHits} hits.`)
+  reasons.push(
+    i18n.t('reasons.arbeitnowLive', {
+      company: job.company_name || i18n.t('reasons.employer'),
+    }),
+  )
+  if (skillHits) reasons.push(i18n.t('reasons.skillHits', { count: skillHits }))
   if (country) {
     reasons.push(
       locHits >= 3
-        ? `Listed location aligns with ${country}.`
-        : `Listed in ${job.location || 'EU/remote'} — confirm visa/remote eligibility from ${country}.`,
+        ? i18n.t('reasons.locationAligns', { country })
+        : i18n.t('reasons.locationListed', {
+            location: job.location || i18n.t('reasons.euRemote'),
+            country,
+          }),
     )
   }
-  reasons.push('Fetched from the public Arbeitnow job board API.')
+  reasons.push(i18n.t('reasons.arbeitnowFetched'))
 
   return {
     title: job.title,
@@ -143,40 +156,47 @@ export function buildCountryJobBoards(profile) {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '') || 'jobs'
 
+  const countryLabel = country || i18n.t('reasons.yourCountry')
+  const locationLabel = country || i18n.t('reasons.yourLocation')
+  const regionLabel = country || i18n.t('reasons.region')
+
   return [
     {
-      title: `${field} jobs in ${country || 'your country'} — Indeed`,
+      title: i18n.t('reasons.indeedTitle', { field, country: countryLabel }),
       url: `https://www.indeed.com/jobs?q=${query}&l=${countryQ}`,
       company: null,
       source: 'Indeed',
-      reasoning: `Country-filtered Indeed search for “${decodeURIComponent(query)}” near ${country || 'your location'}. Open results and apply only to listings that match your skills.`,
+      reasoning: i18n.t('reasons.indeedReason', {
+        query: decodeURIComponent(query),
+        country: locationLabel,
+      }),
       match_score: country ? 78 : 55,
       feed: 'board',
     },
     {
-      title: `${field} roles — LinkedIn Jobs`,
+      title: i18n.t('reasons.linkedinTitle', { field }),
       url: `https://www.linkedin.com/jobs/search/?keywords=${query}&location=${countryQ}`,
       company: null,
       source: 'LinkedIn',
-      reasoning: `LinkedIn search biased to ${country || 'your country'} with your field/skills as keywords.`,
+      reasoning: i18n.t('reasons.linkedinReason', { country: countryLabel }),
       match_score: country ? 76 : 54,
       feed: 'board',
     },
     {
-      title: `Remote ${field} — Remote OK`,
+      title: i18n.t('reasons.remoteTitle', { field }),
       url: `https://remoteok.com/remote-${slug}-jobs`,
       company: null,
       source: 'Remote OK',
-      reasoning: `Remote-first board filtered by skill slug “${slug}” so ${country || 'your country'} isn’t a hard blocker.`,
+      reasoning: i18n.t('reasons.remoteReason', { slug, country: countryLabel }),
       match_score: 70,
       feed: 'board',
     },
     {
-      title: `${country || 'Regional'} humanitarian & development jobs — ReliefWeb`,
+      title: i18n.t('reasons.reliefTitle', { country: country || i18n.t('reasons.region') }),
       url: `https://reliefweb.int/jobs?search=${countryQ}%20${query}`,
       company: null,
       source: 'ReliefWeb',
-      reasoning: `ReliefWeb jobs search including ${country || 'region'} — useful for development, health, and NGO tracks.`,
+      reasoning: i18n.t('reasons.reliefReason', { country: regionLabel }),
       match_score: /public|health|development|social|education|humanitarian|policy/i.test(field) ? 74 : 48,
       feed: 'board',
     },

@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 /**
  * Folder-style legal sections + TOC.
  * Avoids href="#id" which breaks in-page section navigation on some routers.
  */
 export default function LegalFolders({ items, initialId }) {
+  const { t } = useTranslation()
   const [openId, setOpenId] = useState(initialId || items[0]?.id || null)
 
   useEffect(() => {
@@ -45,8 +47,8 @@ export default function LegalFolders({ items, initialId }) {
 
   return (
     <section className="container legal-layout">
-      <aside className="legal-toc" aria-label="On this page">
-        <p className="jarvis-caption">On this page</p>
+      <aside className="legal-toc" aria-label={t('legal.onThisPage')}>
+        <p className="jarvis-caption">{t('legal.onThisPage')}</p>
         {items.map((item) => (
           <button
             key={item.id}

@@ -1,5 +1,6 @@
 /** Profile-aware matching: country-eligible scholarships + live/web job feeds. */
 
+import i18n from '../i18n'
 import { LISTING_CATALOG } from './listingCatalog'
 import { SCHOLARSHIP_PROGRAMS, isScholarshipEligible } from './scholarshipPrograms'
 import { fetchLiveJobs, buildCountryJobBoards } from './jobFeed'
@@ -112,20 +113,33 @@ function reasonScholarship(item, summary) {
 
   if (summary.primary) {
     const yearBit = summary.year ? ` (${summary.year})` : ''
-    const instBit = summary.institution ? ` from ${summary.institution}` : ''
+    const instBit = summary.institution
+      ? i18n.t('reasons.fromInstitution', { institution: summary.institution })
+      : ''
+    const kind =
+      summary.primary.type === 'certificate'
+        ? i18n.t('reasons.certificate')
+        : i18n.t('reasons.degree')
     parts.push(
-      `Your ${summary.primary.type === 'certificate' ? 'certificate' : 'degree'} in ${summary.primary.field}${yearBit}${instBit} was used as the primary academic signal.`,
+      i18n.t('reasons.primarySignal', {
+        kind,
+        field: summary.primary.field,
+        yearBit,
+        instBit,
+      }),
     )
   } else {
-    parts.push(`Focus field “${summary.field}” guided ranking for this award.`)
+    parts.push(i18n.t('reasons.focusField', { field: summary.field }))
   }
 
   if (summary.skills.length) {
     parts.push(
-      `Skills factored in: ${summary.skills
-        .slice(0, 5)
-        .map((s) => `${s.skill_name} (${s.proficiency || 'intermediate'})`)
-        .join(', ')}.`,
+      i18n.t('reasons.skillsFactored', {
+        list: summary.skills
+          .slice(0, 5)
+          .map((s) => `${s.skill_name} (${s.proficiency || 'intermediate'})`)
+          .join(', '),
+      }),
     )
   }
 
@@ -133,13 +147,13 @@ function reasonScholarship(item, summary) {
     const regional = (item.regions || []).some((r) => regions.includes(r) && r !== 'global')
     parts.push(
       regional
-        ? `Eligibility signal: program targets regions that include applicants from ${summary.country}. Always confirm the current eligible-country list on the official site.`
-        : `Open internationally — still confirm that ${summary.country} is on this cycle’s eligible list before investing application time.`,
+        ? i18n.t('reasons.eligibilityRegional', { country: summary.country })
+        : i18n.t('reasons.eligibilityOpen', { country: summary.country }),
     )
   }
 
-  if (item.deadlineLabel) parts.push(`Timing: ${item.deadlineLabel}.`)
-  parts.push('Official URL is linked — deadlines and nationality rules change by cycle.')
+  if (item.deadlineLabel) parts.push(i18n.t('reasons.timing', { deadline: item.deadlineLabel }))
+  parts.push(i18n.t('reasons.officialUrl'))
   return parts.join(' ')
 }
 

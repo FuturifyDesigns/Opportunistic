@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LANGUAGES, nativeLanguageName } from '../i18n/languages'
+import { changeAppLanguage } from '../i18n'
 
 export default function LanguageSwitcher({ compact = false }) {
   const { i18n, t } = useTranslation()
@@ -50,7 +51,7 @@ export default function LanguageSwitcher({ compact = false }) {
   }, [open])
 
   function pick(code) {
-    void i18n.changeLanguage(code).then(() => {
+    void changeAppLanguage(code).then(() => {
       setOpen(false)
     })
   }

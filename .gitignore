@@ -37,3 +37,11 @@ secrets/
 
 supabase/.temp/
 
+
+src/i18n/.translate-cache.json
+src/i18n/.translate-progress.json
+
+
+src/i18n/.shard-*.log
+src/i18n/.shard-*.err
+

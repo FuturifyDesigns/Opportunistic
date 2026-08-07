@@ -25,7 +25,7 @@ export default function SiteFooter() {
           </div>
         </div>
 
-        <nav className="footer-nav" aria-label="Footer">
+        <nav className="footer-nav" aria-label={t('common.footerNav')}>
           <div className="footer-col">
             <p className="footer-label">{t('nav.product')}</p>
             <Link to="/how-it-works">{t('nav.howItWorks')}</Link>

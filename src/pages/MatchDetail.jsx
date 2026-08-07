@@ -42,7 +42,7 @@ export default function MatchDetail() {
       match: { ...match, found_at: `${match.found_at || ''}|n${tipNonce}` },
       count: 6,
     })
-  }, [match, profile, qualifications, skills, listing, kind, tipNonce])
+  }, [match, profile, qualifications, skills, listing, kind, tipNonce, i18n.language])
 
   useEffect(() => {
     document.title = match?.title ? `${match.title} — Opportunistic` : t('match.metaTitle')
@@ -57,12 +57,12 @@ export default function MatchDetail() {
     setTipNonce(0)
 
     if (!table) {
-      setError('Unknown listing type.')
+      setError(t('match.unknownType'))
       setNotFound(true)
       return undefined
     }
     if (!user?.id || !id) {
-      setError('Missing match reference.')
+      setError(t('match.missingRef'))
       setNotFound(true)
       return undefined
     }
@@ -108,7 +108,7 @@ export default function MatchDetail() {
       if (err) throw err
       if (data) setMatch(data)
     } catch (err) {
-      setError(err.message || 'Could not update match')
+      setError(err.message || t('match.updateFailed'))
     } finally {
       setBusy(false)
     }
@@ -228,7 +228,7 @@ export default function MatchDetail() {
                       key={src}
                       className="detail-gallery-item"
                       onClick={() => setActiveImage(src)}
-                      aria-label="Expand gallery image"
+                      aria-label={t('match.expandGallery')}
                     >
                       <img src={src} alt="" loading="lazy" />
                     </button>
@@ -315,7 +315,7 @@ export default function MatchDetail() {
                     </p>
                   ))
                 ) : (
-                  <p className="reasoning-line">Open the source listing and compare requirements to your profile.</p>
+                  <p className="reasoning-line">{t('match.reasonFallback')}</p>
                 )}
               </div>
             </section>
@@ -328,14 +328,14 @@ export default function MatchDetail() {
                 {match.saved ? t('match.unsave') : t('match.save')}
               </button>
               <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => toggle('dismissed')}>
-                {match.dismissed ? 'Restore' : t('match.dismiss')}
+                {match.dismissed ? t('match.restore') : t('match.dismiss')}
               </button>
             </div>
           </article>
         ) : null}
 
         {activeImage ? (
-          <button type="button" className="lightbox" onClick={() => setActiveImage(null)} aria-label="Close image">
+          <button type="button" className="lightbox" onClick={() => setActiveImage(null)} aria-label={t('match.closeImage')}>
             <img src={activeImage} alt="" />
           </button>
         ) : null}

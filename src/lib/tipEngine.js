@@ -3,6 +3,8 @@
  * Tips reshuffle whenever profile skills/quals/country/headline or match score change.
  */
 
+import i18n from '../i18n'
+
 function hashSeed(str) {
   let h = 2166136261
   for (let i = 0; i < str.length; i += 1) {
@@ -65,6 +67,10 @@ function profileFingerprint(profile, qualifications, skills) {
   ].join('::')
 }
 
+function tt(key, opts) {
+  return i18n.t(`tips.${key}`, opts)
+}
+
 function scholarshipPool({ profile, listing, field, skills, quals, country, score, advanced, weak }) {
   const skillNames = skills.map((s) => s.skill_name)
   const skillList = skillNames.slice(0, 3).join(', ') || field
@@ -73,103 +79,77 @@ function scholarshipPool({ profile, listing, field, skills, quals, country, scor
   const tips = []
 
   tips.push(
-    `Write a 150-word leadership story that starts in ${country || 'your community'} and ends with how a ${listing.source} award multiplies that impact.`,
+    tt('sLeadership', {
+      place: country || tt('yourCommunity'),
+      source: listing.source,
+    }),
   )
   tips.push(
-    `Map your ${field} background to 3 modules on a target ${listing.location || 'host'} program — name the modules in your personal statement.`,
+    tt('sModules', {
+      field,
+      location: listing.location || tt('host'),
+    }),
   )
   if (skillList) {
-    tips.push(
-      `In essay 1, dedicate one paragraph to how ${skillList} already produced a measurable result (numbers beat adjectives).`,
-    )
+    tips.push(tt('sEssaySkills', { skills: skillList }))
   }
   if (advanced.length) {
     tips.push(
-      `Lead with your ${advanced[0].skill_name} depth (${advanced[0].proficiency}) as proof you can handle ${listing.level || 'postgraduate'} intensity.`,
+      tt('sAdvanced', {
+        skill: advanced[0].skill_name,
+        level: advanced[0].proficiency,
+        intensity: listing.level || tt('postgraduate'),
+      }),
     )
   }
   if (weak.length) {
-    tips.push(
-      `Before submitting, raise ${weak[0].skill_name} with a short project or certificate — reviewers notice unfinished skill claims.`,
-    )
+    tips.push(tt('sWeak', { skill: weak[0].skill_name }))
   }
   if (inst) {
-    tips.push(
-      `Ask a referee from ${inst} who saw you lead, not only teach you — Chevening-style panels weight influence over grades alone.`,
-    )
+    tips.push(tt('sRefereeInst', { institution: inst }))
   } else {
-    tips.push(
-      `Secure two referees who can quote a specific initiative you ran — vague “hardworking student” letters sink strong profiles.`,
-    )
+    tips.push(tt('sRefereeGeneric'))
   }
+  tips.push(tt('sCalendar', { deadline: listing.deadlineLabel || tt('officialClose') }))
+  tips.push(tt('sOffline'))
   tips.push(
-    `Build a deadline reverse calendar from “${listing.deadlineLabel || 'the official close date'}” with buffers for transcripts, tests, and references.`,
+    tt('sAlumni', {
+      place: country || tt('yourRegion'),
+      source: listing.source,
+    }),
   )
+  tips.push(tt('sScore', { score: Math.round(score) }))
+  tips.push(tt('sHeadline', { headline: profile?.headline || field }))
+  tips.push(tt('sPitch', { source: listing.source }))
+  tips.push(tt('sProof'))
   tips.push(
-    `Draft answers offline first, then paste into the portal — auto-save glitches erase hours of work on many scholarship forms.`,
+    tt('sEligibility', {
+      source: listing.source,
+      country: country || tt('country'),
+    }),
   )
-  tips.push(
-    `Research 2 alumni from ${country || 'your region'} who won ${listing.source}; note what their applications emphasized and mirror the structure, not the story.`,
-  )
-  tips.push(
-    `If your match score is ${Math.round(score)}%, treat gaps honestly in the essay — panels reward self-awareness more than perfection claims.`,
-  )
-  tips.push(
-    `Align your headline (“${profile?.headline || field}”) with the program’s stated mission so the first screen already feels intentional.`,
-  )
-  tips.push(
-    `Prepare a 60-second verbal pitch of your study plan for interviews: problem → your edge → ${listing.source} as the accelerator.`,
-  )
-  tips.push(
-    `Collect proof artifacts (GitHub, reports, awards, community letters) that back every skill you listed — screenshots ready before you apply.`,
-  )
-  tips.push(
-    `Check nationality and return-home clauses for ${listing.source} against your ${country || 'country'} status this cycle — eligibility mistakes waste strong essays.`,
-  )
-  tips.push(
-    `Rewrite your bio so a stranger in ${listing.location || 'the host country'} understands your field in one sentence, then expand.`,
-  )
+  tips.push(tt('sBio', { location: listing.location || tt('hostCountry') }))
   if (listing.id === 'chevening') {
-    tips.push(
-      `Pick three UK courses that genuinely fit ${field}, not prestige alone — Chevening rejects mismatched course trios even with strong essays.`,
-    )
-    tips.push(
-      `Spend a full page on “networking” plans: which UK societies, labs, or policy groups you will join, and what you bring back to ${country || 'home'}.`,
-    )
+    tips.push(tt('sCheveningCourses', { field }))
+    tips.push(tt('sCheveningNet', { place: country || tt('home') }))
   }
   if (listing.id === 'daad') {
-    tips.push(
-      `Filter DAAD by your exact degree level and ${field}, then shortlist 2 calls — generic “Germany” applications rarely clear the first cut.`,
-    )
-    tips.push(
-      `Decide early whether you need German or English proof for the host program, and book the test date before the call closes.`,
-    )
+    tips.push(tt('sDaadFilter', { field }))
+    tips.push(tt('sDaadLang'))
   }
   if (listing.id === 'mastercard') {
-    tips.push(
-      `Apply through a partner university that teaches ${field} — Mastercard Scholars is campus-specific, not one global form.`,
-    )
-    tips.push(
-      `Document need and leadership together: one paragraph on barriers, one on what you already changed for others in ${country || 'your community'}.`,
-    )
+    tips.push(tt('sMastercardApply', { field }))
+    tips.push(tt('sMastercardNeed', { place: country || tt('yourCommunity') }))
   }
   if (listing.id === 'fulbright') {
-    tips.push(
-      `Use your country’s Fulbright page only — deadlines and forms for ${country || 'your nationality'} differ from the global brochure.`,
-    )
-    tips.push(
-      `Make the research/study objective falsifiable: what question in ${field} will you answer in 12–24 months?`,
-    )
+    tips.push(tt('sFulbrightPage', { country: country || tt('yourNationality') }))
+    tips.push(tt('sFulbrightObj', { field }))
   }
   if (listing.id === 'gates') {
-    tips.push(
-      `Cambridge fit comes first: name a supervisor or lab group relevant to ${field} before polishing the Gates statement.`,
-    )
+    tips.push(tt('sGates', { field }))
   }
   if (listing.id === 'unesco' || listing.id === 'african_union') {
-    tips.push(
-      `Tie your proposal to a published theme from ${listing.source}, using language from the call — thematic misalignment is a common silent reject.`,
-    )
+    tips.push(tt('sTheme', { source: listing.source }))
   }
 
   return tips
@@ -180,84 +160,59 @@ function jobPool({ profile, listing, field, skills, quals, country, score, advan
   const primarySkill = skillNames[0] || field
   const tips = []
 
+  tips.push(tt('jResume', { skill: primarySkill, field, source: listing.source }))
   tips.push(
-    `Rewrite your résumé summary to lead with ${primarySkill} + ${field}, then mirror the top 5 verbs from each ${listing.source} posting you open.`,
-  )
-  tips.push(
-    `Build a 1-page “proof sheet” with 3 bullets: problem, action using ${skillNames.slice(0, 2).join(' / ') || field}, measurable result.`,
+    tt('jProof', {
+      skills: skillNames.slice(0, 2).join(' / ') || field,
+    }),
   )
   if (advanced.length) {
     tips.push(
-      `Put ${advanced.map((s) => s.skill_name).slice(0, 2).join(' and ')} in the first third of your LinkedIn/About — recruiters skim, they don’t hunt.`,
+      tt('jAdvanced', {
+        skills: advanced
+          .map((s) => s.skill_name)
+          .slice(0, 2)
+          .join(' and '),
+      }),
     )
   }
   if (weak.length) {
-    tips.push(
-      `For roles requiring ${weak[0].skill_name}, add a weekend mini-project and link it — intermediate claims without evidence get filtered out.`,
-    )
+    tips.push(tt('jWeak', { skill: weak[0].skill_name }))
   }
   tips.push(
-    `Set ${listing.source} alerts for “${field}” and your country (${country || 'target location'}), then apply within 48 hours of posting.`,
+    tt('jAlerts', {
+      source: listing.source,
+      field,
+      country: country || tt('targetLocation'),
+    }),
   )
-  tips.push(
-    `Target 5 companies per week that hire for ${field} in or from ${country || 'your market'}, not 50 random Easy Apply clicks.`,
-  )
-  tips.push(
-    `In every cover note, name one concrete deliverable you would ship in the first 30 days using your current stack.`,
-  )
-  tips.push(
-    `Ask for referrals only after you can explain the team’s product in 2 sentences — cold asks without homework burn bridges.`,
-  )
-  tips.push(
-    `Record a 90-second Loom (or voice note) walking through a project; attach it when ${listing.source} allows message/apply extras.`,
-  )
-  tips.push(
-    `Your current match confidence is ~${Math.round(score)}% — if under 70%, tighten skills on Profile and rematch before spraying applications.`,
-  )
-  tips.push(
-    `Translate academic language from ${quals[0]?.field || field} into employer language: “coursework” → “delivered X under deadline”.`,
-  )
-  tips.push(
-    `Keep a rejection log: role, missing skill, next action — patterns tell you what to learn next faster than guesswork.`,
-  )
+  tips.push(tt('jTarget', { field, country: country || tt('yourMarket') }))
+  tips.push(tt('jCover'))
+  tips.push(tt('jReferrals'))
+  tips.push(tt('jLoom', { source: listing.source }))
+  tips.push(tt('jConfidence', { score: Math.round(score) }))
+  tips.push(tt('jTranslate', { field: quals[0]?.field || field }))
+  tips.push(tt('jLog'))
   if (listing.id === 'linkedin') {
-    tips.push(
-      `Turn on Open to Work (recruiters only) and pin a featured project that proves ${primarySkill}.`,
-    )
-    tips.push(
-      `Comment thoughtfully on 3 hiring-manager posts in ${field} this week before cold-applying — warm visibility beats silent Apply.`,
-    )
+    tips.push(tt('jLinkedinOpen', { skill: primarySkill }))
+    tips.push(tt('jLinkedinComment', { field }))
   }
   if (listing.id === 'indeed') {
-    tips.push(
-      `Use Indeed’s location filter exactly as “${country || 'your city/country'}” and sort by date — stale reposts waste energy.`,
-    )
+    tips.push(tt('jIndeed', { country: country || tt('yourCityCountry') }))
   }
   if (listing.id === 'remoteok') {
-    tips.push(
-      `Read the country/timezone line twice on Remote OK posts — many “remote” roles still exclude ${country || 'some regions'}.`,
-    )
-    tips.push(
-      `Price your contractor rate and timezone overlap upfront in the first message to avoid ghosting after screens.`,
-    )
+    tips.push(tt('jRemoteOk', { country: country || tt('someRegions') }))
+    tips.push(tt('jRemoteRate'))
   }
   if (listing.id === 'glassdoor') {
-    tips.push(
-      `Read the latest interview reports for that employer, then prepare 2 stories that answer the most repeated question pattern.`,
-    )
+    tips.push(tt('jGlassdoor'))
   }
   if (listing.id === 'reliefweb') {
-    tips.push(
-      `Lead applications with field/volunteer impact in ${country || 'your region'} — ReliefWeb hiring heavily weights mission-relevant experience.`,
-    )
-    tips.push(
-      `Match language from the vacancy (MEAL, protection, WASH, etc.) only if you can defend it — buzzword stuffing is obvious.`,
-    )
+    tips.push(tt('jReliefImpact', { place: country || tt('yourRegion') }))
+    tips.push(tt('jReliefLang'))
   }
   if (profile?.headline) {
-    tips.push(
-      `Sync your public headline to “${profile.headline}” everywhere you apply so ${listing.source} screens and your CV tell one story.`,
-    )
+    tips.push(tt('jHeadline', { headline: profile.headline, source: listing.source }))
   }
 
   return tips
@@ -277,14 +232,17 @@ export function generateWinTips({
 } = {}) {
   const quals = (qualifications || []).filter((q) => q.field?.trim())
   const sk = (skills || []).filter((s) => s.skill_name?.trim())
-  const field = quals[0]?.field?.trim() || sk[0]?.skill_name || 'your field'
+  const field = quals[0]?.field?.trim() || sk[0]?.skill_name || tt('yourField')
   const country = profile?.country || null
   const score = Number(match?.match_score) || 50
-  const advanced = topSkills(sk.filter((s) => ['advanced', 'expert'].includes(s.proficiency)), 3)
+  const advanced = topSkills(
+    sk.filter((s) => ['advanced', 'expert'].includes(s.proficiency)),
+    3,
+  )
   const weak = weakSkills(sk)
   const listingSafe = listing || {
     id: 'generic',
-    source: match?.source || 'this opportunity',
+    source: match?.source || tt('thisOpportunity'),
     location: '',
     level: '',
     deadlineLabel: '',
@@ -302,32 +260,19 @@ export function generateWinTips({
     weak,
   }
 
-  const pool =
-    kind === 'job' || listingSafe.kind === 'job'
-      ? jobPool(ctx)
-      : scholarshipPool(ctx)
-
-  // Generic fallbacks if pool somehow thin
-  while (pool.length < count) {
-    pool.push(
-      `Update your Opportunistic profile, save to rematch, then revisit this page — tips regenerate from your latest skills and goals.`,
-    )
-  }
-
+  const pool = kind === 'job' ? jobPool(ctx) : scholarshipPool(ctx)
   const seed = [
-    profileFingerprint(profile, quals, sk),
-    listingSafe.id || listingSafe.source || '',
-    match?.id || '',
-    Math.round(score),
-    match?.found_at || '',
     kind,
+    listingSafe.id,
+    match?.id || match?.url || '',
+    profileFingerprint(profile, quals, sk),
+    Math.round(score),
+    i18n.language,
   ].join('|')
 
   const rand = mulberry32(hashSeed(seed))
-  const tips = pickUnique(pool, count, rand)
-
   return {
-    tips,
+    tips: pickUnique(pool, count, rand),
     seed,
     generatedAt: new Date().toISOString(),
   }

@@ -72,24 +72,27 @@ export default function Dashboard() {
     async (reason = 'manual') => {
       if (!user?.id || refreshing) return
       setRefreshing(true)
-      setEngineNote(reason === 'weekly' ? 'Weekly refresh · scanning the web…' : 'Fetching live jobs & country scholarships…')
+      setEngineNote(reason === 'weekly' ? t('dashboard.weeklyNote') : t('dashboard.refreshingNote'))
       try {
         const result = await runMatchingForUser(user.id)
         setEngineNote(
-          `Updated · ${result.scholarships} scholarships · ${result.jobs} jobs` +
-            (result.meta?.live != null ? ` · ${result.meta.live} live postings` : ''),
+          t('dashboard.updated', {
+            scholarships: result.scholarships,
+            jobs: result.jobs,
+          }) +
+            (result.meta?.live != null ? ` ${t('dashboard.liveHaul', { live: result.meta.live })}` : ''),
         )
         setLastAt(result.refreshedAt)
         setMeta(result.meta || null)
         await refreshProfile?.()
         await load()
       } catch (e) {
-        setEngineNote(e.message || 'Refresh failed')
+        setEngineNote(e.message || t('dashboard.refreshFailed'))
       } finally {
         setRefreshing(false)
       }
     },
-    [user?.id, refreshing, load, refreshProfile],
+    [user?.id, refreshing, load, refreshProfile, t],
   )
 
   useEffect(() => {
@@ -161,7 +164,9 @@ export default function Dashboard() {
 
   const lastLabel = lastAt
     ? new Date(lastAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
-    : 'Never'
+    : t('dashboard.never')
+
+  const countryLabel = profile?.country || t('dashboard.statYourCountry')
 
   return (
     <div className="page dash-page">
@@ -181,11 +186,12 @@ export default function Dashboard() {
             <div className="dash-engine">
               <span className={`dash-engine-dot ${refreshing ? 'pulse' : ''}`} />
               <div>
-                <strong>Opportunity engine</strong>
+                <strong>{t('dashboard.engineTitle')}</strong>
                 <p>
-                  Country · <em>{profile?.country || 'set in profile'}</em>
-                  {meta?.live != null ? ` · Last live haul ${meta.live} jobs` : ''}
-                  {' · '}Refreshed {lastLabel}
+                  {t('dashboard.engineCountry')}{' '}
+                  <em>{profile?.country || t('dashboard.engineSetProfile')}</em>
+                  {meta?.live != null ? ` ${t('dashboard.engineLastLive', { live: meta.live })}` : ''}
+                  {` ${t('dashboard.engineRefreshed', { when: lastLabel })}`}
                 </p>
                 {engineNote ? <p className="dash-engine-note">{engineNote}</p> : null}
               </div>
@@ -198,7 +204,7 @@ export default function Dashboard() {
               disabled={refreshing}
               onClick={() => refreshEngine('manual')}
             >
-              {refreshing ? 'Scanning web…' : 'Refresh from web'}
+              {refreshing ? t('dashboard.scanning') : t('dashboard.refresh')}
             </button>
             <Link className="btn btn-ghost" to="/profile">
               {t('dashboard.updateProfile')}
@@ -208,24 +214,24 @@ export default function Dashboard() {
 
         <section className="dash-stats">
           <article className="dash-stat">
-            <p className="dash-stat-label">Scholarships</p>
+            <p className="dash-stat-label">{t('dashboard.statScholarships')}</p>
             <p className="dash-stat-value">{scholarships.length}</p>
-            <p className="dash-stat-hint">Eligible for {profile?.country || 'your country'}</p>
+            <p className="dash-stat-hint">{t('dashboard.statEligible', { country: countryLabel })}</p>
           </article>
           <article className="dash-stat">
-            <p className="dash-stat-label">Jobs</p>
+            <p className="dash-stat-label">{t('dashboard.statJobs')}</p>
             <p className="dash-stat-value">{jobs.length}</p>
-            <p className="dash-stat-hint">Live feeds + country boards</p>
+            <p className="dash-stat-hint">{t('dashboard.statJobsHint')}</p>
           </article>
           <article className="dash-stat">
-            <p className="dash-stat-label">Avg score</p>
+            <p className="dash-stat-label">{t('dashboard.statAvg')}</p>
             <p className="dash-stat-value">{avgScore || '—'}%</p>
-            <p className="dash-stat-hint">Profile fit across this tab</p>
+            <p className="dash-stat-hint">{t('dashboard.statAvgHint')}</p>
           </article>
           <article className="dash-stat">
-            <p className="dash-stat-label">Saved</p>
+            <p className="dash-stat-label">{t('dashboard.statSaved')}</p>
             <p className="dash-stat-value">{savedCount}</p>
-            <p className="dash-stat-hint">{strongCount} strong matches (≥75%)</p>
+            <p className="dash-stat-hint">{t('dashboard.statStrong', { count: strongCount })}</p>
           </article>
         </section>
 
@@ -245,26 +251,26 @@ export default function Dashboard() {
 
           <div className="dash-filters">
             <button type="button" className={filter === 'all' ? 'chip active' : 'chip'} onClick={() => setFilter('all')}>
-              All
+              {t('dashboard.filterAll')}
             </button>
             <button
               type="button"
               className={filter === 'strong' ? 'chip active' : 'chip'}
               onClick={() => setFilter('strong')}
             >
-              Strong
+              {t('dashboard.filterStrong')}
             </button>
             <button
               type="button"
               className={filter === 'saved' ? 'chip active' : 'chip'}
               onClick={() => setFilter('saved')}
             >
-              Saved
+              {t('dashboard.filterSaved')}
             </button>
             <input
               className="dash-search"
               type="search"
-              placeholder="Filter by title, source, skill…"
+              placeholder={t('dashboard.searchPlaceholder')}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
@@ -276,7 +282,7 @@ export default function Dashboard() {
             {loading || refreshing ? (
               <div className="dash-loading">
                 <div className="spinner" />
-                <p>{refreshing ? 'Pulling live jobs & country scholarships…' : t('common.loading')}</p>
+                <p>{refreshing ? t('dashboard.pulling') : t('common.loading')}</p>
               </div>
             ) : rows.length === 0 ? (
               <div className="empty-state glass-panel">
@@ -284,7 +290,7 @@ export default function Dashboard() {
                 <p>{t('dashboard.emptyBody')}</p>
                 <div className="cta-row">
                   <button type="button" className="btn" onClick={() => refreshEngine('manual')}>
-                    Refresh from web
+                    {t('dashboard.refresh')}
                   </button>
                   <Link className="btn btn-ghost" to="/profile">
                     {t('dashboard.updateProfile')}
@@ -308,24 +314,24 @@ export default function Dashboard() {
           </div>
 
           <aside className="dash-side glass-panel">
-            <p className="jarvis-caption">How matching works</p>
-            <h2>Profile → web → ranked cards</h2>
+            <p className="jarvis-caption">{t('dashboard.sideCaption')}</p>
+            <h2>{t('dashboard.sideTitle')}</h2>
             <ul className="dash-side-list">
               <li>
-                <strong>Scholarships</strong>
-                <span>Only programs that accept applicants from {profile?.country || 'your country'} / region.</span>
+                <strong>{t('dashboard.sideSchTitle')}</strong>
+                <span>{t('dashboard.sideSchBody', { country: countryLabel })}</span>
               </li>
               <li>
-                <strong>Jobs</strong>
-                <span>Live Remotive & Arbeitnow postings scored to your skills, plus Indeed/LinkedIn searches for your country.</span>
+                <strong>{t('dashboard.sideJobTitle')}</strong>
+                <span>{t('dashboard.sideJobBody')}</span>
               </li>
               <li>
-                <strong>Weekly</strong>
-                <span>Auto-refresh when results are older than 7 days. You can also hit Refresh from web anytime.</span>
+                <strong>{t('dashboard.sideWeekTitle')}</strong>
+                <span>{t('dashboard.sideWeekBody')}</span>
               </li>
             </ul>
             <a className="text-link" href="https://remotive.com/remote-jobs" target="_blank" rel="noreferrer">
-              Remotive feed →
+              {t('dashboard.remotiveLink')}
             </a>
           </aside>
         </div>

@@ -221,7 +221,7 @@ export default function Auth() {
         navigate('/dashboard')
       }
     } catch (err) {
-      setMessage(err.message || 'Something went wrong')
+      setMessage(err.message || t('auth.genericError'))
     } finally {
       setBusy(false)
     }
@@ -235,7 +235,7 @@ export default function Auth() {
           {phase === 'choose' ? (
             <section className="auth-choose">
               <div className="auth-choose-copy">
-                <p className="eyebrow">Access</p>
+                <p className="eyebrow">{t('auth.accessEyebrow')}</p>
                 <h1>{t('auth.choosePortal')}</h1>
               </div>
               <div className="auth-orbs" role="group" aria-label={`${t('auth.signIn')} / ${t('auth.signUp')}`}>

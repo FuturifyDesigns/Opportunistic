@@ -11,6 +11,8 @@ import {
   storeLanguage,
 } from './languages'
 
+const localeModules = import.meta.glob('./locales/*.json')
+
 function prune(obj) {
   if (!obj || typeof obj !== 'object') return obj
   const out = Array.isArray(obj) ? [] : {}
@@ -38,29 +40,45 @@ function deepMerge(a, b) {
   return out
 }
 
-function buildResources() {
-  const resources = {
-    en: { translation: en },
-  }
-
-  for (const { code } of LANGUAGES) {
-    if (code === 'en') continue
-    const fromShell = prune(shellToNested(SHELL[code]))
-    const fromOverlay = overlays[code] || {}
-    // Full English base so every key resolves; overlays/shell replace what we translate.
-    resources[code] = {
-      translation: deepMerge(deepMerge(deepMerge({}, en), fromShell), fromOverlay),
-    }
-  }
-
-  return resources
+function composeLocale(code, generated) {
+  const fromShell = prune(shellToNested(SHELL[code]))
+  const fromOverlay = overlays[code] || {}
+  return deepMerge(deepMerge(deepMerge(deepMerge({}, en), fromShell), fromOverlay), generated || {})
 }
 
-const initial =
-  getStoredLanguage() || detectBrowserLanguage() || 'en'
+const loaded = new Set(['en'])
+
+async function loadLocale(code) {
+  if (!code || code === 'en' || loaded.has(code)) return
+  const key = Object.keys(localeModules).find((p) => p.endsWith(`/locales/${code}.json`))
+  let generated = null
+  if (key) {
+    try {
+      const mod = await localeModules[key]()
+      generated = mod?.default || mod
+    } catch {
+      generated = null
+    }
+  }
+  i18n.addResourceBundle(code, 'translation', composeLocale(code, generated), true, true)
+  loaded.add(code)
+}
+
+const initial = getStoredLanguage() || detectBrowserLanguage() || 'en'
+
+// Seed lightweight packs so language switcher labels / shell work before full load.
+const bootstrap = { en: { translation: en } }
+for (const { code } of LANGUAGES) {
+  if (code === 'en') continue
+  const fromShell = prune(shellToNested(SHELL[code]))
+  const fromOverlay = overlays[code] || {}
+  bootstrap[code] = {
+    translation: deepMerge(deepMerge(deepMerge({}, en), fromShell), fromOverlay),
+  }
+}
 
 i18n.use(initReactI18next).init({
-  resources: buildResources(),
+  resources: bootstrap,
   lng: initial,
   fallbackLng: 'en',
   interpolation: { escapeValue: false },
@@ -78,12 +96,27 @@ export function applyDocumentLanguage(code = i18n.language) {
   document.documentElement.dir = meta.dir === 'rtl' ? 'rtl' : 'ltr'
 }
 
+export async function changeAppLanguage(code) {
+  await loadLocale(code)
+  await i18n.changeLanguage(code)
+  applyDocumentLanguage(code)
+}
+
+// Prefetch initial language pack
+loadLocale(initial).then(() => {
+  if (i18n.language === initial) {
+    i18n.reloadResources(initial)
+    applyDocumentLanguage(initial)
+  }
+})
+
 applyDocumentLanguage(initial)
 
 i18n.on('languageChanged', (lng) => {
   storeLanguage(lng)
   applyDocumentLanguage(lng)
+  loadLocale(lng)
 })
 
-export { LANGUAGES, storeLanguage }
+export { LANGUAGES, storeLanguage, loadLocale }
 export default i18n

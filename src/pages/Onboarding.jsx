@@ -73,13 +73,21 @@ export default function Onboarding() {
   const progress = ((step + 1) / GUIDE.length) * 100
 
   const feedPreview = useMemo(() => {
-    const items = [`Country · ${country}`]
-    if (fullName) items.push(`Name · ${fullName.split(' ')[0]}`)
-    if (headline) items.push(`Headline · ${headline.slice(0, 28)}${headline.length > 28 ? '…' : ''}`)
+    const items = [t('onboarding.feedCountry', { country })]
+    if (fullName) items.push(t('onboarding.feedName', { name: fullName.split(' ')[0] }))
+    if (headline) {
+      items.push(
+        t('onboarding.feedHeadline', {
+          headline: `${headline.slice(0, 28)}${headline.length > 28 ? '…' : ''}`,
+        }),
+      )
+    }
     qualifications.filter((q) => q.field.trim()).forEach((q) => items.push(`${q.type} · ${q.field}`))
-    skills.filter((s) => s.skill_name.trim()).forEach((s) => items.push(`Skill · ${s.skill_name}`))
+    skills
+      .filter((s) => s.skill_name.trim())
+      .forEach((s) => items.push(t('onboarding.feedSkill', { skill: s.skill_name })))
     return items.slice(0, 6)
-  }, [country, fullName, headline, qualifications, skills])
+  }, [country, fullName, headline, qualifications, skills, t, i18n.language])
 
   useGSAP(
     () => {
@@ -110,13 +118,13 @@ export default function Onboarding() {
     setError('')
     setProcessLogs([])
     const lines = [
-      '> locking profile…',
-      `> country=${country}`,
-      `> qualifications=${qualifications.filter((q) => q.field.trim()).length}`,
-      `> skills=${skills.filter((s) => s.skill_name.trim()).length}`,
-      '> building match queries…',
-      '> scoring + writing reasons…',
-      '> pushing results to dashboard…',
+      t('onboarding.logLock'),
+      t('onboarding.logCountry', { country }),
+      t('onboarding.logQuals', { count: qualifications.filter((q) => q.field.trim()).length }),
+      t('onboarding.logSkills', { count: skills.filter((s) => s.skill_name.trim()).length }),
+      t('onboarding.logQueries'),
+      t('onboarding.logScoring'),
+      t('onboarding.logPush'),
     ]
     lines.forEach((line, i) => {
       window.setTimeout(() => setProcessLogs((prev) => [...prev, line]), i * 380)
@@ -125,10 +133,10 @@ export default function Onboarding() {
     try {
       const bio =
         goal === 'scholarships'
-          ? 'Looking primarily for scholarships.'
+          ? t('onboarding.bioScholarships')
           : goal === 'jobs'
-            ? 'Looking primarily for jobs.'
-            : 'Looking for scholarships and jobs.'
+            ? t('onboarding.bioJobs')
+            : t('onboarding.bioBoth')
 
       const { error: pErr } = await supabase.from('profiles').upsert({
         user_id: user.id,
