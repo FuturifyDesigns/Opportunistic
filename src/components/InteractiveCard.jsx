@@ -19,6 +19,8 @@ export default function InteractiveCard({
       if (!el || prefersReducedMotion()) return
 
       const onMove = (e) => {
+        // Scramble hover must not drive card tilt (avoids position jumps).
+        if (e.target?.closest?.('.gt-word, .gt-heading')) return
         const r = el.getBoundingClientRect()
         const x = (e.clientX - r.left) / r.width - 0.5
         const y = (e.clientY - r.top) / r.height - 0.5
@@ -29,6 +31,7 @@ export default function InteractiveCard({
           duration: 0.35,
           ease: 'power2.out',
           transformPerspective: 800,
+          overwrite: 'auto',
         })
         const shine = el.querySelector('.card-shine')
         if (shine) {
@@ -36,6 +39,7 @@ export default function InteractiveCard({
             opacity: 0.35,
             backgroundPosition: `${50 + x * 40}% ${50 + y * 40}%`,
             duration: 0.3,
+            overwrite: 'auto',
           })
         }
       }
@@ -47,9 +51,10 @@ export default function InteractiveCard({
           y: 0,
           duration: 0.45,
           ease: 'power3.out',
+          overwrite: 'auto',
         })
         const shine = el.querySelector('.card-shine')
-        if (shine) gsap.to(shine, { opacity: 0, duration: 0.35 })
+        if (shine) gsap.to(shine, { opacity: 0, duration: 0.35, overwrite: 'auto' })
       }
 
       el.addEventListener('pointermove', onMove)
