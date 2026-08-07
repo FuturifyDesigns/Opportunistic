@@ -129,6 +129,96 @@ textarea {
   color: var(--ink);
 }
 
+.account-menu {
+  position: relative;
+  z-index: 50;
+}
+
+.account-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  cursor: pointer;
+  line-height: 0;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.account-menu-trigger img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  background: transparent !important;
+}
+
+.account-menu-trigger:hover,
+.account-menu.open .account-menu-trigger {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(11, 110, 79, 0.12);
+}
+
+.account-menu-panel {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  right: 0;
+  min-width: 200px;
+  padding: 0.45rem;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.14);
+  display: grid;
+  gap: 0.15rem;
+}
+
+.account-menu-label {
+  margin: 0;
+  padding: 0.45rem 0.7rem 0.55rem;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 0.2rem;
+}
+
+.account-menu-panel a,
+.account-menu-signout {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.55rem 0.7rem;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.account-menu-panel a:hover,
+.account-menu-panel a.active,
+.account-menu-signout:hover {
+  background: rgba(11, 110, 79, 0.08);
+  color: var(--accent);
+}
+
+.account-menu-signout {
+  margin-top: 0.15rem;
+  border-top: 1px solid var(--line);
+  border-radius: 0 0 8px 8px;
+  color: var(--muted);
+}
+
 .nav-start-logo {
   display: inline-flex;
   align-items: center;
@@ -3251,6 +3341,21 @@ a.btn-auth {
 
   .nav.open {
     display: flex;
+  }
+
+  .account-menu {
+    width: 100%;
+  }
+
+  .account-menu-trigger {
+    margin-left: auto;
+  }
+
+  .account-menu-panel {
+    position: static;
+    margin-top: 0.45rem;
+    box-shadow: none;
+    width: 100%;
   }
 
   .header-inner {

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
@@ -6,11 +6,34 @@ import GetStartedLogo from './GetStartedLogo'
 import LanguageSwitcher from './LanguageSwitcher'
 
 export default function SiteHeader() {
-  const { user, signOut } = useAuth()
+  const { user, profile, signOut } = useAuth()
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
+  const [accountOpen, setAccountOpen] = useState(false)
+  const accountRef = useRef(null)
 
-  const close = () => setOpen(false)
+  const close = () => {
+    setOpen(false)
+    setAccountOpen(false)
+  }
+
+  useEffect(() => {
+    if (!accountOpen) return
+    const onDoc = (e) => {
+      if (!accountRef.current?.contains(e.target)) setAccountOpen(false)
+    }
+    const onKey = (e) => {
+      if (e.key === 'Escape') setAccountOpen(false)
+    }
+    document.addEventListener('mousedown', onDoc)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDoc)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [accountOpen])
+
+  const firstName = profile?.full_name?.trim()?.split(/\s+/)[0] || user?.email?.split('@')[0] || t('common.brand')
 
   return (
     <header className="site-header">
@@ -31,7 +54,10 @@ export default function SiteHeader() {
           className="nav-toggle"
           aria-expanded={open}
           aria-label={t('common.menu')}
-          onClick={() => setOpen((v) => !v)}
+          onClick={() => {
+            setAccountOpen(false)
+            setOpen((v) => !v)
+          }}
         >
           <span />
           <span />
@@ -51,27 +77,50 @@ export default function SiteHeader() {
           <LanguageSwitcher compact />
 
           {user ? (
-            <>
-              <NavLink to="/dashboard" onClick={close}>
-                {t('nav.dashboard')}
-              </NavLink>
-              <NavLink to="/profile" onClick={close}>
-                {t('nav.profile')}
-              </NavLink>
-              <NavLink to="/settings" onClick={close}>
-                {t('nav.settings')}
-              </NavLink>
+            <div className={`account-menu ${accountOpen ? 'open' : ''}`} ref={accountRef}>
               <button
                 type="button"
-                className="btn btn-ghost btn-sm"
-                onClick={() => {
-                  close()
-                  signOut()
-                }}
+                className="account-menu-trigger"
+                aria-expanded={accountOpen}
+                aria-haspopup="menu"
+                aria-label={t('nav.dashboard')}
+                title={firstName}
+                onClick={() => setAccountOpen((v) => !v)}
               >
-                {t('nav.signOut')}
+                <img
+                  src={`${import.meta.env.BASE_URL}logo.png`}
+                  alt=""
+                  width="40"
+                  height="40"
+                />
               </button>
-            </>
+
+              {accountOpen ? (
+                <div className="account-menu-panel" role="menu">
+                  <p className="account-menu-label">{firstName}</p>
+                  <NavLink role="menuitem" to="/dashboard" onClick={close}>
+                    {t('nav.dashboard')}
+                  </NavLink>
+                  <NavLink role="menuitem" to="/profile" onClick={close}>
+                    {t('nav.profile')}
+                  </NavLink>
+                  <NavLink role="menuitem" to="/settings" onClick={close}>
+                    {t('nav.settings')}
+                  </NavLink>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="account-menu-signout"
+                    onClick={() => {
+                      close()
+                      signOut()
+                    }}
+                  >
+                    {t('nav.signOut')}
+                  </button>
+                </div>
+              ) : null}
+            </div>
           ) : (
             <GetStartedLogo onClick={close} />
           )}
