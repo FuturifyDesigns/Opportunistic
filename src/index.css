@@ -426,9 +426,11 @@ textarea {
   }
 }
 
-/* Futurify-style heading scramble (word hover) — layout-stable, no crop */
+/* Futurify-style heading scramble (word hover) — never crop glyphs */
 .gt-heading {
   overflow: visible;
+  /* Room for descenders (g, y, p) with tight display line-heights */
+  padding-bottom: 0.08em;
 }
 
 .gt-heading .gt-word {
@@ -436,38 +438,34 @@ textarea {
   display: inline-block;
   vertical-align: baseline;
   white-space: nowrap;
-  /* Clip only sideways so scramble can’t widen the line; keep descenders */
-  overflow-x: clip;
-  overflow-y: visible;
-  padding-bottom: 0.12em;
-  margin-bottom: -0.12em;
+  overflow: visible;
   cursor: default;
   transition: color 0.18s ease;
 }
 
 .gt-heading .gt-base {
-  display: inline-block;
+  display: inline;
   white-space: nowrap;
   line-height: inherit;
-  padding-bottom: 0.08em;
 }
 
 .gt-heading .gt-fx {
   position: absolute;
   left: 0;
   top: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: baseline;
   white-space: nowrap;
-  overflow: hidden;
+  overflow: visible;
   pointer-events: none;
   opacity: 0;
+  visibility: hidden;
   color: inherit;
   line-height: inherit;
-  font-family: ui-monospace, 'Cascadia Mono', 'Segoe UI Mono', Menlo, Consolas, monospace;
-  font-size: 0.92em;
-  letter-spacing: 0.02em;
+  font: inherit;
+  letter-spacing: inherit;
 }
 
 .gt-heading .gt-word.is-scrambling .gt-base {
@@ -476,6 +474,7 @@ textarea {
 
 .gt-heading .gt-word.is-scrambling .gt-fx {
   opacity: 1;
+  visibility: visible;
   color: var(--accent);
   text-shadow:
     -1px 0 rgba(45, 226, 230, 0.45),
@@ -567,10 +566,11 @@ textarea {
   font-family: var(--display);
   font-weight: 600;
   font-size: clamp(2.2rem, 4.8vw, 3.5rem);
-  line-height: 1.05;
+  line-height: 1.18;
   letter-spacing: -0.035em;
   margin: 0 0 1rem;
   max-width: 14ch;
+  overflow: visible;
 }
 
 .hero-copy p {
@@ -649,9 +649,10 @@ h2 {
   font-family: var(--display);
   font-weight: 600;
   font-size: clamp(1.6rem, 3vw, 2.2rem);
-  line-height: 1.15;
+  line-height: 1.25;
   margin: 0 0 0.85rem;
   letter-spacing: -0.03em;
+  overflow: visible;
 }
 
 .feature-stack {
@@ -695,6 +696,13 @@ h2 {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 2.25rem 1.5rem;
+  overflow: visible;
+}
+
+.cta-panel h2 {
+  line-height: 1.25;
+  overflow: visible;
+  padding-inline: 0.15em;
 }
 
 .cta-panel p {
@@ -1416,8 +1424,9 @@ sup {
   font-weight: 600;
   font-size: clamp(2rem, 4.2vw, 3rem);
   letter-spacing: -0.035em;
-  line-height: 1.08;
+  line-height: 1.18;
   margin: 0.2rem 0 0.75rem;
+  overflow: visible;
 }
 
 .legal-hero .lede {
@@ -1938,10 +1947,11 @@ button.linkish {
   font-family: var(--display);
   font-weight: 600;
   font-size: clamp(2rem, 4vw, 3rem);
-  line-height: 1.08;
+  line-height: 1.18;
   letter-spacing: -0.035em;
   margin: 0 0 0.85rem;
   max-width: 18ch;
+  overflow: visible;
 }
 
 .lede {
@@ -1977,7 +1987,8 @@ button.linkish {
   padding: 1.2rem 1.25rem;
   transform-style: preserve-3d;
   will-change: transform;
-  overflow: hidden;
+  /* visible so heading descenders / scramble aren’t sliced */
+  overflow: visible;
 }
 
 .interactive-card-inner {
@@ -2302,9 +2313,10 @@ button.linkish {
   font-weight: 600;
   font-size: clamp(2.1rem, 4.6vw, 3.35rem);
   letter-spacing: -0.035em;
-  line-height: 1.08;
+  line-height: 1.18;
   margin: 0.35rem 0 0.85rem;
   max-width: 16ch;
+  overflow: visible;
 }
 
 .about-hero-copy .lede {
@@ -2337,9 +2349,10 @@ button.linkish {
   font-weight: 600;
   font-size: clamp(1.55rem, 3vw, 2.15rem);
   letter-spacing: -0.03em;
-  line-height: 1.15;
+  line-height: 1.25;
   margin: 0.35rem 0 0;
   max-width: 18ch;
+  overflow: visible;
 }
 
 .about-mission-body {
@@ -2359,7 +2372,9 @@ button.linkish {
   font-weight: 600;
   font-size: clamp(1.55rem, 3vw, 2.1rem);
   letter-spacing: -0.03em;
+  line-height: 1.25;
   margin: 0.35rem 0 1.5rem;
+  overflow: visible;
 }
 
 .about-principle-list {
@@ -2500,6 +2515,8 @@ button.linkish {
   font-weight: 600;
   margin: 0 0 0.55rem;
   letter-spacing: -0.03em;
+  line-height: 1.25;
+  overflow: visible;
 }
 
 .about-cta > p {
@@ -2609,6 +2626,15 @@ button.linkish {
   box-shadow: none;
   backdrop-filter: none;
   padding: 1.25rem 1.35rem;
+  overflow: visible;
+}
+
+.glass-panel h2,
+.glass-panel h3,
+.cta-panel h2,
+.about-maker-inner h2 {
+  overflow: visible;
+  line-height: 1.28;
 }
 
 .hero-copy.glass-panel {
@@ -2796,6 +2822,12 @@ a.btn-auth {
 
 .detail-row.glass-panel {
   padding: 1.25rem 1.35rem;
+  overflow: visible;
+}
+
+.detail-row h2 {
+  overflow: visible;
+  line-height: 1.28;
 }
 
 /* Jarvis console — light theme to match site */

@@ -8,36 +8,18 @@ function prefersReducedMotion() {
   return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
-/** Freeze horizontal size so scramble glyphs can’t reflow parents / cards.
- *  Never lock height — that clips descenders (g, y, etc.). */
-function lockWordBox(span) {
-  if (!span || span.dataset.locked === '1') return
-  const rect = span.getBoundingClientRect()
-  if (rect.width <= 0) return
-  const w = `${Math.ceil(rect.width + 1)}px`
-  span.style.setProperty('--gt-w', w)
-  span.style.width = w
-  span.style.minWidth = w
-  span.style.maxWidth = w
-  span.style.height = 'auto'
-  span.style.minHeight = '0'
-  span.dataset.locked = '1'
-}
-
-function lockAllWords(el) {
-  el.querySelectorAll('.gt-word').forEach(lockWordBox)
-}
-
+/**
+ * Scramble only an overlay — never rewrite the visible base text.
+ * No width/height locks: those clipped descenders and trailing letters.
+ */
 function scrambleWord(span) {
   if (span._gtBusy || prefersReducedMotion() || !canUsePointer()) return
   const orig = span.dataset.o || span.textContent || ''
   if (!orig.trim()) return
 
-  lockWordBox(span)
   span._gtBusy = true
   span.classList.add('is-scrambling')
 
-  // Scramble only the overlay layer — base text stays for layout size.
   let fx = span.querySelector('.gt-fx')
   if (!fx) {
     fx = document.createElement('span')
@@ -90,8 +72,8 @@ function isSkippable(el) {
 }
 
 /**
- * Split plain-text headings into word spans with Futurify-style scramble on hover.
- * Layout size is locked so cards / parents never jitter.
+ * Split plain-text headings into word spans with scramble-on-hover.
+ * Base glyphs stay put so layout never jitters or clips.
  */
 export function enhanceHeading(el) {
   if (!el || el.dataset.glitch === '1') return
@@ -130,12 +112,6 @@ export function enhanceHeading(el) {
     span.addEventListener('mouseenter', () => scrambleWord(span))
     el.appendChild(span)
   })
-
-  // Measure after layout so width lock matches real glyphs.
-  requestAnimationFrame(() => {
-    lockAllWords(el)
-    requestAnimationFrame(() => lockAllWords(el))
-  })
 }
 
 const SELECTOR = [
@@ -164,7 +140,6 @@ export function enhanceAllHeadings(root = document) {
       if (!hasWords) {
         clearEnhanced(el)
       } else {
-        lockAllWords(el)
         return
       }
     }
@@ -185,20 +160,21 @@ export function createHeadingGlitchObserver(root) {
   }
 
   enhanceAllHeadings(root)
-  // Only watch structure — never characterData (scramble would retrigger and jitter).
   const obs = new MutationObserver((mutations) => {
     for (const m of mutations) {
       if (m.type !== 'childList') continue
-      // Ignore our own scramble overlay text nodes / fx updates
       const t = m.target
       if (t?.closest?.('.gt-word, .gt-fx, .gt-base')) continue
       if (m.addedNodes.length === 0 && m.removedNodes.length === 0) continue
-      const onlyGlitch =
-        [...m.addedNodes, ...m.removedNodes].every(
-          (n) =>
-            n.nodeType === 3 ||
-            (n.nodeType === 1 && n.classList && (n.classList.contains('gt-fx') || n.classList.contains('gt-word') || n.classList.contains('gt-base'))),
-        )
+      const onlyGlitch = [...m.addedNodes, ...m.removedNodes].every(
+        (n) =>
+          n.nodeType === 3 ||
+          (n.nodeType === 1 &&
+            n.classList &&
+            (n.classList.contains('gt-fx') ||
+              n.classList.contains('gt-word') ||
+              n.classList.contains('gt-base'))),
+      )
       if (onlyGlitch && m.target?.classList?.contains('gt-heading')) continue
       schedule()
       return
