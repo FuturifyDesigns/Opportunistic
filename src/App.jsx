@@ -1,4 +1,4 @@
-import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import Landing from './pages/Landing'
@@ -17,7 +17,7 @@ import Terms from './pages/Terms'
 export default function App() {
   return (
     <AuthProvider>
-      <HashRouter>
+      <BrowserRouter basename="/Opportunistic">
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
@@ -68,7 +68,7 @@ export default function App() {
           />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </HashRouter>
+      </BrowserRouter>
     </AuthProvider>
   )
 }

@@ -101,8 +101,8 @@ textarea {
 }
 
 .brand-mark {
-  width: 32px;
-  height: 32px;
+  width: 48px;
+  height: 48px;
   object-fit: contain;
   border-radius: 0;
   display: block;
@@ -188,11 +188,11 @@ textarea {
 }
 
 .hero-brand {
-  width: min(88px, 22vw);
+  width: min(168px, 42vw);
   height: auto;
   aspect-ratio: 1;
   object-fit: contain;
-  margin-bottom: 1rem;
+  margin-bottom: 1.15rem;
   border-radius: 0;
   background: transparent !important;
   display: block;
@@ -246,14 +246,15 @@ textarea {
 }
 
 .orbit img {
-  width: 42%;
+  width: 52%;
   position: relative;
   z-index: 1;
   border-radius: 0;
-  background: transparent;
+  background: transparent !important;
   object-fit: contain;
   aspect-ratio: 1;
   filter: none;
+  box-shadow: none;
 }
 
 .cta-row {
@@ -366,11 +367,11 @@ h2 {
 }
 
 .footer-logo img {
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   object-fit: contain;
   border-radius: 0;
-  background: transparent;
+  background: transparent !important;
   filter: none;
 }
 
@@ -2290,12 +2291,12 @@ a.btn-auth {
 }
 
 .auth-orb-core img {
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 64px;
   margin-bottom: 0.35rem;
   border-radius: 0;
   object-fit: contain;
-  background: transparent;
+  background: transparent !important;
   filter: none;
 }
 

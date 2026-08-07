@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 
 /**
  * Folder-style legal sections + TOC.
- * Avoids href="#id" which breaks HashRouter (sends users to home).
+ * Avoids href="#id" which breaks in-page section navigation on some routers.
  */
 export default function LegalFolders({ items, initialId }) {
   const [openId, setOpenId] = useState(initialId || items[0]?.id || null)

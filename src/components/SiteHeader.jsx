@@ -16,8 +16,8 @@ export default function SiteHeader() {
             src={`${import.meta.env.BASE_URL}logo.png`}
             alt=""
             className="brand-mark"
-            width="36"
-            height="36"
+            width="48"
+            height="48"
           />
           <span className="brand-word">Opportunistic</span>
         </NavLink>

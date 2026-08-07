@@ -8,7 +8,7 @@ export default function SiteFooter() {
       <div className="container footer-grid">
         <div className="footer-brand">
           <Link to="/" className="footer-logo" aria-label="Opportunistic home">
-            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" width="36" height="36" />
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" width="44" height="44" />
             <span>
               Opportunistic<sup>™</sup>
             </span>
