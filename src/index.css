@@ -554,7 +554,7 @@ textarea {
   height: auto;
   aspect-ratio: 1;
   object-fit: contain;
-  margin-bottom: 1.15rem;
+  margin: 0 auto 1.15rem;
   border-radius: 0;
   background: transparent !important;
   display: block;
