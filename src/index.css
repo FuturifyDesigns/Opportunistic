@@ -3828,6 +3828,16 @@ a.btn-auth {
   display: block;
 }
 
+.match-card-media img.listing-img-fallback,
+.detail-cover.listing-img-fallback,
+.detail-gallery-item img.listing-img-fallback,
+.lightbox img.listing-img-fallback {
+  object-fit: contain;
+  object-position: center;
+  background: #ffffff;
+  padding: 0.75rem;
+}
+
 .match-location {
   margin-top: 0.15rem;
   font-size: 0.85rem;
