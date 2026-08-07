@@ -12,7 +12,7 @@ export default function SiteFooter() {
     <footer className="site-footer">
       <div className="container footer-grid">
         <div className="footer-brand">
-          <Link to="/" className="footer-logo" aria-label={`${t('common.brand')} ${t('common.home')}`}>
+          <Link to="/home" className="footer-logo" aria-label={`${t('common.brand')} ${t('common.home')}`}>
             <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" width="44" height="44" />
             <span>
               {t('common.brand')}

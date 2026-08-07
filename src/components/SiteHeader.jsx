@@ -40,7 +40,7 @@ export default function SiteHeader() {
   return (
     <header className="site-header">
       <div className="container header-inner">
-        <NavLink to="/" className="brand" aria-label={`${t('common.brand')} ${t('common.home')}`} onClick={close} end>
+        <NavLink to="/home" className="brand" aria-label={`${t('common.brand')} ${t('common.home')}`} onClick={close} end>
           <img
             src={`${import.meta.env.BASE_URL}logo.png`}
             alt=""

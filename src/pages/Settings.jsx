@@ -55,7 +55,7 @@ export default function Settings() {
       ])
       toast.success(t('settings.deleted'))
       await signOut()
-      navigate('/')
+      navigate('/home')
     } catch (err) {
       toast.error(err.message || t('common.toast.genericError'))
     } finally {

@@ -7,6 +7,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import GlitchHeadings from './components/GlitchHeadings'
 import CookieConsent from './components/CookieConsent'
 import Landing from './pages/Landing'
+import Intro from './pages/Intro'
 import HowItWorks from './pages/HowItWorks'
 import Features from './pages/Features'
 import About from './pages/About'
@@ -24,7 +25,8 @@ function AppRoutes() {
   // Remount route tree on language change so every page updates instantly.
   return (
     <Routes key={i18n.language}>
-      <Route path="/" element={<Landing />} />
+      <Route path="/" element={<Intro />} />
+      <Route path="/home" element={<Landing />} />
       <Route path="/how-it-works" element={<HowItWorks />} />
       <Route path="/features" element={<Features />} />
       <Route path="/about" element={<About />} />
@@ -71,7 +73,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<Navigate to="/home" replace />} />
     </Routes>
   )
 }
