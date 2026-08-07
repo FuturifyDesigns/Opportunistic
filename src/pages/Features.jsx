@@ -6,6 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
 import InteractiveCard from '../components/InteractiveCard'
+import PageBackdrop from '../components/PageBackdrop'
 import { prefersReducedMotion, revealOnScroll } from '../lib/animations'
 
 gsap.registerPlugin(useGSAP, ScrollTrigger)
@@ -78,79 +79,84 @@ export default function Features() {
   }, [])
 
   return (
-    <div ref={root} className="page">
-      <SiteHeader />
-      <main>
-        <section className="page-hero container">
-          <p className="eyebrow">Features</p>
-          <h1>Two engines. One profile. Clear reasons.</h1>
-          <p className="lede">
-            Scroll the capabilities — cards tilt as you explore, and each block slides in from alternating sides.
-          </p>
-        </section>
-
-        <section className="section">
-          <div className="container feature-zigzags">
-            {FEATURES.map((f, i) => (
-              <div key={f.title} className={`feature-zigzag ${f.side === 'right' ? 'flip' : ''}`}>
-                <div className="zig-copy">
-                  <p className="eyebrow">{f.eyebrow}</p>
-                  <h2>{f.title}</h2>
-                  <p>{f.body}</p>
-                  <ul className="check-list">
-                    {f.points.map((p) => (
-                      <li key={p}>{p}</li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="zig-media">
-                  <InteractiveCard className="feature-showcase">
-                    <p className="eyebrow">Preview</p>
-                    <strong>{f.eyebrow}</strong>
-                    <div className="mini-bars" aria-hidden="true">
-                      <span style={{ width: `${88 - i * 6}%` }} />
-                      <span style={{ width: `${72 - i * 4}%` }} />
-                      <span style={{ width: `${64 - i * 5}%` }} />
-                    </div>
-                    <p className="muted">Hover / tilt this card</p>
-                  </InteractiveCard>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="section section-band">
-          <div className="container card-grid">
-            {[
-              ['Visible reasoning', 'Why each match fits sits on the card — not behind a modal.'],
-              ['Mobile-first', 'Most applicants arrive on a phone; layout and motion respect that.'],
-              ['Honest ads later', 'At most 1–2 units, never inside forms or the matching flow.'],
-            ].map(([t, b], i) => (
-              <InteractiveCard key={t} className="grid-card" data-reveal={i % 2 ? 'right' : 'left'}>
-                <h3>{t}</h3>
-                <p>{b}</p>
-              </InteractiveCard>
-            ))}
-          </div>
-        </section>
-
-        <section className="section">
-          <div className="container cta-panel" data-reveal="up">
-            <h2>See it in motion</h2>
-            <p>Jump to the animated walkthrough, or start building your profile.</p>
-            <div className="cta-row" style={{ justifyContent: 'center' }}>
-              <Link className="btn" to="/how-it-works">
-                How it works
-              </Link>
-              <Link className="btn btn-ghost" to="/auth?mode=signup">
-                Sign up
-              </Link>
+    <PageBackdrop image="features.jpg">
+      <div ref={root}>
+        <SiteHeader />
+        <main>
+          <section className="page-hero container">
+            <div className="glass-panel hero-copy-block">
+              <p className="eyebrow">Features</p>
+              <h1>Two engines. One profile. Clear reasons.</h1>
+              <p className="lede">
+                Scroll the capabilities — cards tilt as you explore, and each block slides in from alternating sides.
+              </p>
             </div>
-          </div>
-        </section>
-      </main>
-      <SiteFooter />
-    </div>
+          </section>
+
+          <section className="section">
+            <div className="container feature-zigzags">
+              {FEATURES.map((f, i) => (
+                <div key={f.title} className={`feature-zigzag ${f.side === 'right' ? 'flip' : ''}`}>
+                  <div className="zig-copy glass-panel">
+                    <p className="eyebrow">{f.eyebrow}</p>
+                    <h2>{f.title}</h2>
+                    <p>{f.body}</p>
+                    <ul className="check-list">
+                      {f.points.map((p) => (
+                        <li key={p}>{p}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="zig-media">
+                    <InteractiveCard className="feature-showcase">
+                      <p className="eyebrow">Preview</p>
+                      <strong>{f.eyebrow}</strong>
+                      <div className="mini-bars" aria-hidden="true">
+                        <span style={{ width: `${88 - i * 6}%` }} />
+                        <span style={{ width: `${72 - i * 4}%` }} />
+                        <span style={{ width: `${64 - i * 5}%` }} />
+                      </div>
+                      <p className="muted">Hover / tilt this card</p>
+                    </InteractiveCard>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="section">
+            <div className="container card-grid">
+              {[
+                ['Visible reasoning', 'Why each match fits sits on the card — not behind a modal.'],
+                ['Mobile-first', 'Most applicants arrive on a phone; layout and motion respect that.'],
+                ['Honest ads later', 'At most 1–2 units, never inside forms or the matching flow.'],
+              ].map(([t, b], i) => (
+                <InteractiveCard key={t} className="grid-card" data-reveal={i % 2 ? 'right' : 'left'}>
+                  <h3>{t}</h3>
+                  <p>{b}</p>
+                </InteractiveCard>
+              ))}
+            </div>
+          </section>
+
+          <section className="section">
+            <div className="container cta-panel glass-panel" data-reveal="up">
+              <h2>See it in motion</h2>
+              <p>Jump to the animated walkthrough, or start building your profile.</p>
+              <div className="cta-row" style={{ justifyContent: 'center' }}>
+                <Link className="btn" to="/how-it-works">
+                  How it works
+                </Link>
+                <Link className="btn btn-auth" to="/auth?mode=signup">
+                  <span>Sign up</span>
+                  <span className="btn-auth-shine" aria-hidden="true" />
+                </Link>
+              </div>
+            </div>
+          </section>
+        </main>
+        <SiteFooter />
+      </div>
+    </PageBackdrop>
   )
 }

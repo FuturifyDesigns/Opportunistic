@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import GetStartedLogo from './GetStartedLogo'
 
 export default function SiteHeader() {
   const { user, signOut } = useAuth()
@@ -11,10 +12,9 @@ export default function SiteHeader() {
   return (
     <header className="site-header">
       <div className="container header-inner">
-        <Link to="/" className="brand" aria-label="Opportunistic home" onClick={close}>
-          <img src={`${import.meta.env.BASE_URL}mark.svg`} alt="" className="brand-mark" width="28" height="28" />
-          <span>Opportunistic</span>
-        </Link>
+        <NavLink to="/" className="brand" aria-label="Opportunistic home" onClick={close} end>
+          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="Opportunistic" className="brand-logo" />
+        </NavLink>
 
         <button
           type="button"
@@ -39,12 +39,7 @@ export default function SiteHeader() {
               <NavLink to="/about" onClick={close}>
                 About
               </NavLink>
-              <NavLink to="/auth" onClick={close}>
-                Sign in
-              </NavLink>
-              <NavLink to="/auth?mode=signup" className="btn btn-sm" onClick={close}>
-                Get started
-              </NavLink>
+              <GetStartedLogo onClick={close} />
             </>
           ) : (
             <>
