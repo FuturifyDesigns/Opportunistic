@@ -78,8 +78,9 @@ export default function Intro() {
       const tl = gsap.timeline({ defaults: { ease: 'power2.out' } })
       tl.from('.intro-core', { scale: 0.88, opacity: 0, duration: 0.8 })
         .from('.intro-rings span:not(.intro-sweep)', { scale: 0.75, opacity: 0, stagger: 0.08, duration: 0.5 }, '-=0.55')
-        .from('.intro-word', { y: 16, opacity: 0, duration: 0.45 }, '-=0.25')
-        .from('.intro-enter', { y: 12, opacity: 0, duration: 0.4 }, '-=0.1')
+        .from('.intro-word', { y: 16, opacity: 0, duration: 0.45, clearProps: 'transform' }, '-=0.25')
+
+      gsap.set('.intro-enter', { clearProps: 'opacity,transform,visibility' })
 
       gsap.to('.intro-rings .r2', {
         rotate: 360,
@@ -218,7 +219,7 @@ export default function Intro() {
                 </div>
               </div>
               <p className="intro-word">{t('common.brand')}</p>
-              <span className={`intro-enter${ready ? ' show' : ''}`}>
+              <span className="intro-enter show" aria-hidden="false">
                 <span className="intro-enter-label">{ready ? t('intro.enterHint') : t('intro.booting')}</span>
                 <span className="intro-enter-arrow" aria-hidden="true">
                   →
