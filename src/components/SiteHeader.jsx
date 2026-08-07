@@ -74,7 +74,7 @@ export default function SiteHeader() {
             {t('nav.about')}
           </NavLink>
 
-          <LanguageSwitcher compact />
+          <LanguageSwitcher compact onPick={close} />
 
           {user ? (
             <div className={`account-menu ${accountOpen ? 'open' : ''}`} ref={accountRef}>
