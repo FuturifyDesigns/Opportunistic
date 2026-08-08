@@ -6,55 +6,31 @@
 
 import i18n from '../i18n'
 import { countryFitScore, jobFitsSelectedCountry } from './countryMatch'
-
-function skillBlob(skills = [], field = '') {
-  return `${field} ${(skills || []).map((s) => s.skill_name || s).join(' ')}`.toLowerCase()
-}
-
-function overlapScore(text, blob) {
-  if (!blob.trim()) return 0
-  const words = blob
-    .split(/[^a-z0-9+#.]/i)
-    .map((w) => w.toLowerCase())
-    .filter((w) => w.length > 2)
-  const uniq = [...new Set(words)]
-  const hay = String(text || '').toLowerCase()
-  let hits = 0
-  for (const w of uniq) {
-    if (hay.includes(w)) hits += 1
-  }
-  return hits
-}
+import { evaluateJobListing } from './skillMatch'
 
 function mapRemotive(job, profile) {
   const country = profile.country || ''
   const location = job.candidate_required_location || job.job_type || 'Remote'
   if (!jobFitsSelectedCountry(location, country)) return null
 
-  const blob = skillBlob(profile.skills, profile.field)
-  const text = `${job.title} ${job.company_name} ${job.description || ''} ${(job.tags || []).join(' ')}`
-  const skillHits = overlapScore(text, blob)
   const locHits = countryFitScore(location, country)
-  let score = 42 + Math.min(30, skillHits * 4) + locHits * 8
-  if (profile.goal === 'jobs') score += 10
-  if (profile.goal === 'scholarships') score -= 12
-  score = Math.max(32, Math.min(96, Math.round(score)))
-
-  const reasons = []
-  reasons.push(
-    i18n.t('reasons.remotiveLive', {
-      company: job.company_name || i18n.t('reasons.employer'),
-    }),
+  const tags = Array.isArray(job.tags) ? job.tags : []
+  const evaled = evaluateJobListing(
+    {
+      title: job.title,
+      description: job.description || '',
+      tags,
+      company: job.company_name || '',
+      location,
+      source: 'Remotive',
+      url: job.url || job.job_url,
+    },
+    profile,
+    { countryFitHint: locHits },
   )
-  if (skillHits) reasons.push(i18n.t('reasons.matchedTerms', { count: skillHits }))
-  if (country) {
-    reasons.push(
-      locHits >= 3
-        ? i18n.t('reasons.locationExplicit', { country })
-        : i18n.t('reasons.locationRemote', { country }),
-    )
-  }
-  reasons.push(i18n.t('reasons.remotiveFetched'))
+
+  // Drop weak / unrelated live postings so the feed stays accurate
+  if (!evaled.hasSignal || evaled.match_score < 52) return null
 
   return {
     title: job.title,
@@ -64,8 +40,9 @@ function mapRemotive(job, profile) {
       locHits >= 3 && country
         ? `Remotive · ${country}`
         : `Remotive · ${job.category || 'Remote'}`,
-    reasoning: reasons.join(' '),
-    match_score: score,
+    reasoning: evaled.reasoning,
+    match_score: evaled.match_score,
+    scorecard: evaled.scorecard,
     location,
     published: job.publication_date || null,
     feed: 'remotive',
@@ -78,38 +55,32 @@ function mapArbeitnow(job, profile) {
   const location = job.location || ''
   if (!jobFitsSelectedCountry(location, country)) return null
 
-  const blob = skillBlob(profile.skills, profile.field)
-  const text = `${job.title} ${job.company_name} ${job.description || ''} ${(job.tags || []).join(' ')} ${location}`
-  const skillHits = overlapScore(text, blob)
   const locHits = countryFitScore(location, country)
-  let score = 40 + Math.min(28, skillHits * 4) + locHits * 9
-  if (profile.goal === 'jobs') score += 8
-  if (profile.goal === 'scholarships') score -= 10
-  score = Math.max(30, Math.min(94, Math.round(score)))
-
-  const reasons = []
-  reasons.push(
-    i18n.t('reasons.arbeitnowLive', {
-      company: job.company_name || i18n.t('reasons.employer'),
-    }),
+  const tags = Array.isArray(job.tags) ? job.tags : []
+  const evaled = evaluateJobListing(
+    {
+      title: job.title,
+      description: job.description || '',
+      tags,
+      company: job.company_name || '',
+      location,
+      source: 'Arbeitnow',
+      url: job.url,
+    },
+    profile,
+    { countryFitHint: locHits },
   )
-  if (skillHits) reasons.push(i18n.t('reasons.skillHits', { count: skillHits }))
-  if (country) {
-    reasons.push(
-      locHits >= 3
-        ? i18n.t('reasons.locationAligns', { country })
-        : i18n.t('reasons.locationRemote', { country }),
-    )
-  }
-  reasons.push(i18n.t('reasons.arbeitnowFetched'))
+
+  if (!evaled.hasSignal || evaled.match_score < 52) return null
 
   return {
     title: job.title,
     url: job.url,
     company: job.company_name || null,
     source: 'Arbeitnow',
-    reasoning: reasons.join(' '),
-    match_score: score,
+    reasoning: evaled.reasoning,
+    match_score: evaled.match_score,
+    scorecard: evaled.scorecard,
     location: location || null,
     published: job.created_at || null,
     feed: 'arbeitnow',
@@ -140,6 +111,24 @@ async function fetchArbeitnow(query) {
   return (filtered.length ? filtered : jobs).slice(0, 60)
 }
 
+function scoreBoard(profile, { title, source, location, url, extraText = '' }) {
+  // Board portals are search links — score field/location fit only, not fake skill hits.
+  const evaled = evaluateJobListing(
+    {
+      title,
+      description: `${title} ${extraText}`,
+      tags: [],
+      company: '',
+      location: location || profile.country || '',
+      source,
+      url,
+    },
+    profile,
+    { countryFitHint: profile.country ? 3 : 1 },
+  )
+  return evaled
+}
+
 /** Country-targeted search board links (always available as fallback / supplement). */
 export function buildCountryJobBoards(profile) {
   const field = profile.field || 'jobs'
@@ -153,70 +142,81 @@ export function buildCountryJobBoards(profile) {
     .replace(/^-|-$/g, '') || 'jobs'
 
   const countryLabel = country || i18n.t('reasons.yourCountry')
-  const locationLabel = country || i18n.t('reasons.yourLocation')
-  const regionLabel = country || i18n.t('reasons.region')
 
-  return [
+  const boards = [
     {
       title: i18n.t('reasons.indeedTitle', { field, country: countryLabel }),
       url: `https://www.indeed.com/jobs?q=${query}&l=${countryQ}`,
       company: null,
       source: 'Indeed',
-      reasoning: i18n.t('reasons.indeedReason', {
-        query: decodeURIComponent(query),
-        country: locationLabel,
-      }),
-      match_score: country ? 88 : 55,
       location: country || null,
       feed: 'board',
       country_fit: country ? 3 : 0,
+      extra: `Indeed jobs ${field} ${country}`,
     },
     {
       title: i18n.t('reasons.linkedinTitle', { field }),
       url: `https://www.linkedin.com/jobs/search/?keywords=${query}&location=${countryQ}`,
       company: null,
       source: 'LinkedIn',
-      reasoning: i18n.t('reasons.linkedinReason', { country: countryLabel }),
-      match_score: country ? 86 : 54,
       location: country || null,
       feed: 'board',
       country_fit: country ? 3 : 0,
+      extra: `LinkedIn jobs ${field} ${country}`,
     },
     {
       title: i18n.t('reasons.remoteTitle', { field }),
       url: `https://remoteok.com/remote-${slug}-jobs`,
       company: null,
       source: 'Remote OK',
-      reasoning: i18n.t('reasons.remoteReason', { slug, country: countryLabel }),
-      match_score: country ? 68 : 50,
       location: 'Remote',
       feed: 'board',
       country_fit: 1,
+      extra: `Remote ${field} ${slug}`,
     },
     {
       title: i18n.t('reasons.reliefTitle', { country: country || i18n.t('reasons.region') }),
       url: `https://reliefweb.int/jobs?search=${countryQ}%20${query}`,
       company: null,
       source: 'ReliefWeb',
-      reasoning: i18n.t('reasons.reliefReason', { country: regionLabel }),
-      match_score: /public|health|development|social|education|humanitarian|policy/i.test(field)
-        ? country
-          ? 84
-          : 48
-        : country
-          ? 62
-          : 40,
       location: country || null,
       feed: 'board',
       country_fit: country ? 3 : 0,
+      extra: `ReliefWeb humanitarian development ${field} ${country}`,
     },
   ]
+
+  return boards.map((b) => {
+    const evaled = scoreBoard(profile, {
+      title: b.title,
+      source: b.source,
+      location: b.location,
+      url: b.url,
+      extraText: b.extra,
+    })
+    // Boards are search portals — keep them but score from profile fit
+    let score = evaled.match_score
+    if (b.source === 'ReliefWeb' && !/public|health|development|social|education|humanitarian|policy/i.test(field)) {
+      score = Math.min(score, 58)
+    }
+    return {
+      title: b.title,
+      url: b.url,
+      company: null,
+      source: b.source,
+      reasoning: evaled.reasoning,
+      match_score: Math.max(40, Math.min(92, score)),
+      scorecard: evaled.scorecard,
+      location: b.location,
+      feed: b.feed,
+      country_fit: b.country_fit,
+    }
+  })
 }
 
 /**
  * Fetch live jobs and merge with country board links.
  * Live API results are hard-filtered to the selected country (or open remote).
- * @returns {{ jobs: object[], meta: { live: number, boards: number, errors: string[] } }}
  */
 export async function fetchLiveJobs(profile) {
   const country = profile.country || ''
@@ -242,7 +242,6 @@ export async function fetchLiveJobs(profile) {
   }
 
   try {
-    // Prefer country name in the local board filter when available
     const arbeitnow = await fetchArbeitnow(country ? `${query} ${country}` : query)
     fetched += arbeitnow.length
     for (const j of arbeitnow) {
@@ -254,7 +253,6 @@ export async function fetchLiveJobs(profile) {
     errors.push(`Arbeitnow: ${e.message}`)
   }
 
-  // Dedupe by URL
   const seen = new Set()
   live = live.filter((j) => {
     if (!j.url || seen.has(j.url)) return false
@@ -262,22 +260,17 @@ export async function fetchLiveJobs(profile) {
     return true
   })
 
-  // Prefer explicit country matches over generic remote
   live.sort((a, b) => {
-    const fit = (b.country_fit || 0) - (a.country_fit || 0)
-    if (fit) return fit
-    return b.match_score - a.match_score
+    const score = (b.match_score || 0) - (a.match_score || 0)
+    if (score) return score
+    return (b.country_fit || 0) - (a.country_fit || 0)
   })
 
-  const topLive = live.slice(0, 24)
+  const topLive = live.slice(0, 28)
   const boards = buildCountryJobBoards(profile)
 
   return {
-    jobs: [...topLive, ...boards].sort((a, b) => {
-      const fit = (b.country_fit || 0) - (a.country_fit || 0)
-      if (fit) return fit
-      return b.match_score - a.match_score
-    }),
+    jobs: [...topLive, ...boards].sort((a, b) => (b.match_score || 0) - (a.match_score || 0)),
     meta: {
       live: topLive.length,
       boards: boards.length,

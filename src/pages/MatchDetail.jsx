@@ -6,9 +6,11 @@ import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import { getListingBySource } from '../lib/listingCatalog'
 import { generateWinTips } from '../lib/tipEngine'
+import { unpackReasoning } from '../lib/skillMatch'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
 import ListingImage, { DEFAULT_OPPORTUNITY_IMAGE } from '../components/ListingImage'
+import SkillScorecard from '../components/SkillScorecard'
 
 function splitSentences(text = '') {
   return text
@@ -36,6 +38,7 @@ export default function MatchDetail() {
 
   const winTips = useMemo(() => {
     if (!match) return { tips: [] }
+    const { scorecard } = unpackReasoning(match.reasoning || '')
     return generateWinTips({
       kind: kind === 'job' ? 'job' : 'scholarship',
       profile,
@@ -43,6 +46,7 @@ export default function MatchDetail() {
       skills,
       listing,
       match: { ...match, found_at: `${match.found_at || ''}|n${tipNonce}` },
+      scorecard,
       count: 6,
     })
   }, [match, profile, qualifications, skills, listing, kind, tipNonce, i18n.language])
@@ -127,8 +131,9 @@ export default function MatchDetail() {
 
   const gallery = listing?.gallery?.filter(Boolean) || []
   const cover = listing?.cover || gallery[0] || DEFAULT_OPPORTUNITY_IMAGE
-  const reasons = splitSentences(match?.reasoning || '')
-  const locationLabel = match?.location || listing?.location || null
+  const { text: reasonPlain, scorecard } = unpackReasoning(match?.reasoning || '')
+  const reasons = splitSentences(reasonPlain)
+  const locationLabel = match?.location || listing?.location || scorecard?.location?.label || null
 
   return (
     <div className="page">
@@ -314,6 +319,7 @@ export default function MatchDetail() {
 
             <section className="detail-section">
               <h2>{t('match.whyFits')}</h2>
+              {scorecard ? <SkillScorecard scorecard={scorecard} /> : null}
               <div className="reasoning-block">
                 {reasons.length ? (
                   reasons.map((sentence, i) => (

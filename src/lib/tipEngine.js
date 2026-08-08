@@ -4,6 +4,7 @@
  */
 
 import i18n from '../i18n'
+import { tipsFromScorecard } from './skillMatch'
 
 function hashSeed(str) {
   let h = 2166136261
@@ -228,6 +229,7 @@ export function generateWinTips({
   skills = [],
   listing = null,
   match = null,
+  scorecard = null,
   count = 6,
 } = {}) {
   const quals = (qualifications || []).filter((q) => q.field?.trim())
@@ -260,7 +262,8 @@ export function generateWinTips({
     weak,
   }
 
-  const pool = kind === 'job' ? jobPool(ctx) : scholarshipPool(ctx)
+  const plain = tipsFromScorecard(scorecard, { kind, country, field })
+  const pool = [...plain, ...(kind === 'job' ? jobPool(ctx) : scholarshipPool(ctx))]
   const seed = [
     kind,
     listingSafe.id,
@@ -268,6 +271,7 @@ export function generateWinTips({
     profileFingerprint(profile, quals, sk),
     Math.round(score),
     i18n.language,
+    (scorecard?.matched || []).join(','),
   ].join('|')
 
   const rand = mulberry32(hashSeed(seed))

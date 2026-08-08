@@ -1,9 +1,10 @@
 /** Profile-aware matching: country-eligible scholarships + live/web job feeds. */
 
-import i18n from '../i18n'
 import { LISTING_CATALOG } from './listingCatalog'
 import { SCHOLARSHIP_PROGRAMS, isScholarshipEligible } from './scholarshipPrograms'
 import { fetchLiveJobs, buildCountryJobBoards } from './jobFeed'
+import { resolveGoal } from './goal'
+import { evaluateScholarship } from './skillMatch'
 
 export function regionHints(country = '') {
   const c = country.toLowerCase()
@@ -43,8 +44,6 @@ export function regionHints(country = '') {
   return hints
 }
 
-import { resolveGoal } from './goal'
-
 export function summarizeProfile(profile, qualifications, skills) {
   const quals = (qualifications || []).filter((q) => q.field?.trim())
   const sk = (skills || []).filter((s) => s.skill_name?.trim())
@@ -64,108 +63,23 @@ export function summarizeProfile(profile, qualifications, skills) {
   }
 }
 
-function fieldOverlap(itemFields, profileField, skills) {
-  const blob = `${profileField} ${skills.map((s) => s.skill_name).join(' ')}`.toLowerCase()
-  const specific = (itemFields || []).filter((f) => f !== 'any')
-  if (!specific.length) return 0
-  return specific.some((f) => blob.includes(f)) ? 2 : 0
-}
-
-function scoreScholarship(item, summary) {
-  const regions = regionHints(summary.country || '')
-  let score = 40
-  const regionHit = (item.regions || []).filter((r) => regions.includes(r) && r !== 'global')
-  score += Math.min(28, regionHit.length * 9)
-  if ((item.regions || []).includes('global')) score += 3
-
-  const overlap = fieldOverlap(item.fields, summary.field, summary.skills)
-  score += overlap * 10
-  if (!(item.fields || []).includes('any') && overlap === 0) score -= 8
-
-  score += Math.min(10, summary.quals.length * 3)
-  score += Math.min(14, summary.skills.length * 2)
-  score += Math.min(8, summary.advanced.length * 3)
-  if (summary.goal === 'scholarships') score += 12
-  if (summary.goal === 'jobs') score -= 14
-  if (summary.institution) score += 2
-  if (!summary.skills.length) score -= 5
-  if (!summary.quals.length) score -= 8
-
-  // Exact country list boost
-  const c = (summary.country || '').toLowerCase()
-  if ((item.countries || []).some((x) => x !== '*' && x !== '*africa' && c.includes(x))) score += 8
-
-  return Math.max(30, Math.min(97, Math.round(score)))
-}
-
-function reasonScholarship(item, summary) {
-  const listing = LISTING_CATALOG[item.id]
-  const parts = []
-  const regions = regionHints(summary.country || '')
-
-  parts.push(`${item.title}: ${item.focus}.`)
-  if (listing?.summary) parts.push(listing.summary)
-
-  if (summary.primary) {
-    const yearBit = summary.year ? ` (${summary.year})` : ''
-    const instBit = summary.institution
-      ? i18n.t('reasons.fromInstitution', { institution: summary.institution })
-      : ''
-    const kind =
-      summary.primary.type === 'certificate'
-        ? i18n.t('reasons.certificate')
-        : i18n.t('reasons.degree')
-    parts.push(
-      i18n.t('reasons.primarySignal', {
-        kind,
-        field: summary.primary.field,
-        yearBit,
-        instBit,
-      }),
-    )
-  } else {
-    parts.push(i18n.t('reasons.focusField', { field: summary.field }))
-  }
-
-  if (summary.skills.length) {
-    parts.push(
-      i18n.t('reasons.skillsFactored', {
-        list: summary.skills
-          .slice(0, 5)
-          .map((s) => `${s.skill_name} (${s.proficiency || 'intermediate'})`)
-          .join(', '),
-      }),
-    )
-  }
-
-  if (summary.country) {
-    const regional = (item.regions || []).some((r) => regions.includes(r) && r !== 'global')
-    parts.push(
-      regional
-        ? i18n.t('reasons.eligibilityRegional', { country: summary.country })
-        : i18n.t('reasons.eligibilityOpen', { country: summary.country }),
-    )
-  }
-
-  if (item.deadlineLabel) parts.push(i18n.t('reasons.timing', { deadline: item.deadlineLabel }))
-  parts.push(i18n.t('reasons.officialUrl'))
-  return parts.join(' ')
-}
-
 /**
  * Scholarships allowed for the user’s country (strict eligibility filter).
  */
 export function buildScholarshipMatches(profile, qualifications, skills) {
   const summary = summarizeProfile(profile, qualifications || [], skills || [])
+  const regions = regionHints(summary.country || '')
   return SCHOLARSHIP_PROGRAMS.filter((p) => isScholarshipEligible(p, summary.country))
     .map((item) => {
       const listing = LISTING_CATALOG[item.id]
+      const evaled = evaluateScholarship(item, summary, regions)
       return {
         title: item.title,
         url: item.url || listing?.url,
         source: item.source,
-        reasoning: reasonScholarship(item, summary),
-        match_score: scoreScholarship(item, summary),
+        reasoning: evaled.reasoning,
+        match_score: evaled.match_score,
+        scorecard: evaled.scorecard,
         deadline: null,
         listingId: item.id,
       }

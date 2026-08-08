@@ -4,7 +4,9 @@ import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { prefersReducedMotion } from '../lib/animations'
 import { getListingBySource } from '../lib/listingCatalog'
+import { unpackReasoning } from '../lib/skillMatch'
 import ListingImage, { DEFAULT_OPPORTUNITY_IMAGE } from './ListingImage'
+import SkillScorecard from './SkillScorecard'
 
 gsap.registerPlugin(useGSAP)
 
@@ -14,6 +16,13 @@ export default function MatchCard({ match, kind, onSave, onDismiss, onOpen }) {
   const ref = useRef(null)
   const listing = getListingBySource(match.source)
   const thumb = listing?.cover || listing?.gallery?.[0] || DEFAULT_OPPORTUNITY_IMAGE
+  const { text: reasonText, scorecard } = unpackReasoning(match.reasoning || '')
+  const shortReason = reasonText
+    .split(/(?<=\.)\s+/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .slice(0, 2)
+    .join(' ')
 
   useGSAP(
     () => {
@@ -77,12 +86,8 @@ export default function MatchCard({ match, kind, onSave, onDismiss, onOpen }) {
             {score}%
           </div>
         </div>
-        <p className="reasoning">
-          {(match.reasoning || '')
-            .split(/(?<=\.)\s+/)
-            .slice(0, 2)
-            .join(' ')}
-        </p>
+        <p className="reasoning">{shortReason || t('match.reasonFallback')}</p>
+        {scorecard ? <SkillScorecard scorecard={scorecard} compact /> : null}
         <div className="match-meta">
           {match.deadline ? (
             <span>{t('matchCard.deadline', { date: match.deadline })}</span>

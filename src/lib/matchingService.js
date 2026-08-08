@@ -100,10 +100,7 @@ export async function runMatchingForUser(userId) {
     url: m.url,
     company: m.company ?? null,
     source: m.source,
-    // Persist location inside reasoning so cards/detail keep country context without a DB migration.
-    reasoning: m.location
-      ? `${m.location} · ${m.reasoning}`
-      : m.reasoning,
+    reasoning: m.reasoning,
     match_score: m.match_score,
     saved: savedJobs.has(sourceKey(m)),
     dismissed: dismissedJobs.has(sourceKey(m)),

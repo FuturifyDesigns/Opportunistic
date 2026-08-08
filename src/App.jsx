@@ -5,6 +5,7 @@ import { ConsentProvider } from './context/ConsentContext'
 import { ToastProvider } from './context/ToastContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import GlitchHeadings from './components/GlitchHeadings'
+import VhsPageTransition from './components/VhsPageTransition'
 import CookieConsent from './components/CookieConsent'
 import Landing from './pages/Landing'
 import Intro from './pages/Intro'
@@ -85,6 +86,7 @@ export default function App() {
         <ToastProvider>
           <BrowserRouter>
             <GlitchHeadings />
+            <VhsPageTransition />
             <CookieConsent />
             <AppRoutes />
           </BrowserRouter>
