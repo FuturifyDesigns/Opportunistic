@@ -88,7 +88,9 @@ export default function App() {
             <GlitchHeadings />
             <VhsPageTransition />
             <CookieConsent />
-            <AppRoutes />
+            <div id="page-shell" className="page-shell">
+              <AppRoutes />
+            </div>
           </BrowserRouter>
         </ToastProvider>
       </ConsentProvider>

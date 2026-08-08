@@ -462,6 +462,11 @@ textarea:focus-visible {
 }
 
 /* VHS scramble page transition */
+.page-shell {
+  min-height: 100%;
+  will-change: opacity, transform;
+}
+
 .vhs-transition {
   position: fixed;
   inset: 0;
