@@ -78,7 +78,7 @@ export default function Terms() {
         content: (
           <p>
             {t('termsBody.contactBody')}{' '}
-            <a href="mailto:hello@opportunistic.online">hello@opportunistic.online</a>
+            <a href="mailto:futurifydesigns@gmail.com">futurifydesigns@gmail.com</a>
           </p>
         ),
       },

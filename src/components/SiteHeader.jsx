@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
+import { isAdminEmail } from '../lib/analytics'
 import GetStartedLogo from './GetStartedLogo'
 import LanguageSwitcher from './LanguageSwitcher'
 
@@ -13,6 +14,7 @@ export default function SiteHeader() {
   const [open, setOpen] = useState(false)
   const [accountOpen, setAccountOpen] = useState(false)
   const accountRef = useRef(null)
+  const showAdmin = isAdminEmail(user?.email)
 
   const close = () => {
     setOpen(false)
@@ -109,6 +111,11 @@ export default function SiteHeader() {
                   <NavLink role="menuitem" to="/settings" onClick={close}>
                     {t('nav.settings')}
                   </NavLink>
+                  {showAdmin ? (
+                    <NavLink role="menuitem" to="/admin" onClick={close}>
+                      Admin
+                    </NavLink>
+                  ) : null}
                   <button
                     type="button"
                     role="menuitem"

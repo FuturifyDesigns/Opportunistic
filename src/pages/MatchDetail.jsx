@@ -7,6 +7,7 @@ import { useToast } from '../context/ToastContext'
 import { getListingBySource } from '../lib/listingCatalog'
 import { generateWinTips } from '../lib/tipEngine'
 import { unpackReasoning } from '../lib/skillMatch'
+import { trackEngage } from '../lib/analytics'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
 import ListingImage, { DEFAULT_OPPORTUNITY_IMAGE } from '../components/ListingImage'
@@ -116,8 +117,10 @@ export default function MatchDetail() {
       if (err) throw err
       if (data) setMatch(data)
       if (field === 'saved') {
+        trackEngage(nextValue ? 'save' : 'unsave', { kind, matchId: match.id }, user?.id)
         toast.success(nextValue ? t('match.savedToast') : t('match.unsavedToast'))
       } else if (field === 'dismissed') {
+        trackEngage(nextValue ? 'dismiss' : 'restore', { kind, matchId: match.id }, user?.id)
         toast.info(nextValue ? t('match.dismissedToast') : t('match.restoredToast'))
       }
     } catch (err) {

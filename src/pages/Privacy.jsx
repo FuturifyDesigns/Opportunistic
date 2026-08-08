@@ -127,7 +127,7 @@ export default function Privacy() {
                 {t('privacyBody.rightsCalloutBefore')}{' '}
                 <Link to="/settings">{t('nav.settings')}</Link>{' '}
                 {t('privacyBody.rightsCalloutMid')}{' '}
-                <a href="mailto:hello@opportunistic.online">hello@opportunistic.online</a>
+                <a href="mailto:futurifydesigns@gmail.com">futurifydesigns@gmail.com</a>
               </p>
             </div>
           </>
@@ -149,7 +149,7 @@ export default function Privacy() {
         content: (
           <p>
             {t('privacyBody.contactBody')}{' '}
-            <a href="mailto:hello@opportunistic.online">hello@opportunistic.online</a>
+            <a href="mailto:futurifydesigns@gmail.com">futurifydesigns@gmail.com</a>
           </p>
         ),
       },

@@ -4,8 +4,9 @@ import { AuthProvider } from './context/AuthContext'
 import { ConsentProvider } from './context/ConsentContext'
 import { ToastProvider } from './context/ToastContext'
 import ProtectedRoute from './components/ProtectedRoute'
+import AdminRoute from './components/AdminRoute'
 import GlitchHeadings from './components/GlitchHeadings'
-import VhsPageTransition from './components/VhsPageTransition'
+import PageLifecycle from './components/PageLifecycle'
 import CookieConsent from './components/CookieConsent'
 import Landing from './pages/Landing'
 import Intro from './pages/Intro'
@@ -20,6 +21,7 @@ import Settings from './pages/Settings'
 import MatchDetail from './pages/MatchDetail'
 import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
+import Admin from './pages/Admin'
 
 function AppRoutes() {
   const { i18n } = useTranslation()
@@ -74,6 +76,14 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/admin"
+        element={
+          <AdminRoute>
+            <Admin />
+          </AdminRoute>
+        }
+      />
       <Route path="*" element={<Navigate to="/home" replace />} />
     </Routes>
   )
@@ -86,7 +96,7 @@ export default function App() {
         <ToastProvider>
           <BrowserRouter>
             <GlitchHeadings />
-            <VhsPageTransition />
+            <PageLifecycle />
             <CookieConsent />
             <div id="page-shell" className="page-shell">
               <AppRoutes />

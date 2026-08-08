@@ -682,7 +682,7 @@
     "transfersTitle": "International transfers",
     "transfersBody": "Infrastructure may process data in regions used by our providers (for example Supabase and Brevo). Where data leaves your country, we rely on appropriate safeguards recognized under GDPR-style rules (such as standard contractual clauses offered by those providers) and minimize what we store.",
     "retentionTitle": "Retention",
-    "retentionBody": "Account and match data stay while your account is active. If you delete your data in Settings, we remove profile, qualifications, skills, matches, and search history from the app database. Auth-account purge may also be requested at hello@opportunistic.online. Consent records may be kept as proof of choice for up to the cookie lifetime or as required by law.",
+    "retentionBody": "Account and match data stay while your account is active. If you delete your data in Settings, we remove profile, qualifications, skills, matches, and search history from the app database. Auth-account purge may also be requested at futurifydesigns@gmail.com. Consent records may be kept as proof of choice for up to the cookie lifetime or as required by law.",
     "rightsTitle": "Your rights",
     "rightsBody": "Depending on where you live, you may have rights to access, correct, delete, restrict, object, port data, and withdraw consent. We honour these as a global baseline. You can edit your profile anytime and delete your data from Settings.",
     "rightsCalloutBefore": "Open",

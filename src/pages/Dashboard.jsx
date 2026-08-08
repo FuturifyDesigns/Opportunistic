@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { supabase } from '../lib/supabase'
+import { trackEngage } from '../lib/analytics'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import {
@@ -95,6 +96,7 @@ export default function Dashboard() {
       setEngineNote(reason === 'weekly' ? t('dashboard.weeklyNote') : t('dashboard.refreshingNote'))
       try {
         const result = await runMatchingForUser(user.id)
+        trackEngage('rematch', { reason }, user.id)
         setEngineNote(
           t('dashboard.updated', {
             scholarships: result.scholarships,
@@ -163,6 +165,7 @@ export default function Dashboard() {
     try {
       const { error } = await supabase.from(table).update({ saved: nextSaved }).eq('id', match.id)
       if (error) throw error
+      trackEngage(nextSaved ? 'save' : 'unsave', { kind: tab, matchId: match.id }, user?.id)
       toast.success(nextSaved ? t('common.toast.matchSaved') : t('common.toast.matchUnsaved'))
       load()
     } catch (err) {
@@ -175,6 +178,7 @@ export default function Dashboard() {
     try {
       const { error } = await supabase.from(table).update({ dismissed: true }).eq('id', match.id)
       if (error) throw error
+      trackEngage('dismiss', { kind: tab, matchId: match.id }, user?.id)
       toast.info(t('common.toast.matchDismissed'))
       load()
     } catch (err) {

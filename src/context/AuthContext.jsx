@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { trackEngage } from '../lib/analytics'
 
 const AuthContext = createContext(null)
 
@@ -121,9 +122,12 @@ export function AuthProvider({ children }) {
 
     initAuth()
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, next) => {
       setSession(next)
       refreshProfile(next?.user?.id, next?.user)
+      if (event === 'SIGNED_IN' && next?.user?.id) {
+        trackEngage('sign_in', { provider: next.user.app_metadata?.provider }, next.user.id)
+      }
     })
 
     return () => {
