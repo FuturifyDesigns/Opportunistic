@@ -13,9 +13,23 @@ function scrambleLabel(len = 11) {
   return out
 }
 
+function scrollPageToTop() {
+  const html = document.documentElement
+  const prev = html.style.scrollBehavior
+  html.style.scrollBehavior = 'auto'
+  window.scrollTo(0, 0)
+  document.body.scrollTop = 0
+  html.scrollTop = 0
+  html.style.scrollBehavior = prev
+}
+
+function pageShell() {
+  return document.getElementById('page-shell')
+}
+
 /**
  * Full-viewport VHS / scramble wipe on route changes.
- * Covers the page swap, then tears away to reveal the new screen.
+ * Always starts the next page at the top, then fades content in after the wipe.
  */
 export default function VhsPageTransition() {
   const location = useLocation()
@@ -29,12 +43,21 @@ export default function VhsPageTransition() {
     const root = rootRef.current
     if (!root) return undefined
 
+    scrollPageToTop()
+
+    const shell = pageShell()
+
     if (firstRef.current) {
       firstRef.current = false
+      if (shell) gsap.set(shell, { opacity: 1, y: 0, clearProps: 'transform' })
       return undefined
     }
 
-    if (prefersReducedMotion()) return undefined
+    if (prefersReducedMotion()) {
+      if (shell) gsap.set(shell, { opacity: 1, y: 0, clearProps: 'transform' })
+      return undefined
+    }
+
     if (busyRef.current) {
       tweenRef.current?.kill()
     }
@@ -47,6 +70,11 @@ export default function VhsPageTransition() {
     const scan = root.querySelector('.vhs-scan')
     const tracking = root.querySelector('.vhs-tracking')
 
+    // Hide incoming page under the wipe, then reveal with a fade.
+    if (shell) {
+      gsap.set(shell, { opacity: 0, y: 18 })
+    }
+
     root.setAttribute('aria-hidden', 'false')
     root.classList.add('is-active')
 
@@ -57,17 +85,19 @@ export default function VhsPageTransition() {
       }, 40)
     }
 
+    const finishReveal = () => {
+      window.clearInterval(scrambleTimer)
+      if (label) label.textContent = ''
+      root.classList.remove('is-active')
+      root.setAttribute('aria-hidden', 'true')
+      gsap.set(root, { clearProps: 'opacity' })
+      busyRef.current = false
+      tweenRef.current = null
+    }
+
     const tl = gsap.timeline({
       defaults: { ease: 'none' },
-      onComplete: () => {
-        window.clearInterval(scrambleTimer)
-        if (label) label.textContent = ''
-        root.classList.remove('is-active')
-        root.setAttribute('aria-hidden', 'true')
-        gsap.set(root, { clearProps: 'opacity' })
-        busyRef.current = false
-        tweenRef.current = null
-      },
+      onComplete: finishReveal,
     })
     tweenRef.current = tl
 
@@ -77,11 +107,7 @@ export default function VhsPageTransition() {
     gsap.set([noise, scan, tracking], { opacity: 1 })
 
     // Hit — hard cover + tear
-    tl.fromTo(
-      root,
-      { opacity: 0 },
-      { opacity: 1, duration: 0.06 },
-    )
+    tl.fromTo(root, { opacity: 0 }, { opacity: 1, duration: 0.06 })
       .to(
         slices,
         {
@@ -115,9 +141,7 @@ export default function VhsPageTransition() {
         0,
       )
       .to(noise, { opacity: 0.9, duration: 0.15 }, 0.05)
-      // Hold a beat of static
       .to({}, { duration: 0.12 })
-      // Tear away
       .to(
         slices,
         {
@@ -133,10 +157,26 @@ export default function VhsPageTransition() {
       .to([noise, scan, tracking], { opacity: 0, duration: 0.22 }, '<0.05')
       .to(root, { opacity: 0, duration: 0.18, ease: 'power2.out' }, '<0.08')
 
+    // Content fade-in as the VHS tears away
+    if (shell) {
+      tl.to(
+        shell,
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.55,
+          ease: 'power2.out',
+          onStart: () => scrollPageToTop(),
+        },
+        '-=0.22',
+      )
+    }
+
     return () => {
       window.clearInterval(scrambleTimer)
       tl.kill()
       busyRef.current = false
+      if (shell) gsap.set(shell, { opacity: 1, y: 0, clearProps: 'transform' })
     }
   }, [location.pathname])
 
