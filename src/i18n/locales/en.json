@@ -193,6 +193,9 @@
       "strong": "Strong"
     },
     "checkEmail": "Check your email to confirm your account, then sign in.",
+    "verifiedTitle": "Email verified",
+    "verifiedBody": "Your email is verified. You can close this page.",
+    "verifiedErrorTitle": "Verification failed",
     "backToChoose": "Back to choose",
     "genericError": "Something went wrong",
     "accessEyebrow": "Access"

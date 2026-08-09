@@ -14,6 +14,7 @@ import HowItWorks from './pages/HowItWorks'
 import Features from './pages/Features'
 import About from './pages/About'
 import Auth from './pages/Auth'
+import EmailVerified from './pages/EmailVerified'
 import Onboarding from './pages/Onboarding'
 import Dashboard from './pages/Dashboard'
 import Profile from './pages/Profile'
@@ -34,6 +35,7 @@ function AppRoutes() {
       <Route path="/features" element={<Features />} />
       <Route path="/about" element={<About />} />
       <Route path="/auth" element={<Auth />} />
+      <Route path="/verified" element={<EmailVerified />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/terms" element={<Terms />} />
       <Route

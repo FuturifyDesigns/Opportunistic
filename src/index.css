@@ -2769,6 +2769,48 @@ sup {
   max-width: 42ch;
 }
 
+/* Temporary email-verified landing (confirmation link) */
+.verified-page .verified-main {
+  min-height: 100dvh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  text-align: center;
+  padding: 2rem 1.25rem 3rem;
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
+.verified-page .verified-main .eyebrow {
+  margin: 0 0 0.85rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted, #5a5a55);
+}
+
+.verified-page .verified-main h1 {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(1.85rem, 4vw, 2.5rem);
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin: 0 0 0.75rem;
+}
+
+.verified-page .verified-main .lede {
+  margin: 0;
+  max-width: 28ch;
+  color: var(--muted, #5a5a55);
+  font-size: 1.05rem;
+  line-height: 1.45;
+}
+
+.verified-page .verified-main .spinner {
+  margin-top: 0.5rem;
+}
+
 .legal-meta {
   display: flex;
   flex-wrap: wrap;
