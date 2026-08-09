@@ -299,7 +299,50 @@ export const FIELD_ALIASES = {
   'supply chan': 'supply chain',
   'heath science': 'health science',
   frnech: 'french',
-  chan: 'chain',
+  frech: 'french',
+  spanis: 'spanish',
+  spanich: 'spanish',
+  geologoy: 'geology',
+  archealogy: 'archaeology',
+  midwifry: 'midwifery',
+  midwifey: 'midwifery',
+  dentisty: 'dentistry',
+  dentisrty: 'dentistry',
+  'early childhood': 'early childhood',
+  'early childhod': 'early childhood',
+  'special educaton': 'special education',
+  'physical educaton': 'physical education',
+  'public heath': 'public health',
+  'civil engneering': 'civil engineering',
+  'mechanical engneering': 'mechanical engineering',
+  'chemical engneering': 'chemical engineering',
+  'software engneering': 'software engineering',
+  'computer sceince': 'computer science',
+  'data sceince': 'data science',
+  'political sceince': 'political science',
+  'animal sceince': 'animal science',
+  'food sceince': 'food science',
+  'soil sceince': 'soil science',
+  'sport sceince': 'sport science',
+  'sports sceince': 'sports science',
+  'library sceince': 'library science',
+  'health sceince': 'health science',
+  'life sceince': 'life sciences',
+  'life sceinces': 'life sciences',
+  'material sceince': 'materials science',
+  'materials sceince': 'materials science',
+  'enviromental sceince': 'environmental science',
+  'information tecnology': 'information technology',
+  'information sytems': 'information systems',
+  'human resourses': 'human resources',
+  'internationl business': 'international business',
+  'mass comunication': 'mass communication',
+  'graphic desing': 'graphic design',
+  'interior desing': 'interior design',
+  'project managment': 'project management',
+  'business managment': 'business management',
+  'business adminstration': 'business administration',
+  'public adminstration': 'public administration',
 }
 
 export const SKILL_TYPO_ALIASES = {
@@ -369,6 +412,202 @@ export const SKILL_TYPO_ALIASES = {
   spss: 'SPSS / stats basics',
   quickbooks: 'QuickBooks / Sage',
   sage: 'QuickBooks / Sage',
+  html: 'HTML / CSS',
+  css: 'HTML / CSS',
+  'html/css': 'HTML / CSS',
+  mongodb: 'MongoDB',
+  mongo: 'MongoDB',
+  docker: 'Docker',
+  kubernetes: 'Kubernetes',
+  k8s: 'Kubernetes',
+  aws: 'AWS',
+  azure: 'Azure',
+  gcp: 'GCP',
+  linux: 'Linux',
+  unix: 'Linux',
+  java: 'Java',
+  kotlin: 'Kotlin',
+  swift: 'Swift',
+  golang: 'Go',
+  rust: 'Rust',
+  csharp: 'C#',
+  'c#': 'C#',
+  'c++': 'C++',
+  cpp: 'C++',
+  rlang: 'R',
+  tableau: 'Tableau',
+  seaborn: 'Seaborn',
+  tensorflow: 'TensorFlow',
+  pytorch: 'PyTorch',
+  sklearn: 'Scikit-learn',
+  'scikit-learn': 'Scikit-learn',
+  scikitlearn: 'Scikit-learn',
+  wordpress: 'WordPress',
+  shopify: 'Shopify',
+  salesforce: 'Salesforce',
+  jira: 'Jira',
+  slack: 'Slack',
+  sketch: 'Sketch',
+  notion: 'Notion',
+  'ui/ux': 'UI/UX design',
+  uiux: 'UI/UX design',
+  ux: 'UI/UX design',
+  ui: 'UI/UX design',
+  seo: 'SEO',
+  sem: 'SEM / Ads',
+  copywriting: 'Copywriting',
+  'public speaking': 'Public speaking',
+  publicspeaking: 'Public speaking',
+  mentoring: 'Mentoring',
+  coaching: 'Coaching',
+  'critical thinking': 'Critical thinking',
+  criticalthinking: 'Critical thinking',
+  'data analysis': 'Data analysis',
+  dataanalysis: 'Data analysis',
+  'machine learning': 'Machine learning',
+  machinelearning: 'Machine learning',
+  ml: 'Machine learning',
+  'deep learning': 'Deep learning',
+  deeplearning: 'Deep learning',
+  nlp: 'NLP',
+  'natural language processing': 'NLP',
+}
+
+/**
+ * Generate common misspellings for a canonical token/phrase.
+ * Used to auto-cover every catalog field/skill — not just hand-picked ones.
+ */
+export function generateTypoVariants(canonical = '') {
+  const w = String(canonical || '')
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, ' ')
+  if (w.length < 4) return []
+
+  const out = new Set()
+
+  const pushWordTypos = (word, rejoin) => {
+    if (word.length < 4) return
+    const accept = (variant) => {
+      if (!variant || variant === word || variant.length < 3) return
+      // Keep a solid shared stem so banking↛baking, plan↛plant noise stays low
+      const need = Math.min(4, Math.max(2, Math.floor(Math.min(word.length, variant.length) / 2)))
+      if (sharedPrefixLen(word, variant) < need) return
+      if (Math.abs(word.length - variant.length) > 2) return
+      rejoin(variant)
+    }
+    for (let i = 0; i < word.length - 1; i += 1) {
+      accept(word.slice(0, i) + word[i + 1] + word[i] + word.slice(i + 2))
+    }
+    for (let i = 0; i < word.length; i += 1) {
+      accept(word.slice(0, i) + word.slice(i + 1))
+    }
+    if (/(.)\1/.test(word)) accept(word.replace(/(.)\1/g, '$1'))
+    if (word.includes('ie')) accept(word.replace(/ie/g, 'ei'))
+    if (word.includes('ei')) accept(word.replace(/ei/g, 'ie'))
+    if (word.includes('ph')) accept(word.replace(/ph/g, 'f'))
+    if (word.endsWith('ence')) accept(`${word.slice(0, -4)}ance`)
+    if (word.endsWith('ance')) accept(`${word.slice(0, -4)}ence`)
+    if (word.endsWith('er') && word.length >= 6) accept(`${word.slice(0, -2)}or`)
+    if (word.endsWith('or') && word.length >= 6) accept(`${word.slice(0, -2)}er`)
+    if (word.includes('tion')) accept(word.replace(/tion/g, 'sion'))
+    if (word.includes('sion')) accept(word.replace(/sion/g, 'tion'))
+  }
+
+  const words = w.split(' ')
+  if (words.length === 1) {
+    pushWordTypos(w, (v) => out.add(v))
+  } else {
+    pushWordTypos(w.replace(/\s+/g, ''), (v) => out.add(v)) // rare: computerscience
+    words.forEach((word, idx) => {
+      pushWordTypos(word, (vw) => {
+        const next = [...words]
+        next[idx] = vw
+        out.add(next.join(' '))
+        out.add(vw)
+      })
+    })
+  }
+
+  out.delete(w)
+  return [...out].filter((v) => v.length >= 3 && v !== w)
+}
+
+/**
+ * Merge manual aliases with auto-generated typos for every dictionary entry.
+ * Ambiguous typos (map to 2+ targets) are dropped.
+ */
+export function buildAliasTable(manualAliases = {}, dictionary = [], { casingMap = null } = {}) {
+  const table = { ...manualAliases }
+  const dictLower = dictionary.map((d) => String(d).toLowerCase())
+  const dictSet = new Set(dictLower)
+  const claims = new Map()
+
+  const canonCase = (lower) => {
+    if (casingMap && casingMap.has(lower)) return casingMap.get(lower)
+    return lower
+  }
+
+  const claim = (typo, targetLower) => {
+    const t = String(typo || '')
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, ' ')
+    if (!t || t === targetLower) return
+    if (t.length < 3) return
+    if (dictSet.has(t)) return
+    if (manualAliases[t] && String(manualAliases[t]).toLowerCase() !== targetLower) return
+    if (!claims.has(t)) claims.set(t, new Set())
+    claims.get(t).add(targetLower)
+  }
+
+  for (const raw of dictionary) {
+    const target = String(raw).toLowerCase()
+    for (const v of generateTypoVariants(target)) claim(v, target)
+    const parts = target.split(/\s+/).filter(Boolean)
+    if (parts.length > 1) {
+      for (const part of parts) {
+        if (part.length < 4) continue
+        for (const v of generateTypoVariants(part)) claim(v, part)
+      }
+    }
+  }
+
+  for (const [typo, targets] of claims) {
+    if (targets.size !== 1) continue
+    if (table[typo]) continue
+    table[typo] = canonCase([...targets][0])
+  }
+
+  return table
+}
+
+const aliasTableCache = new Map()
+
+function aliasTableFor(kind, dictionary, manual) {
+  const strong = `${kind}\0${[...dictionary].map((d) => String(d).toLowerCase()).sort().join('\0')}`
+  if (aliasTableCache.has(strong)) return aliasTableCache.get(strong)
+
+  let casingMap = null
+  if (kind === 'skill') {
+    casingMap = new Map()
+    for (const s of dictionary) casingMap.set(String(s).toLowerCase(), s)
+    for (const v of Object.values(manual)) {
+      if (typeof v === 'string') casingMap.set(v.toLowerCase(), v)
+    }
+  }
+
+  const table = buildAliasTable(manual, dictionary, { casingMap })
+  aliasTableCache.set(strong, table)
+  return table
+}
+
+function lookupAlias(aliases, value) {
+  const key = String(value || '')
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, ' ')
+  return aliases[key] || null
 }
 
 const DEGREE_PREFIX_RE =
@@ -439,14 +678,14 @@ export function correctFieldName(input, fieldDictionary = []) {
 
   if (!rest) return prefix || trimmed
 
-  const dict = fieldDictionary.length
-    ? fieldDictionary
-    : []
+  const dict = fieldDictionary.length ? fieldDictionary : []
+  const aliases = aliasTableFor('field', dict, FIELD_ALIASES)
 
   // Full-phrase alias / fuzzy first
   const restLower = rest.toLowerCase()
-  if (FIELD_ALIASES[restLower]) {
-    const fixed = titleCaseWords(FIELD_ALIASES[restLower])
+  const aliasHit = lookupAlias(aliases, restLower)
+  if (aliasHit) {
+    const fixed = titleCaseWords(aliasHit)
     return prefix ? `${prefix} ${fixed}` : fixed
   }
 
@@ -465,17 +704,19 @@ export function correctFieldName(input, fieldDictionary = []) {
         .filter((w) => w.length >= 4),
     ),
   ]
-  // Prefer original dictionary phrases as display when reassembled
   const correctedWords = words.map((w) => {
     const low = w.toLowerCase().replace(/[^a-z0-9-]/g, '')
-    if (FIELD_ALIASES[low]) return FIELD_ALIASES[low]
-    if (w.length <= 3) return w // keep of, and, BA fragments
+    const a = lookupAlias(aliases, low)
+    if (a) return a
+    if (w.length <= 3) return w
     const hit = bestFuzzyMatch(low, singleWordDict, { minLen: 4 })
     return hit || w
   })
 
   let assembled = correctedWords.join(' ')
-  // If word-wise fix now matches a known phrase, snap to canonical phrase casing
+  const assembledAlias = lookupAlias(aliases, assembled)
+  if (assembledAlias) assembled = assembledAlias
+
   const snap = bestFuzzyMatch(assembled, dict, { minLen: 4 })
   if (
     snap &&
@@ -496,8 +737,10 @@ export function correctSkillName(input, skillDictionary = []) {
   const trimmed = String(input || '').trim().replace(/\s+/g, ' ')
   if (!trimmed) return ''
 
+  const aliases = aliasTableFor('skill', skillDictionary, SKILL_TYPO_ALIASES)
   const lower = trimmed.toLowerCase()
-  if (SKILL_TYPO_ALIASES[lower]) return SKILL_TYPO_ALIASES[lower]
+  const aliasHit = lookupAlias(aliases, lower)
+  if (aliasHit) return aliasHit
 
   // Exact catalog match (preserve catalog casing)
   for (const s of skillDictionary) {
@@ -510,14 +753,19 @@ export function correctSkillName(input, skillDictionary = []) {
   // Word-wise for multi-word custom skills against catalog tokens
   if (trimmed.includes(' ') && skillDictionary.length) {
     const tokens = [
-      ...new Set(skillDictionary.flatMap((s) => String(s).toLowerCase().split(/[^a-z0-9+#.]+/)).filter((w) => w.length >= 4)),
+      ...new Set(
+        skillDictionary
+          .flatMap((s) => String(s).toLowerCase().split(/[^a-z0-9+#.]+/))
+          .filter((w) => w.length >= 4),
+      ),
     ]
     const parts = trimmed.split(/\s+/).map((p) => {
       const low = p.toLowerCase()
-      if (SKILL_TYPO_ALIASES[low]) return SKILL_TYPO_ALIASES[low]
-      return bestFuzzyMatch(low, tokens, { minLen: 4 }) || p
+      return lookupAlias(aliases, low) || bestFuzzyMatch(low, tokens, { minLen: 4 }) || p
     })
     const joined = parts.join(' ')
+    const joinedAlias = lookupAlias(aliases, joined)
+    if (joinedAlias) return joinedAlias
     const again = bestFuzzyMatch(joined, skillDictionary, { minLen: 4 })
     if (again) return again
   }
