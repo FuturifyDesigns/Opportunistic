@@ -409,8 +409,12 @@ const CATALOG = [
       'educational psychology',
       'adult education',
       'teacher training',
+      'science education',
+      'mathematics education',
       'bed',
       'med',
+      'b.ed',
+      'm.ed',
     ],
     skills: [
       'Lesson planning',

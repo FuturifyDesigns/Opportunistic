@@ -34,8 +34,8 @@ function maxDistanceFor(len) {
   if (len <= 3) return 0
   if (len <= 5) return 1
   if (len <= 8) return 2
-  if (len <= 12) return 3
-  return 4
+  if (len <= 12) return 2
+  return 3
 }
 
 function titleCaseWords(s) {
@@ -48,6 +48,18 @@ function titleCaseWords(s) {
       return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
     })
     .join(' ')
+}
+
+function firstLettersCompatible(a, b) {
+  const aw = String(a).toLowerCase().trim().split(/\s+/).filter(Boolean)
+  const bw = String(b).toLowerCase().trim().split(/\s+/).filter(Boolean)
+  if (!aw.length || !bw.length) return true
+  // First content word should start the same — stops bed↔food, lit↔fit, etc.
+  if (aw[0][0] !== bw[0][0]) return false
+  if (aw.length > 1 && bw.length > 1 && aw[aw.length - 1][0] !== bw[bw.length - 1][0]) {
+    return false
+  }
+  return true
 }
 
 /**
@@ -82,6 +94,7 @@ export function bestFuzzyMatch(input, dictionary, { minLen = 3 } = {}) {
     const cl = c.toLowerCase()
     // Skip wildly different lengths
     if (Math.abs(cl.length - needle.length) > limit + 1) continue
+    if (!firstLettersCompatible(needle, cl)) continue
     const d = levenshtein(needle, cl)
     if (d < bestDist) {
       second = bestDist
@@ -97,6 +110,8 @@ export function bestFuzzyMatch(input, dictionary, { minLen = 3 } = {}) {
   if (bestDist === second) return null
   // Require clear win when distance > 1
   if (bestDist > 1 && second - bestDist < 1) return null
+  // Multi-word: don't rewrite whole phrases on weak edits (bed science ≠ food science)
+  if (needle.includes(' ') && bestDist > 2) return null
   return best
 }
 
@@ -276,7 +291,7 @@ export const SKILL_TYPO_ALIASES = {
 }
 
 const DEGREE_PREFIX_RE =
-  /^(b\.?\s*sc|bsc|b\.?\s*a|ba|b\.?\s*eng|beng|b\.?\s*tech|btech|b\.?\s*com|bcom|bba|bca|ll\.?\s*b|llb|m\.?\s*sc|msc|m\.?\s*a|ma|m\.?\s*eng|meng|mba|mca|m\.?\s*phil|mphil|ph\.?\s*d|phd|dphil|pgdip|pgcert|hnd|hnc|diploma|certificate|cert|nd|nc)\b[. ]*/i
+  /^(b\.?\s*ed|bed|m\.?\s*ed|med|b\.?\s*sc|bsc|b\.?\s*a|ba|b\.?\s*eng|beng|b\.?\s*tech|btech|b\.?\s*com|bcom|bba|bca|ll\.?\s*b|llb|m\.?\s*sc|msc|m\.?\s*a|ma|m\.?\s*eng|meng|mba|mca|m\.?\s*phil|mphil|ph\.?\s*d|phd|dphil|pgdip|pgcert|hnd|hnc|diploma|certificate|cert|nd|nc)\b[. ]*/i
 
 function formatDegreePrefix(prefixRaw) {
   const p = String(prefixRaw || '')
@@ -284,6 +299,8 @@ function formatDegreePrefix(prefixRaw) {
     .replace(/\./g, '')
     .replace(/\s+/g, '')
   const map = {
+    bed: 'BEd',
+    med: 'MEd',
     bsc: 'BSc',
     ba: 'BA',
     beng: 'BEng',
