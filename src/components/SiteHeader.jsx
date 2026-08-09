@@ -81,55 +81,85 @@ export default function SiteHeader() {
           <LanguageSwitcher compact onPick={close} />
 
           {user ? (
-            <div className={`account-menu ${accountOpen ? 'open' : ''}`} ref={accountRef}>
-              <button
-                type="button"
-                className="account-menu-trigger"
-                aria-expanded={accountOpen}
-                aria-haspopup="menu"
-                aria-label={t('nav.dashboard')}
-                title={firstName}
-                onClick={() => setAccountOpen((v) => !v)}
-              >
-                <img
-                  src={`${import.meta.env.BASE_URL}logo.png`}
-                  alt=""
-                  width="40"
-                  height="40"
-                />
-              </button>
+            <>
+              <div className={`account-menu account-menu-desktop ${accountOpen ? 'open' : ''}`} ref={accountRef}>
+                <button
+                  type="button"
+                  className="account-menu-trigger"
+                  aria-expanded={accountOpen}
+                  aria-haspopup="menu"
+                  aria-label={t('nav.dashboard')}
+                  title={firstName}
+                  onClick={() => setAccountOpen((v) => !v)}
+                >
+                  <img
+                    src={`${import.meta.env.BASE_URL}logo.png`}
+                    alt=""
+                    width="40"
+                    height="40"
+                  />
+                </button>
 
-              {accountOpen ? (
-                <div className="account-menu-panel" role="menu">
-                  <p className="account-menu-label">{firstName}</p>
-                  <NavLink role="menuitem" to="/dashboard" onClick={close}>
-                    {t('nav.dashboard')}
-                  </NavLink>
-                  <NavLink role="menuitem" to="/profile" onClick={close}>
-                    {t('nav.profile')}
-                  </NavLink>
-                  <NavLink role="menuitem" to="/settings" onClick={close}>
-                    {t('nav.settings')}
-                  </NavLink>
-                  {showAdmin ? (
-                    <NavLink role="menuitem" to="/admin" onClick={close}>
-                      Admin
+                {accountOpen ? (
+                  <div className="account-menu-panel" role="menu">
+                    <p className="account-menu-label">{firstName}</p>
+                    <NavLink role="menuitem" to="/dashboard" onClick={close}>
+                      {t('nav.dashboard')}
                     </NavLink>
-                  ) : null}
-                  <button
-                    type="button"
-                    role="menuitem"
-                    className="account-menu-signout"
-                    onClick={() => {
-                      close()
-                      void signOut().then(() => toast.info(t('common.toast.signedOut')))
-                    }}
-                  >
-                    {t('nav.signOut')}
-                  </button>
-                </div>
-              ) : null}
-            </div>
+                    <NavLink role="menuitem" to="/profile" onClick={close}>
+                      {t('nav.profile')}
+                    </NavLink>
+                    <NavLink role="menuitem" to="/settings" onClick={close}>
+                      {t('nav.settings')}
+                    </NavLink>
+                    {showAdmin ? (
+                      <NavLink role="menuitem" to="/admin" onClick={close} className="account-admin-link">
+                        Admin
+                      </NavLink>
+                    ) : null}
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="account-menu-signout"
+                      onClick={() => {
+                        close()
+                        void signOut().then(() => toast.info(t('common.toast.signedOut')))
+                      }}
+                    >
+                      {t('nav.signOut')}
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+
+              <div className="account-links-mobile">
+                <p className="account-menu-label">{firstName}</p>
+                <NavLink to="/dashboard" onClick={close}>
+                  {t('nav.dashboard')}
+                </NavLink>
+                <NavLink to="/profile" onClick={close}>
+                  {t('nav.profile')}
+                </NavLink>
+                <NavLink to="/settings" onClick={close}>
+                  {t('nav.settings')}
+                </NavLink>
+                {showAdmin ? (
+                  <NavLink to="/admin" onClick={close} className="account-admin-link">
+                    Admin
+                  </NavLink>
+                ) : null}
+                <button
+                  type="button"
+                  className="account-menu-signout"
+                  onClick={() => {
+                    close()
+                    void signOut().then(() => toast.info(t('common.toast.signedOut')))
+                  }}
+                >
+                  {t('nav.signOut')}
+                </button>
+              </div>
+            </>
           ) : (
             <GetStartedLogo onClick={close} />
           )}
