@@ -33,9 +33,9 @@ export function levenshtein(a = '', b = '') {
 function maxDistanceFor(len) {
   if (len <= 3) return 0
   if (len <= 5) return 1
-  if (len <= 8) return 2
+  if (len <= 8) return 1
   if (len <= 12) return 2
-  return 3
+  return 2
 }
 
 function titleCaseWords(s) {
@@ -50,16 +50,54 @@ function titleCaseWords(s) {
     .join(' ')
 }
 
-function firstLettersCompatible(a, b) {
+function sharedPrefixLen(a, b) {
+  const n = Math.min(a.length, b.length)
+  let i = 0
+  while (i < n && a[i] === b[i]) i += 1
+  return i
+}
+
+/** Per-word guard: stops social↔soil, bed↔food, plan↔planning, baking↔banking. */
+function tokensCompatible(a, b) {
   const aw = String(a).toLowerCase().trim().split(/\s+/).filter(Boolean)
   const bw = String(b).toLowerCase().trim().split(/\s+/).filter(Boolean)
-  if (!aw.length || !bw.length) return true
-  // First content word should start the same — stops bed↔food, lit↔fit, etc.
-  if (aw[0][0] !== bw[0][0]) return false
-  if (aw.length > 1 && bw.length > 1 && aw[aw.length - 1][0] !== bw[bw.length - 1][0]) {
+  if (!aw.length || !bw.length) return false
+
+  // Prefer same word count; allow only simple pluralization at the phrase level
+  if (aw.length !== bw.length) {
+    const joinedA = aw.join(' ')
+    const joinedB = bw.join(' ')
+    if (joinedA + 's' === joinedB || joinedB + 's' === joinedA) return true
+    if (joinedA + 'es' === joinedB || joinedB + 'es' === joinedA) return true
     return false
   }
+
+  for (let i = 0; i < aw.length; i += 1) {
+    const x = aw[i]
+    const y = bw[i]
+    if (x === y) continue
+    if (x[0] !== y[0]) return false
+
+    const d = levenshtein(x, y)
+    const limit = maxDistanceFor(Math.min(x.length, y.length))
+    if (d > limit) return false
+
+    // Short / medium words: keep a solid shared stem so baking≠banking, plan≠plant loosely
+    if (d > 0) {
+      const stem = Math.min(3, Math.floor(Math.min(x.length, y.length) * 0.5))
+      if (sharedPrefixLen(x, y) < Math.max(2, stem)) return false
+    }
+    // Never expand a short token into a much longer one (plan→planning)
+    if (Math.abs(x.length - y.length) > limit + 1) return false
+  }
   return true
+}
+
+function isSimpleVariant(needle, cand) {
+  if (cand === needle + 's' || needle === cand + 's') return true
+  if (cand === needle + 'es' || needle === cand + 'es') return true
+  if (cand === needle + 'ing' && needle.length >= 5) return true
+  return false
 }
 
 /**
@@ -75,14 +113,24 @@ export function bestFuzzyMatch(input, dictionary, { minLen = 3 } = {}) {
     if (String(cand).toLowerCase() === needle) return cand
   }
 
-  // Starts-with / contains strong hints for longer needles
+  // Safe prefix / plural variants only (not plan→planning)
+  const variantHits = dictionary.filter((cand) => {
+    const c = String(cand).toLowerCase()
+    return isSimpleVariant(needle, c)
+  })
+  if (variantHits.length === 1) return variantHits[0]
+  if (variantHits.length > 1) {
+    variantHits.sort((a, b) => String(a).length - String(b).length)
+    return variantHits[0]
+  }
+
   const prefixHits = dictionary.filter((cand) => {
     const c = String(cand).toLowerCase()
-    return c.startsWith(needle) || needle.startsWith(c)
+    if (!(c.startsWith(needle) || needle.startsWith(c))) return false
+    if (Math.min(c.length, needle.length) < 5) return false
+    return Math.abs(c.length - needle.length) <= 2
   })
-  if (prefixHits.length === 1 && Math.abs(prefixHits[0].length - raw.length) <= 4) {
-    return prefixHits[0]
-  }
+  if (prefixHits.length === 1) return prefixHits[0]
 
   let best = null
   let bestDist = Infinity
@@ -92,9 +140,8 @@ export function bestFuzzyMatch(input, dictionary, { minLen = 3 } = {}) {
   for (const cand of dictionary) {
     const c = String(cand)
     const cl = c.toLowerCase()
-    // Skip wildly different lengths
     if (Math.abs(cl.length - needle.length) > limit + 1) continue
-    if (!firstLettersCompatible(needle, cl)) continue
+    if (!tokensCompatible(needle, cl)) continue
     const d = levenshtein(needle, cl)
     if (d < bestDist) {
       second = bestDist
@@ -106,11 +153,8 @@ export function bestFuzzyMatch(input, dictionary, { minLen = 3 } = {}) {
   }
 
   if (!best || bestDist > limit) return null
-  // Ambiguous: two equally close candidates
   if (bestDist === second) return null
-  // Require clear win when distance > 1
   if (bestDist > 1 && second - bestDist < 1) return null
-  // Multi-word: don't rewrite whole phrases on weak edits (bed science ≠ food science)
   if (needle.includes(' ') && bestDist > 2) return null
   return best
 }
@@ -132,10 +176,14 @@ export const FIELD_ALIASES = {
   scince: 'science',
   sciense: 'science',
   sience: 'science',
+  sceince: 'science',
+  scienece: 'science',
   engneering: 'engineering',
   engeneering: 'engineering',
   engineerng: 'engineering',
   enginering: 'engineering',
+  eletrical: 'electrical',
+  electical: 'electrical',
   buisness: 'business',
   bussiness: 'business',
   busines: 'business',
@@ -148,6 +196,10 @@ export const FIELD_ALIASES = {
   physcology: 'psychology',
   sociolgy: 'sociology',
   socioloy: 'sociology',
+  'social science': 'social science',
+  'social sciences': 'social sciences',
+  'socail science': 'social science',
+  'soical science': 'social science',
   matematics: 'mathematics',
   mathmatics: 'mathematics',
   maths: 'mathematics',
@@ -175,6 +227,8 @@ export const FIELD_ALIASES = {
   architeture: 'architecture',
   nurshing: 'nursing',
   nusing: 'nursing',
+  nutrion: 'nutrition',
+  nutrtion: 'nutrition',
   pharmasy: 'pharmacy',
   pharamacy: 'pharmacy',
   medicin: 'medicine',
@@ -205,6 +259,8 @@ export const FIELD_ALIASES = {
   statistcs: 'statistics',
   statistiks: 'statistics',
   politcal: 'political',
+  polisci: 'political science',
+  'poli sci': 'political science',
   goverment: 'government',
   internationl: 'international',
   comunication: 'communication',
@@ -219,6 +275,31 @@ export const FIELD_ALIASES = {
   theolgy: 'theology',
   archeology: 'archaeology',
   archaelogy: 'archaeology',
+  musci: 'music',
+  forensics: 'forensic science',
+  forensic: 'forensic science',
+  geogrophy: 'geography',
+  geograpy: 'geography',
+  antropology: 'anthropology',
+  criminolgy: 'criminology',
+  biotechology: 'biotechnology',
+  libary: 'library',
+  grahic: 'graphic',
+  tourisim: 'tourism',
+  resouces: 'resources',
+  studes: 'studies',
+  hisotry: 'history',
+  histroy: 'history',
+  'plant science': 'plant science',
+  'plante science': 'plant science',
+  'inferior design': 'interior design',
+  'electronics engineering': 'electronics engineering',
+  'electronic engineering': 'electronic engineering',
+  'projec management': 'project management',
+  'supply chan': 'supply chain',
+  'heath science': 'health science',
+  frnech: 'french',
+  chan: 'chain',
 }
 
 export const SKILL_TYPO_ALIASES = {
@@ -291,7 +372,7 @@ export const SKILL_TYPO_ALIASES = {
 }
 
 const DEGREE_PREFIX_RE =
-  /^(b\.?\s*ed|bed|m\.?\s*ed|med|b\.?\s*sc|bsc|b\.?\s*a|ba|b\.?\s*eng|beng|b\.?\s*tech|btech|b\.?\s*com|bcom|bba|bca|ll\.?\s*b|llb|m\.?\s*sc|msc|m\.?\s*a|ma|m\.?\s*eng|meng|mba|mca|m\.?\s*phil|mphil|ph\.?\s*d|phd|dphil|pgdip|pgcert|hnd|hnc|diploma|certificate|cert|nd|nc)\b[. ]*/i
+  /^(b\.?\s*ed|bed|m\.?\s*ed|med|b\.?\s*sc|bsc|b\.?\s*a|ba|b\.?\s*eng|beng|b\.?\s*tech|btech|b\.?\s*com|bcom|bba|bca|ll\.?\s*b|llb|ll\.?\s*m|llm|m\.?\s*sc|msc|m\.?\s*a|ma|m\.?\s*eng|meng|mba|mca|m\.?\s*phil|mphil|ph\.?\s*d|phd|dphil|pgce|pgde|pgdip|pgcert|hnd|hnc|diploma|certificate|cert|nd|nc)\b[. ]*/i
 
 function formatDegreePrefix(prefixRaw) {
   const p = String(prefixRaw || '')
@@ -309,6 +390,7 @@ function formatDegreePrefix(prefixRaw) {
     bba: 'BBA',
     bca: 'BCA',
     llb: 'LLB',
+    llm: 'LLM',
     msc: 'MSc',
     ma: 'MA',
     meng: 'MEng',
@@ -317,6 +399,8 @@ function formatDegreePrefix(prefixRaw) {
     mphil: 'MPhil',
     phd: 'PhD',
     dphil: 'DPhil',
+    pgce: 'PGCE',
+    pgde: 'PGDE',
     pgdip: 'PGDip',
     pgcert: 'PGCert',
     hnd: 'HND',
@@ -393,7 +477,11 @@ export function correctFieldName(input, fieldDictionary = []) {
   let assembled = correctedWords.join(' ')
   // If word-wise fix now matches a known phrase, snap to canonical phrase casing
   const snap = bestFuzzyMatch(assembled, dict, { minLen: 4 })
-  if (snap && levenshtein(assembled.toLowerCase(), snap.toLowerCase()) <= 2) {
+  if (
+    snap &&
+    tokensCompatible(assembled, snap) &&
+    levenshtein(assembled.toLowerCase(), snap.toLowerCase()) <= maxDistanceFor(assembled.length)
+  ) {
     assembled = snap
   }
 

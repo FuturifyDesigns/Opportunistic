@@ -273,6 +273,8 @@ const CATALOG = [
       'organisational psychology',
       'organizational psychology',
       'sociology',
+      'social science',
+      'social sciences',
       'social work',
       'anthropology',
       'political science',
@@ -524,7 +526,7 @@ const CATALOG = [
 
   // —— Engineering (by branch) ——
   {
-    keys: ['electrical', 'electronic', 'electronics', 'electrical engineering', 'electronic engineering', 'mechatronic', 'mechatronics', 'telecommunications', 'telecom'],
+    keys: ['electrical', 'electronic', 'electronics', 'electrical engineering', 'electronic engineering', 'electronics engineering', 'mechatronic', 'mechatronics', 'telecommunications', 'telecom'],
     skills: [
       'Circuit design',
       'MATLAB',
@@ -630,6 +632,8 @@ const CATALOG = [
       'fisheries',
       'aquaculture',
       'soil science',
+      'plant science',
+      'crop science',
       'food science',
       'food technology',
       'wildlife management',
