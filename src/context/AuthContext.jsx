@@ -40,6 +40,18 @@ function cleanAuthParamsFromUrl() {
   }
 }
 
+/** Email confirm links create a session — we verify then sign out so the user signs in manually. */
+function isEmailConfirmCallback() {
+  if (typeof window === 'undefined') return false
+  const url = new URL(window.location.href)
+  const path = url.pathname.replace(/\/+$/, '') || '/'
+  if (path === '/verified') return true
+  const hash = url.hash?.replace(/^#/, '') || ''
+  const hp = new URLSearchParams(hash)
+  const type = url.searchParams.get('type') || hp.get('type')
+  return type === 'signup' || type === 'email' || type === 'email_change'
+}
+
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
   const [profile, setProfile] = useState(null)
@@ -99,6 +111,15 @@ export function AuthProvider({ children }) {
 
     async function initAuth() {
       try {
+        const emailConfirm = hasAuthCallbackParams() && isEmailConfirmCallback()
+        if (emailConfirm) {
+          try {
+            sessionStorage.setItem('opp_email_confirm', '1')
+          } catch {
+            /* ignore */
+          }
+        }
+
         if (hasAuthCallbackParams()) {
           const url = new URL(window.location.href)
           const code = url.searchParams.get('code')
@@ -107,6 +128,15 @@ export function AuthProvider({ children }) {
             if (error) console.error('OAuth code exchange failed:', error.message)
           }
           cleanAuthParamsFromUrl()
+        }
+
+        if (emailConfirm) {
+          // Consume the confirm token, then drop the session so they must sign in.
+          await supabase.auth.signOut()
+          if (!mounted) return
+          setSession(null)
+          setProfile(null)
+          return
         }
 
         const { data } = await supabase.auth.getSession()
@@ -126,7 +156,15 @@ export function AuthProvider({ children }) {
       setSession(next)
       refreshProfile(next?.user?.id, next?.user)
       if (event === 'SIGNED_IN' && next?.user?.id) {
-        trackEngage('sign_in', { provider: next.user.app_metadata?.provider }, next.user.id)
+        let skipTrack = false
+        try {
+          skipTrack = sessionStorage.getItem('opp_email_confirm') === '1'
+        } catch {
+          /* ignore */
+        }
+        if (!skipTrack) {
+          trackEngage('sign_in', { provider: next.user.app_metadata?.provider }, next.user.id)
+        }
       }
     })
 

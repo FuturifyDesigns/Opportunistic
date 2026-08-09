@@ -199,7 +199,7 @@
     },
     "checkEmail": "Check your email to confirm your account, then sign in.",
     "verifiedTitle": "Email verified",
-    "verifiedBody": "Your email is verified. You can close this page.",
+    "verifiedBody": "Your email is verified. You can close this page and sign in.",
     "verifiedErrorTitle": "Verification failed",
     "backToChoose": "Back to choose",
     "genericError": "Something went wrong",

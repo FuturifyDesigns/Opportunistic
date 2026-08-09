@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+// intentionalSignIn: password/OAuth on this tab only — ignore email-confirm sessions from other tabs
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import gsap from 'gsap'
@@ -109,6 +110,8 @@ export default function Auth() {
   const [busy, setBusy] = useState(false)
   const [showPass, setShowPass] = useState(false)
   const [oauthBusy, setOauthBusy] = useState(false)
+  const intentionalSignIn = useRef(false)
+  const sawLoggedOut = useRef(false)
 
   const title = mode === 'signup' ? t('auth.createAccount') : t('auth.signIn')
   const errors = useMemo(
@@ -153,10 +156,31 @@ export default function Auth() {
   }, [])
 
   useEffect(() => {
-    if (loading || !user) return
+    if (loading) return
+    if (!user) {
+      sawLoggedOut.current = true
+      return
+    }
+
+    let emailConfirm = false
+    let oauthIntent = null
     try {
-      const intent = sessionStorage.getItem('opp_oauth_intent')
-      if (intent) {
+      emailConfirm = sessionStorage.getItem('opp_email_confirm') === '1'
+      if (emailConfirm) sessionStorage.removeItem('opp_email_confirm')
+      oauthIntent = sessionStorage.getItem('opp_oauth_intent')
+    } catch {
+      /* ignore */
+    }
+
+    // Email confirm (this tab or another) must not auto-enter the app — stay on sign-in.
+    if (emailConfirm || (sawLoggedOut.current && !intentionalSignIn.current && !oauthIntent)) {
+      intentionalSignIn.current = false
+      supabase.auth.signOut()
+      return
+    }
+
+    try {
+      if (oauthIntent) {
         sessionStorage.removeItem('opp_oauth_intent')
         const createdAt = user.created_at ? Date.parse(user.created_at) : 0
         const isFreshAccount =
@@ -308,12 +332,14 @@ export default function Auth() {
           toast.info(msg)
           setMode('login')
         } else {
+          intentionalSignIn.current = true
           toast.success(t('common.toast.accountCreated'))
           navigate('/onboarding')
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
         if (error) throw error
+        intentionalSignIn.current = true
         toast.success(t('common.toast.signedIn'))
         navigate('/dashboard')
       }
