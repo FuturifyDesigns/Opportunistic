@@ -13,7 +13,7 @@ import PageBackdrop from '../components/PageBackdrop'
 import SkillPicker from '../components/SkillPicker'
 import MatchBeacon from '../components/MatchBeacon'
 import { prefersReducedMotion } from '../lib/animations'
-import { normalizeSkillName } from '../lib/skillCatalog'
+import { normalizeSkillName, normalizeFieldName } from '../lib/skillCatalog'
 import { validateOnboardingStep } from '../lib/fieldValidation'
 import { defaultBioForGoal, goalLabelKey, normalizeGoal, upsertProfile } from '../lib/goal'
 
@@ -246,10 +246,11 @@ export default function Onboarding() {
         .map((q) => ({
           user_id: user.id,
           type: q.type,
-          field: q.field.trim(),
+          field: normalizeFieldName(q.field),
           institution: q.institution.trim() || null,
           year: Number(q.year) || null,
         }))
+        .filter((q) => q.field)
       const skillRows = skills
         .filter((s) => s.skill_name.trim())
         .map((s) => ({
@@ -422,7 +423,11 @@ export default function Onboarding() {
                       <input
                         value={q.field}
                         onChange={(e) => updateQual(i, 'field', e.target.value)}
-                        onBlur={() => markTouched(`qualField_${i}`)}
+                        onBlur={() => {
+                          markTouched(`qualField_${i}`)
+                          const fixed = normalizeFieldName(q.field)
+                          if (fixed && fixed !== q.field) updateQual(i, 'field', fixed)
+                        }}
                         placeholder={t('onboarding.qualFieldPlaceholder')}
                       />
                       {errMsg(`qualField_${i}`) ? (

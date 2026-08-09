@@ -16,7 +16,7 @@ import { useToast } from '../context/ToastContext'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
 import SkillPicker from '../components/SkillPicker'
-import { normalizeSkillName, suggestSkillsFromQualifications } from '../lib/skillCatalog'
+import { normalizeSkillName, normalizeFieldName, suggestSkillsFromQualifications } from '../lib/skillCatalog'
 
 const emptyQual = { type: 'degree', field: '', institution: '', year: new Date().getFullYear() }
 
@@ -105,10 +105,11 @@ export default function Profile() {
         .map((q) => ({
           user_id: user.id,
           type: q.type,
-          field: q.field.trim(),
+          field: normalizeFieldName(q.field),
           institution: q.institution?.trim() || null,
           year: Number(q.year) || null,
         }))
+        .filter((q) => q.field)
       const skillRows = skills
         .filter((s) => s.skill_name?.trim())
         .map((s) => ({
@@ -205,6 +206,14 @@ export default function Profile() {
                   onChange={(e) =>
                     setQualifications((rows) => rows.map((row, idx) => (idx === i ? { ...row, field: e.target.value } : row)))
                   }
+                  onBlur={() => {
+                    const fixed = normalizeFieldName(q.field)
+                    if (fixed && fixed !== q.field) {
+                      setQualifications((rows) =>
+                        rows.map((row, idx) => (idx === i ? { ...row, field: fixed } : row)),
+                      )
+                    }
+                  }}
                 />
               </label>
               <label>

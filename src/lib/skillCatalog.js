@@ -4,6 +4,12 @@
  * Catalog aims to cover common global degree / certificate fields.
  */
 
+import {
+  correctFieldName as correctFieldNameBase,
+  correctSkillName as correctSkillNameBase,
+  FIELD_ALIASES,
+} from './spellCorrect.js'
+
 const CATALOG = [
   // —— Computing & digital ——
   {
@@ -963,8 +969,23 @@ function heuristicSkills(fieldNorm) {
   return [...found]
 }
 
+function fieldDictionary() {
+  const set = new Set()
+  for (const entry of CATALOG) {
+    ;(entry.keys || []).forEach((k) => set.add(k))
+  }
+  // Also include common multi-word display forms from aliases
+  Object.values(FIELD_ALIASES).forEach((v) => set.add(v))
+  return [...set]
+}
+
+function skillDictionary() {
+  return allCatalogSkills()
+}
+
 export function suggestSkillsForFields(fields = []) {
-  const norms = fields.map(normalizeField).filter(Boolean)
+  const corrected = fields.map((f) => correctFieldNameBase(f, fieldDictionary()))
+  const norms = corrected.map(normalizeField).filter(Boolean)
   if (!norms.length) return [...FALLBACK]
 
   const ranked = []
@@ -1008,34 +1029,14 @@ export function suggestSkillsFromQualifications(qualifications = []) {
   return suggestSkillsForFields((qualifications || []).map((q) => q.field))
 }
 
-/** Fix common typos before save / display so reasoning stays accurate. */
-const SKILL_ALIASES = {
-  reacct: 'React',
-  reactjs: 'React',
-  'react.js': 'React',
-  node: 'Node.js',
-  nodejs: 'Node.js',
-  'node.js': 'Node.js',
-  js: 'JavaScript',
-  javascript: 'JavaScript',
-  ts: 'TypeScript',
-  typescript: 'TypeScript',
-  py: 'Python',
-  python: 'Python',
-  fullstack: 'Full stack developer',
-  'full-stack': 'Full stack developer',
-  'full stack': 'Full stack developer',
+/** Normalize + spell-correct a degree / field label. */
+export function normalizeFieldName(name = '') {
+  return correctFieldNameBase(name, fieldDictionary())
 }
 
+/** Fix typos / aliases before save / display so matching stays accurate. */
 export function normalizeSkillName(name = '') {
-  const trimmed = String(name).trim().replace(/\s+/g, ' ')
-  if (!trimmed) return ''
-  const alias = SKILL_ALIASES[trimmed.toLowerCase()]
-  if (alias) return alias
-  if (trimmed === trimmed.toLowerCase() && trimmed.length <= 24 && !trimmed.includes('.')) {
-    return trimmed.replace(/\b\w/g, (c) => c.toUpperCase())
-  }
-  return trimmed
+  return correctSkillNameBase(name, skillDictionary())
 }
 
 /** Catalog list for “is this a suggested pick?” checks on Profile. */
