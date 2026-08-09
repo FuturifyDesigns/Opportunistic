@@ -1,9 +1,11 @@
 /**
  * Suggested skills keyed by degree/certificate field.
  * Matching uses word boundaries so “BSc Literature” never matches CS via “cs”.
+ * Catalog aims to cover common global degree / certificate fields.
  */
 
 const CATALOG = [
+  // —— Computing & digital ——
   {
     keys: [
       'computer science',
@@ -16,12 +18,17 @@ const CATALOG = [
       'computer engineering',
       'cybersecurity',
       'cyber security',
+      'information security',
+      'network engineering',
       'full stack',
       'web development',
+      'mobile development',
+      'game development',
       'programming',
+      'computer applications',
+      'computer studies',
     ],
-    // Short tokens matched only as whole words (never inside BSc/MSc)
-    shortKeys: ['cs', 'se', 'it', 'cis'],
+    shortKeys: ['cs', 'se', 'it', 'cis', 'bca', 'mca'],
     skills: [
       'JavaScript',
       'TypeScript',
@@ -43,10 +50,13 @@ const CATALOG = [
       'data analytics',
       'business analytics',
       'statistics',
+      'statistical science',
       'machine learning',
       'artificial intelligence',
       'data engineering',
       'big data',
+      'actuarial science',
+      'quantitative methods',
     ],
     shortKeys: ['ai', 'ml'],
     skills: [
@@ -62,6 +72,8 @@ const CATALOG = [
       'ETL basics',
     ],
   },
+
+  // —— Literature, languages, humanities ——
   {
     keys: [
       'literature',
@@ -72,6 +84,8 @@ const CATALOG = [
       'english language',
       'english studies',
       'letters',
+      'african literature',
+      'world literature',
     ],
     skills: [
       'Close reading',
@@ -90,20 +104,57 @@ const CATALOG = [
   },
   {
     keys: [
+      'linguistics',
+      'languages',
+      'modern languages',
+      'language studies',
+      'translation',
+      'interpreting',
+      'applied linguistics',
+      'french',
+      'spanish',
+      'german',
+      'portuguese',
+      'arabic',
+      'chinese',
+      'japanese',
+      'swahili',
+      'setswana',
+      'isiZulu',
+      'afrikaans',
+      'foreign languages',
+    ],
+    skills: [
+      'Translation',
+      'Interpretation',
+      'Academic writing',
+      'Cross-cultural communication',
+      'Proofreading',
+      'Language teaching basics',
+      'Research methods',
+      'Presentation skills',
+      'Listening comprehension',
+      'Terminology management',
+    ],
+  },
+  {
+    keys: [
       'humanities',
       'liberal arts',
       'philosophy',
       'history',
       'classics',
       'classical studies',
-      'linguistics',
-      'languages',
-      'modern languages',
-      'language studies',
-      'translation',
       'cultural studies',
       'theology',
       'religious studies',
+      'divinity',
+      'archaeology',
+      'museum studies',
+      'heritage studies',
+      'african studies',
+      'gender studies',
+      'area studies',
     ],
     skills: [
       'Academic writing',
@@ -118,6 +169,8 @@ const CATALOG = [
       'Comparative analysis',
     ],
   },
+
+  // —— Media & creative ——
   {
     keys: [
       'journalism',
@@ -126,9 +179,14 @@ const CATALOG = [
       'communications',
       'communication studies',
       'film studies',
+      'film production',
       'broadcasting',
       'digital media',
       'publishing',
+      'multimedia',
+      'radio',
+      'television',
+      'media production',
     ],
     skills: [
       'News writing',
@@ -144,7 +202,47 @@ const CATALOG = [
     ],
   },
   {
-    keys: ['marketing', 'digital marketing', 'advertising', 'brand management', 'public relations', 'pr '],
+    keys: [
+      'fine art',
+      'fine arts',
+      'visual arts',
+      'graphic design',
+      'industrial design',
+      'product design',
+      'interior design',
+      'illustration',
+      'photography',
+      'fashion',
+      'fashion design',
+      'textile design',
+      'music',
+      'musicology',
+      'theatre',
+      'drama',
+      'performing arts',
+      'dance',
+      'animation',
+      'game design',
+      'ui design',
+      'ux design',
+      'interaction design',
+    ],
+    skills: [
+      'Visual composition',
+      'Adobe Creative Suite',
+      'Concept development',
+      'Portfolio building',
+      'Critique / feedback',
+      'Project delivery',
+      'Client communication',
+      'Typography basics',
+      'Creative direction',
+      'Prototyping',
+    ],
+  },
+  {
+    keys: ['marketing', 'digital marketing', 'advertising', 'brand management', 'public relations', 'branding'],
+    shortKeys: ['pr'],
     skills: [
       'Content writing',
       'Social media',
@@ -155,21 +253,35 @@ const CATALOG = [
       'Copywriting',
       'Market research',
       'Public speaking',
+      'Brand strategy',
     ],
   },
+
+  // —— Social sciences ——
   {
     keys: [
       'psychology',
       'counselling',
       'counseling',
+      'clinical psychology',
+      'organisational psychology',
+      'organizational psychology',
       'sociology',
       'social work',
       'anthropology',
       'political science',
       'politics',
+      'government',
+      'public policy',
+      'public administration',
       'international relations',
       'development studies',
+      'peace studies',
       'geography',
+      'human geography',
+      'demography',
+      'criminology',
+      'criminal justice',
     ],
     skills: [
       'Research methods',
@@ -184,60 +296,31 @@ const CATALOG = [
       'Ethics awareness',
     ],
   },
+
+  // —— Business & economics ——
   {
-    keys: ['fine art', 'fine arts', 'visual arts', 'graphic design', 'design', 'illustration', 'photography', 'fashion', 'music', 'theatre', 'drama', 'performing arts'],
-    skills: [
-      'Visual composition',
-      'Adobe Creative Suite',
-      'Concept development',
-      'Portfolio building',
-      'Critique / feedback',
-      'Project delivery',
-      'Client communication',
-      'Typography basics',
-      'Creative direction',
+    keys: [
+      'business',
+      'business administration',
+      'business management',
+      'commerce',
+      'management',
+      'mba',
+      'administration',
+      'entrepreneurship',
+      'human resources',
+      'human resource management',
+      'supply chain',
+      'logistics',
+      'operations',
+      'operations management',
+      'project management',
+      'office administration',
+      'secretarial studies',
+      'retail management',
+      'international business',
     ],
-  },
-  {
-    keys: ['electrical', 'electronic', 'electronics', 'mechatronic', 'mechatronics'],
-    skills: [
-      'Circuit design',
-      'MATLAB',
-      'Embedded C',
-      'PCB basics',
-      'Power systems',
-      'Signal processing',
-      'AutoCAD Electrical',
-      'Troubleshooting',
-    ],
-  },
-  {
-    keys: ['mechanical', 'industrial engineering', 'manufacturing', 'automotive'],
-    skills: [
-      'SolidWorks',
-      'AutoCAD',
-      'MATLAB',
-      'Thermodynamics',
-      'Manufacturing processes',
-      'Project management',
-      'Quality control',
-      'CNC basics',
-    ],
-  },
-  {
-    keys: ['civil', 'construction', 'architecture', 'quantity surveying', 'structural engineering'],
-    skills: [
-      'AutoCAD',
-      'Revit',
-      'Structural analysis',
-      'Project scheduling',
-      'Quantity surveying basics',
-      'Site supervision',
-      'Microsoft Project',
-    ],
-  },
-  {
-    keys: ['business', 'commerce', 'management', 'mba', 'administration', 'entrepreneurship', 'human resources', 'hr ', 'supply chain', 'operations'],
+    shortKeys: ['hr', 'bba', 'bcom'],
     skills: [
       'Excel',
       'Financial analysis',
@@ -247,10 +330,23 @@ const CATALOG = [
       'CRM tools',
       'Negotiation',
       'Operations basics',
+      'Stakeholder communication',
     ],
   },
   {
-    keys: ['finance', 'accounting', 'economics', 'banking', 'actuarial', 'investment'],
+    keys: [
+      'finance',
+      'accounting',
+      'economics',
+      'banking',
+      'investment',
+      'financial management',
+      'chartered accounting',
+      'taxation',
+      'audit',
+      'auditing',
+    ],
+    shortKeys: ['cfa', 'acca', 'cpa'],
     skills: [
       'Excel',
       'Financial modeling',
@@ -260,10 +356,104 @@ const CATALOG = [
       'Risk analysis',
       'Auditing basics',
       'Power BI',
+      'Financial reporting',
     ],
   },
+
+  // —— Law ——
   {
-    keys: ['medicine', 'nursing', 'health', 'pharmacy', 'public health', 'clinical', 'biomedical', 'physiotherapy', 'dentistry', 'midwifery'],
+    keys: [
+      'law',
+      'legal studies',
+      'paralegal',
+      'jurisprudence',
+      'llb',
+      'llm',
+      'criminal law',
+      'commercial law',
+      'international law',
+      'human rights',
+    ],
+    skills: [
+      'Legal research',
+      'Contract review',
+      'Case analysis',
+      'Legal writing',
+      'Compliance basics',
+      'Negotiation',
+      'Document drafting',
+      'Citation of cases',
+    ],
+  },
+
+  // —— Education ——
+  {
+    keys: [
+      'education',
+      'teaching',
+      'pedagogy',
+      'early childhood',
+      'early childhood education',
+      'primary education',
+      'secondary education',
+      'curriculum',
+      'curriculum studies',
+      'special education',
+      'inclusive education',
+      'educational psychology',
+      'adult education',
+      'teacher training',
+      'bed',
+      'med',
+    ],
+    skills: [
+      'Lesson planning',
+      'Classroom management',
+      'Curriculum design',
+      'Assessment design',
+      'Educational technology',
+      'Mentoring',
+      'Public speaking',
+      'Differentiated instruction',
+    ],
+  },
+
+  // —— Health & medicine ——
+  {
+    keys: [
+      'medicine',
+      'medical science',
+      'nursing',
+      'midwifery',
+      'health',
+      'health science',
+      'health sciences',
+      'pharmacy',
+      'pharmacology',
+      'public health',
+      'clinical',
+      'clinical medicine',
+      'biomedical',
+      'biomedical science',
+      'physiotherapy',
+      'physical therapy',
+      'occupational therapy',
+      'dentistry',
+      'dental',
+      'radiography',
+      'medical laboratory',
+      'laboratory science',
+      'nutrition',
+      'dietetics',
+      'epidemiology',
+      'veterinary',
+      'veterinary science',
+      'veterinary medicine',
+      'optometry',
+      'speech therapy',
+      'audiology',
+    ],
+    shortKeys: ['mbbs', 'md', 'bsn'],
     skills: [
       'Patient care',
       'Clinical documentation',
@@ -273,47 +463,41 @@ const CATALOG = [
       'Health education',
       'EMR familiarity',
       'First aid / CPR',
+      'Ethics & confidentiality',
     ],
   },
-  {
-    keys: ['education', 'teaching', 'pedagogy', 'early childhood', 'curriculum'],
-    skills: [
-      'Lesson planning',
-      'Classroom management',
-      'Curriculum design',
-      'Assessment design',
-      'Educational technology',
-      'Mentoring',
-      'Public speaking',
-    ],
-  },
-  {
-    keys: ['law', 'legal', 'paralegal', 'jurisprudence', 'llb', 'llm'],
-    skills: [
-      'Legal research',
-      'Contract review',
-      'Case analysis',
-      'Legal writing',
-      'Compliance basics',
-      'Negotiation',
-      'Document drafting',
-    ],
-  },
+
+  // —— Natural & physical sciences ——
   {
     keys: [
       'biology',
+      'biological sciences',
       'chemistry',
+      'chemical sciences',
       'physics',
       'biochemistry',
       'microbiology',
       'biotechnology',
+      'molecular biology',
+      'genetics',
+      'neuroscience',
       'environmental science',
       'environmental studies',
       'ecology',
       'geology',
+      'earth science',
+      'earth sciences',
+      'oceanography',
+      'meteorology',
+      'astronomy',
       'mathematics',
       'applied mathematics',
+      'pure mathematics',
       'natural science',
+      'natural sciences',
+      'life sciences',
+      'forensic science',
+      'materials science',
     ],
     skills: [
       'Lab techniques',
@@ -324,10 +508,123 @@ const CATALOG = [
       'Report writing',
       'Safety protocols',
       'Experiment design',
+      'Statistical literacy',
+    ],
+  },
+
+  // —— Engineering (by branch) ——
+  {
+    keys: ['electrical', 'electronic', 'electronics', 'electrical engineering', 'electronic engineering', 'mechatronic', 'mechatronics', 'telecommunications', 'telecom'],
+    skills: [
+      'Circuit design',
+      'MATLAB',
+      'Embedded C',
+      'PCB basics',
+      'Power systems',
+      'Signal processing',
+      'AutoCAD Electrical',
+      'Troubleshooting',
+      'Instrumentation',
     ],
   },
   {
-    keys: ['agriculture', 'agronomy', 'veterinary', 'animal science', 'forestry', 'horticulture'],
+    keys: [
+      'mechanical',
+      'mechanical engineering',
+      'industrial engineering',
+      'manufacturing',
+      'manufacturing engineering',
+      'automotive',
+      'automotive engineering',
+      'aerospace',
+      'aeronautical',
+      'aerospace engineering',
+    ],
+    skills: [
+      'SolidWorks',
+      'AutoCAD',
+      'MATLAB',
+      'Thermodynamics',
+      'Manufacturing processes',
+      'Project management',
+      'Quality control',
+      'CNC basics',
+      'GD&T basics',
+    ],
+  },
+  {
+    keys: [
+      'civil',
+      'civil engineering',
+      'construction',
+      'construction management',
+      'architecture',
+      'architectural studies',
+      'quantity surveying',
+      'structural engineering',
+      'urban planning',
+      'town planning',
+      'surveying',
+      'geomatics',
+    ],
+    skills: [
+      'AutoCAD',
+      'Revit',
+      'Structural analysis',
+      'Project scheduling',
+      'Quantity surveying basics',
+      'Site supervision',
+      'Microsoft Project',
+      'Building codes awareness',
+    ],
+  },
+  {
+    keys: [
+      'chemical engineering',
+      'process engineering',
+      'petroleum engineering',
+      'mining',
+      'mining engineering',
+      'metallurgy',
+      'materials engineering',
+      'nuclear engineering',
+      'environmental engineering',
+      'biomedical engineering',
+      'systems engineering',
+      'engineering',
+    ],
+    skills: [
+      'Process analysis',
+      'MATLAB / Aspen basics',
+      'Safety & HSE',
+      'Technical reporting',
+      'Project management',
+      'Quality assurance',
+      'Data analysis',
+      'Problem solving',
+      'CAD familiarity',
+    ],
+  },
+
+  // —— Agriculture & environment ——
+  {
+    keys: [
+      'agriculture',
+      'agricultural science',
+      'agricultural economics',
+      'agronomy',
+      'animal science',
+      'animal husbandry',
+      'forestry',
+      'horticulture',
+      'fisheries',
+      'aquaculture',
+      'soil science',
+      'food science',
+      'food technology',
+      'wildlife management',
+      'natural resource management',
+    ],
     skills: [
       'Field assessment',
       'Crop / livestock knowledge',
@@ -337,10 +634,25 @@ const CATALOG = [
       'Extension / outreach',
       'GIS basics',
       'Project planning',
+      'Sustainable practices',
     ],
   },
+
+  // —— Hospitality, tourism, sport ——
   {
-    keys: ['hospitality', 'tourism', 'hotel management', 'culinary', 'event management'],
+    keys: [
+      'hospitality',
+      'hospitality management',
+      'tourism',
+      'tourism management',
+      'hotel management',
+      'culinary',
+      'culinary arts',
+      'chef',
+      'event management',
+      'events management',
+      'catering',
+    ],
     skills: [
       'Customer service',
       'Operations coordination',
@@ -350,6 +662,148 @@ const CATALOG = [
       'Cash handling',
       'Team leadership',
       'Vendor management',
+      'Food safety awareness',
+    ],
+  },
+  {
+    keys: [
+      'sport science',
+      'sports science',
+      'exercise science',
+      'kinesiology',
+      'physical education',
+      'coaching',
+      'sports management',
+      'recreation',
+    ],
+    skills: [
+      'Training program design',
+      'Fitness assessment',
+      'Coaching communication',
+      'Injury awareness',
+      'Motivation techniques',
+      'Performance tracking',
+      'First aid',
+      'Team leadership',
+    ],
+  },
+
+  // —— Library, information, archives ——
+  {
+    keys: [
+      'library science',
+      'library studies',
+      'information science',
+      'archival studies',
+      'records management',
+      'knowledge management',
+    ],
+    skills: [
+      'Cataloguing',
+      'Information literacy',
+      'Database searching',
+      'Records management',
+      'Research support',
+      'Digital archiving',
+      'Customer service',
+      'Metadata basics',
+    ],
+  },
+
+  // —— Trades & vocational ——
+  {
+    keys: [
+      'plumbing',
+      'electrical installation',
+      'carpentry',
+      'welding',
+      'automotive repair',
+      'mechanic',
+      'mechanics',
+      'building construction',
+      'bricklaying',
+      'fitting and turning',
+      'boiler making',
+      'technical studies',
+      'vocational',
+      'trade certificate',
+      'artisan',
+    ],
+    skills: [
+      'Technical troubleshooting',
+      'Hand tools & equipment',
+      'Safety (HSE)',
+      'Blueprint reading',
+      'Measurement accuracy',
+      'Maintenance routines',
+      'Customer communication',
+      'Quality finishing',
+    ],
+  },
+
+  // —— Aviation, maritime, transport ——
+  {
+    keys: [
+      'aviation',
+      'piloting',
+      'aeronautics',
+      'aircraft maintenance',
+      'maritime',
+      'nautical',
+      'shipping',
+      'transport',
+      'transportation',
+      'logistics management',
+    ],
+    skills: [
+      'Safety procedures',
+      'Regulatory compliance',
+      'Operational checklists',
+      'Navigation basics',
+      'Technical reporting',
+      'Situational awareness',
+      'Team coordination',
+      'Emergency response',
+    ],
+  },
+
+  // —— Real estate, insurance ——
+  {
+    keys: ['real estate', 'property studies', 'property management', 'insurance', 'actuarial practice', 'estate agency'],
+    skills: [
+      'Client advising',
+      'Contract literacy',
+      'Market appraisal',
+      'Negotiation',
+      'Compliance basics',
+      'CRM / pipeline tracking',
+      'Report writing',
+      'Risk assessment',
+    ],
+  },
+
+  // —— Social care & community ——
+  {
+    keys: [
+      'community development',
+      'community studies',
+      'youth work',
+      'social care',
+      'disability studies',
+      'family studies',
+      'development practice',
+      'ngo management',
+      'humanitarian studies',
+    ],
+    skills: [
+      'Community engagement',
+      'Needs assessment',
+      'Case management',
+      'Facilitation',
+      'Report writing',
+      'Stakeholder mapping',
+      'Safeguarding awareness',
+      'Project coordination',
     ],
   },
 ]
@@ -363,6 +817,104 @@ const FALLBACK = [
   'Research',
   'Writing',
   'Critical thinking',
+]
+
+/** Soft cues when no catalog row hits — still better than generic-only. */
+const HEURISTICS = [
+  {
+    test: /\b(engineer|engineering)\b/,
+    skills: [
+      'Technical reporting',
+      'Problem solving',
+      'CAD familiarity',
+      'Project management',
+      'Data analysis',
+      'Safety awareness',
+      'MATLAB basics',
+      'Teamwork',
+    ],
+  },
+  {
+    test: /\b(science|sciences|scientific)\b/,
+    skills: [
+      'Research methods',
+      'Data analysis',
+      'Scientific writing',
+      'Lab / field methods',
+      'Report writing',
+      'Critical thinking',
+      'Statistics basics',
+    ],
+  },
+  {
+    test: /\b(art|arts|design|creative)\b/,
+    skills: [
+      'Concept development',
+      'Portfolio building',
+      'Visual communication',
+      'Critique / feedback',
+      'Project delivery',
+      'Adobe / Canva basics',
+      'Client communication',
+    ],
+  },
+  {
+    test: /\b(study|studies|research)\b/,
+    skills: [
+      'Academic writing',
+      'Research methods',
+      'Critical thinking',
+      'Citation & referencing',
+      'Presentation skills',
+      'Literature review',
+      'Analysis',
+    ],
+  },
+  {
+    test: /\b(management|admin|administration|business)\b/,
+    skills: [
+      'Excel',
+      'Project coordination',
+      'Communication',
+      'Organisation',
+      'Stakeholder management',
+      'Report writing',
+      'Problem solving',
+    ],
+  },
+  {
+    test: /\b(health|care|clinical|medical|nursing)\b/,
+    skills: [
+      'Patient / client care',
+      'Documentation',
+      'Ethics & confidentiality',
+      'Team communication',
+      'Health education',
+      'Safety protocols',
+    ],
+  },
+  {
+    test: /\b(tech|technology|digital|computing)\b/,
+    skills: [
+      'Problem solving',
+      'Digital literacy',
+      'Documentation',
+      'Basic scripting awareness',
+      'Troubleshooting',
+      'Collaboration tools',
+    ],
+  },
+  {
+    test: /\b(teach|teaching|education|pedagog)\b/,
+    skills: [
+      'Lesson planning',
+      'Classroom management',
+      'Assessment',
+      'Communication',
+      'Mentoring',
+      'Educational technology',
+    ],
+  },
 ]
 
 function escapeRegExp(s) {
@@ -393,16 +945,6 @@ function fieldHasKey(fieldNorm, key) {
   return re.test(fieldNorm)
 }
 
-function entryMatchesField(entry, fieldNorm) {
-  const longHit = (entry.keys || []).some((k) => fieldHasKey(fieldNorm, k))
-  if (longHit) return true
-  return (entry.shortKeys || []).some((k) => fieldHasKey(fieldNorm, k))
-}
-
-/**
- * Score how specifically an entry matches a field (longer key wins).
- * Prevents vague overlaps from drowning out the best category.
- */
 function matchScore(entry, fieldNorm) {
   let best = 0
   for (const k of [...(entry.keys || []), ...(entry.shortKeys || [])]) {
@@ -411,6 +953,14 @@ function matchScore(entry, fieldNorm) {
     if (score > best) best = score
   }
   return best
+}
+
+function heuristicSkills(fieldNorm) {
+  const found = new Set()
+  for (const h of HEURISTICS) {
+    if (h.test.test(fieldNorm)) h.skills.forEach((s) => found.add(s))
+  }
+  return [...found]
 }
 
 export function suggestSkillsForFields(fields = []) {
@@ -426,25 +976,32 @@ export function suggestSkillsForFields(fields = []) {
     }
   }
 
-  if (!ranked.length) return [...FALLBACK]
-
-  // Per field, keep only the strongest category (and near-ties within 2 chars)
-  const byField = new Map()
-  for (const row of ranked) {
-    const cur = byField.get(row.fieldNorm) || []
-    cur.push(row)
-    byField.set(row.fieldNorm, cur)
-  }
-
   const found = new Set()
-  for (const rows of byField.values()) {
-    const top = Math.max(...rows.map((r) => r.score))
-    rows
-      .filter((r) => r.score >= top - 2)
-      .forEach((r) => r.entry.skills.forEach((s) => found.add(s)))
+
+  if (ranked.length) {
+    const byField = new Map()
+    for (const row of ranked) {
+      const cur = byField.get(row.fieldNorm) || []
+      cur.push(row)
+      byField.set(row.fieldNorm, cur)
+    }
+
+    for (const rows of byField.values()) {
+      const top = Math.max(...rows.map((r) => r.score))
+      rows
+        .filter((r) => r.score >= top - 2)
+        .forEach((r) => r.entry.skills.forEach((s) => found.add(s)))
+    }
+  } else {
+    // Unknown field: use heuristics, then soft skills
+    for (const fieldNorm of norms) {
+      heuristicSkills(fieldNorm).forEach((s) => found.add(s))
+    }
+    if (!found.size) FALLBACK.forEach((s) => found.add(s))
+    else FALLBACK.slice(0, 4).forEach((s) => found.add(s))
   }
 
-  return found.size ? [...found] : [...FALLBACK]
+  return [...found]
 }
 
 export function suggestSkillsFromQualifications(qualifications = []) {
