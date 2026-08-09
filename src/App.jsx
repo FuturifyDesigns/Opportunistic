@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AuthProvider } from './context/AuthContext'
 import { ConsentProvider } from './context/ConsentContext'
@@ -23,6 +23,7 @@ import MatchDetail from './pages/MatchDetail'
 import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
 import Admin from './pages/Admin'
+import NotFound from './pages/NotFound'
 
 function AppRoutes() {
   const { i18n } = useTranslation()
@@ -86,7 +87,7 @@ function AppRoutes() {
           </AdminRoute>
         }
       />
-      <Route path="*" element={<Navigate to="/home" replace />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   )
 }

@@ -2811,6 +2811,43 @@ sup {
   margin-top: 0.5rem;
 }
 
+.not-found-page .not-found-main {
+  min-height: min(70dvh, 36rem);
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  text-align: center;
+  padding: 3rem 1.25rem 4rem;
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
+.not-found-page .not-found-main .eyebrow {
+  margin: 0 0 0.85rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted, #5a5a55);
+}
+
+.not-found-page .not-found-main h1 {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(1.85rem, 4vw, 2.5rem);
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin: 0 0 0.75rem;
+}
+
+.not-found-page .not-found-main .lede {
+  margin: 0 0 1.35rem;
+  max-width: 32ch;
+  color: var(--muted, #5a5a55);
+  font-size: 1.05rem;
+  line-height: 1.45;
+}
+
 .legal-meta {
   display: flex;
   flex-wrap: wrap;

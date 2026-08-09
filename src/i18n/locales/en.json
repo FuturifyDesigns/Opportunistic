@@ -37,6 +37,11 @@
       "loadFailed": "Could not load data."
     }
   },
+  "notFound": {
+    "title": "Page not found",
+    "body": "That link doesn’t lead anywhere on Opportunistic.",
+    "home": "Back to home"
+  },
   "nav": {
     "howItWorks": "How it works",
     "features": "Features",
