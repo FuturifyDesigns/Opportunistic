@@ -181,44 +181,11 @@ export default function Admin() {
                 <h2>Event mix (7 days)</h2>
                 <BarList rows={stats?.events_by_type_7d || []} labelKey="event_type" valueKey="count" />
               </section>
-
-              <section className="admin-panel admin-panel-wide">
-                <h2>Live activity feed</h2>
-                <div className="admin-feed">
-                  {(stats?.recent_events || []).length ? (
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>When</th>
-                          <th>Event</th>
-                          <th>Path</th>
-                          <th>Session</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {stats.recent_events.map((ev) => (
-                          <tr key={ev.id}>
-                            <td>{formatTime(ev.created_at)}</td>
-                            <td>
-                              <code>{ev.event_type}</code>
-                              {ev.meta?.action ? <span className="muted"> · {ev.meta.action}</span> : null}
-                            </td>
-                            <td>{ev.path || '—'}</td>
-                            <td className="mono-tiny">{String(ev.session_id || '').slice(0, 8)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  ) : (
-                    <p className="muted">No events yet — browse the site to generate telemetry.</p>
-                  )}
-                </div>
-                <p className="muted admin-updated">
-                  Snapshot {stats?.generated_at ? formatTime(stats.generated_at) : '—'} · auto-refreshes
-                  on every change
-                </p>
-              </section>
             </div>
+            <p className="muted admin-updated">
+              Snapshot {stats?.generated_at ? formatTime(stats.generated_at) : '—'} · auto-refreshes on
+              every change
+            </p>
           </>
         )}
 
