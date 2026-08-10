@@ -7,7 +7,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { SEO_ROUTES, SITE_URL } from '../src/lib/seoRoutes.js'
+import { SEO_ROUTES, canonicalFor } from '../src/lib/seoRoutes.js'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const dist = path.join(root, 'dist')
@@ -37,7 +37,7 @@ for (const route of SEO_ROUTES) {
   }
 
   const html = fs.readFileSync(file, 'utf8')
-  const canonical = route.path === '/' ? `${SITE_URL}/` : `${SITE_URL}${route.path}`
+  const canonical = canonicalFor(route.path)
   const expectedRobots = route.index ? 'index, follow, max-image-preview:large' : 'noindex, follow'
 
   const title = pick(html, /<title>[\s\S]*?<\/title>/)

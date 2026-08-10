@@ -111,6 +111,17 @@ export const SEO_ROUTES = [
 
 export const DEFAULT_SEO = SEO_ROUTES[0]
 
+/**
+ * GitHub Pages serves each prerendered route from <route>/index.html and
+ * 301s the bare path to the trailing-slash form, so canonicals and sitemap
+ * entries must use the trailing slash or they point at a redirect.
+ */
+export function canonicalFor(pathname = '/') {
+  const clean = String(pathname || '/').split('?')[0].split('#')[0]
+  const trimmed = clean.replace(/\/+$/, '')
+  return trimmed ? `${SITE_URL}${trimmed}/` : `${SITE_URL}/`
+}
+
 /** Match a pathname to its SEO entry (handles trailing slashes and /match/:kind/:id). */
 export function seoForPath(pathname = '/') {
   const clean = String(pathname || '/').split('?')[0].split('#')[0]

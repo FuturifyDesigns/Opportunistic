@@ -18,6 +18,7 @@ import {
   SITE_NAME,
   DEFAULT_OG_IMAGE,
   INDEXABLE_ROUTES,
+  canonicalFor,
 } from '../src/lib/seoRoutes.js'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
@@ -63,7 +64,11 @@ function setCanonical(html, href) {
 
 function noscriptBlock(route) {
   const links = INDEXABLE_ROUTES.filter((r) => r.path !== route.path)
-    .map((r) => `<li><a href="${r.path}">${escapeHtml(r.title.split('|')[0].split('—')[0].trim())}</a></li>`)
+    .map((r) => {
+      const href = r.path === '/' ? '/' : `${r.path}/`
+      const label = escapeHtml(r.title.split('|')[0].split('—')[0].trim())
+      return `<li><a href="${href}">${label}</a></li>`
+    })
     .join('')
 
   return `    <noscript>
@@ -78,7 +83,7 @@ function noscriptBlock(route) {
 }
 
 function buildPage(route) {
-  const canonical = route.path === '/' ? `${SITE_URL}/` : `${SITE_URL}${route.path}`
+  const canonical = canonicalFor(route.path)
   let html = shell
 
   html = setTitle(html, route.title)
@@ -124,15 +129,14 @@ for (const route of SEO_ROUTES) {
 const today = new Date().toISOString().slice(0, 10)
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${INDEXABLE_ROUTES.map((r) => {
-  const loc = r.path === '/' ? `${SITE_URL}/` : `${SITE_URL}${r.path}`
-  return `  <url>
-    <loc>${loc}</loc>
+${INDEXABLE_ROUTES.map(
+  (r) => `  <url>
+    <loc>${canonicalFor(r.path)}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>${r.changefreq || 'monthly'}</changefreq>
     <priority>${r.priority || '0.5'}</priority>
-  </url>`
-}).join('\n')}
+  </url>`,
+).join('\n')}
 </urlset>
 `
 fs.writeFileSync(path.join(dist, 'sitemap.xml'), sitemap, 'utf8')

@@ -4,7 +4,7 @@
  * Google reads from the rendered DOM: description, canonical, robots, OG/Twitter.
  */
 
-import { DEFAULT_OG_IMAGE, SITE_URL, seoForPath } from './seoRoutes.js'
+import { DEFAULT_OG_IMAGE, canonicalFor, seoForPath } from './seoRoutes.js'
 
 function upsert(selector, create) {
   let el = document.head.querySelector(selector)
@@ -39,7 +39,7 @@ export function applySeo(pathname = '/') {
   if (typeof document === 'undefined') return
 
   const route = seoForPath(pathname)
-  const canonical = route.path === '/' ? `${SITE_URL}/` : `${SITE_URL}${route.path}`
+  const canonical = canonicalFor(route.path)
 
   const link = upsert('link[rel="canonical"]', () => {
     const l = document.createElement('link')
