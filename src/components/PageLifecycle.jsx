@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom'
 import gsap from 'gsap'
 import { prefersReducedMotion } from '../lib/animations'
 import { trackPageView, trackEvent } from '../lib/analytics'
+import { applySeo, syncSocialTitle } from '../lib/seo'
 import { useAuth } from '../context/AuthContext'
 
 function scrollPageToTop() {
@@ -29,17 +30,26 @@ export default function PageLifecycle() {
     const shell = document.getElementById('page-shell')
     tweenRef.current?.kill()
 
+    applySeo(location.pathname)
+    // Pages set their own translated titles in their effects — mirror after they run.
+    const titleSync = window.setTimeout(syncSocialTitle, 0)
+
     trackPageView(location.pathname, user?.id)
+
+    const settle = () => {
+      window.clearTimeout(titleSync)
+      if (shell) gsap.set(shell, { opacity: 1, y: 0, clearProps: 'transform' })
+    }
 
     if (firstRef.current) {
       firstRef.current = false
       if (shell) gsap.set(shell, { opacity: 1, y: 0, clearProps: 'transform' })
-      return undefined
+      return settle
     }
 
     if (!shell || prefersReducedMotion()) {
       if (shell) gsap.set(shell, { opacity: 1, y: 0, clearProps: 'transform' })
-      return undefined
+      return settle
     }
 
     gsap.set(shell, { opacity: 0, y: 10 })
@@ -53,7 +63,7 @@ export default function PageLifecycle() {
 
     return () => {
       tweenRef.current?.kill()
-      if (shell) gsap.set(shell, { opacity: 1, y: 0, clearProps: 'transform' })
+      settle()
     }
   }, [location.pathname, user?.id])
 

@@ -86,6 +86,41 @@ textarea:focus-visible {
   flex-direction: column;
 }
 
+/* Crawlable fallback shown only when JS is unavailable */
+.noscript-seo {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 3rem 1.25rem;
+  font-family: var(--font);
+  color: var(--ink);
+}
+
+.noscript-seo h1 {
+  font-family: var(--display);
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  letter-spacing: -0.02em;
+  margin: 0 0 0.75rem;
+}
+
+.noscript-seo p {
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.noscript-seo ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.1rem;
+  list-style: none;
+  padding: 0;
+  margin: 1.25rem 0;
+}
+
+.noscript-seo a {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 .container {
   width: min(1120px, calc(100% - 2rem));
   margin-inline: auto;

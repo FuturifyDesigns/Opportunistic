@@ -84,7 +84,7 @@
     "details": "Details"
   },
   "landing": {
-    "title": "Opportunistic",
+    "title": "Scholarship & Job Matching for Students | Opportunistic",
     "headline": "Match scholarships and jobs to a real profile.",
     "lede": "Enter skills and qualifications. Opportunistic ranks openings and explains the fit on every card.",
     "createProfile": "Create profile",
@@ -111,7 +111,7 @@
     "ctaBody": "Onboarding collects country, skills, and qualifications — then matching begins."
   },
   "intro": {
-    "docTitle": "Opportunistic — Enter",
+    "docTitle": "Opportunistic — Scholarships & Jobs Matched to You",
     "enterHint": "Click anywhere to enter",
     "enter": "Enter Opportunistic",
     "booting": "Preparing…",
@@ -326,9 +326,9 @@
   },
   "howItWorks": {
     "title": "Feed the system. Get ranked matches.",
-    "docTitle": "How it works — Opportunistic",
+    "docTitle": "How Scholarship & Job Matching Works | Opportunistic",
     "lede": "Click each stage or watch the console cycle: ingest profile data, process queries, output reasoned results.",
-    "metaTitle": "How it works — Opportunistic",
+    "metaTitle": "How Scholarship & Job Matching Works | Opportunistic",
     "eyebrow": "How it works",
     "cadenceEyebrow": "Cadence",
     "cadenceTitle": "Refresh when it matters",
@@ -343,9 +343,9 @@
   },
   "features": {
     "title": "Two matchers. One profile.",
-    "docTitle": "Features — Opportunistic",
+    "docTitle": "Features — Scholarship and Job Matchers | Opportunistic",
     "lede": "Scholarships worldwide. Jobs by country. Scores and reasons stay on the card.",
-    "metaTitle": "Features — Opportunistic",
+    "metaTitle": "Features — Scholarship and Job Matchers | Opportunistic",
     "eyebrow": "Features",
     "scholarshipEyebrow": "Scholarship matcher",
     "scholarshipTitle": "Worldwide awards, ranked for you",
@@ -384,9 +384,9 @@
   },
   "about": {
     "title": "Scholarships and jobs, matched with reasons.",
-    "docTitle": "About — Opportunistic",
+    "docTitle": "About Opportunistic — Scholarship & Job Matching",
     "lede": "Built for people who are tired of scrolling generic boards. Enter what you’ve studied and what you can do — we rank openings and say why they fit.",
-    "metaTitle": "About — Opportunistic",
+    "metaTitle": "About Opportunistic — Scholarship & Job Matching",
     "eyebrow": "About Opportunistic",
     "ideaCaption": "The idea",
     "ideaTitle": "Matching should feel like a briefing, not a dump of links.",
@@ -655,7 +655,7 @@
     "privacyRow3": "Delete cascade"
   },
   "privacy": {
-    "metaTitle": "Privacy Policy — Opportunistic",
+    "metaTitle": "Privacy Policy | Opportunistic",
     "eyebrow": "Legal",
     "title": "Privacy Policy",
     "lede": "Global data-protection baseline, working cookie controls, and clear rights — updated for Opportunistic.",
@@ -664,7 +664,7 @@
     "langNote": "This full policy is shown in your selected language."
   },
   "terms": {
-    "metaTitle": "Terms of Use — Opportunistic",
+    "metaTitle": "Terms of Use | Opportunistic",
     "eyebrow": "Legal",
     "title": "Terms of Use",
     "lede": "The rules for using Opportunistic as a discovery layer — not as the issuer of any opportunity.",
