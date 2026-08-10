@@ -1,4 +1,14 @@
+# Opportunistic
 User-agent: *
 Allow: /
+
+# Signed-in areas hold no crawlable content
+Disallow: /dashboard
+Disallow: /onboarding
+Disallow: /profile
+Disallow: /settings
+Disallow: /admin
+Disallow: /match/
+Disallow: /verified
 
 Sitemap: https://opportunistic.online/sitemap.xml
