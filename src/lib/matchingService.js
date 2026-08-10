@@ -8,6 +8,9 @@ function sourceKey(row) {
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000
 
+/** How long a set of matches stays fresh before the engine re-scans on its own. */
+export const REFRESH_INTERVAL_MS = WEEK_MS
+
 /** Strict focus: only keep the match types the user asked for. */
 function applyGoalFocus(goal, scholarships, jobs) {
   const sortedSch = [...scholarships].sort((a, b) => b.match_score - a.match_score)
@@ -173,4 +176,15 @@ export function shouldWeeklyRefresh(userId) {
   if (!last) return true
   const age = Date.now() - new Date(last).getTime()
   return Number.isNaN(age) || age >= WEEK_MS
+}
+
+/**
+ * Timestamp (ms) of the next automatic scan, or null when one is already due —
+ * the dashboard counts down to this and re-runs matching when it lands.
+ */
+export function getNextRefreshAt(lastMatchAt) {
+  if (!lastMatchAt) return null
+  const last = new Date(lastMatchAt).getTime()
+  if (Number.isNaN(last)) return null
+  return last + WEEK_MS
 }

@@ -2511,9 +2511,130 @@ sup {
 
 .dash-hero-actions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.55rem;
-  justify-content: flex-end;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.6rem;
+  min-width: 16.5rem;
+}
+
+.dash-countdown {
+  padding: 0.85rem 1rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.dash-countdown-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dash-countdown-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+.dash-countdown-dot.pulse {
+  animation: dash-pulse 1s ease-in-out infinite;
+}
+
+.dash-countdown-label {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.dash-countdown-units {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.3rem;
+  margin: 0.55rem 0 0.15rem;
+}
+
+.dash-countdown-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 2.4rem;
+}
+
+.dash-countdown-unit strong {
+  font-family: var(--display);
+  /* Tabular figures stop the row jittering as the seconds tick */
+  font-variant-numeric: tabular-nums;
+  font-size: 1.5rem;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.dash-countdown-unit em {
+  font-style: normal;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.dash-countdown-sep {
+  font-family: var(--display);
+  font-size: 1.3rem;
+  line-height: 1.25;
+  color: var(--line);
+}
+
+.dash-countdown-live {
+  margin: 0.6rem 0 0.35rem;
+  font-family: var(--display);
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+  color: var(--accent);
+}
+
+.dash-countdown-bar {
+  height: 4px;
+  margin-top: 0.55rem;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.dash-countdown-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width 0.6s linear;
+}
+
+.dash-countdown.is-running .dash-countdown-bar span {
+  width: 100% !important;
+  animation: dash-countdown-sweep 1.4s ease-in-out infinite;
+}
+
+.dash-countdown-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+@keyframes dash-countdown-sweep {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .dash-engine {
@@ -2774,7 +2895,7 @@ sup {
   }
 
   .dash-hero-actions {
-    justify-content: flex-start;
+    min-width: 0;
   }
 
   .dash-stats {

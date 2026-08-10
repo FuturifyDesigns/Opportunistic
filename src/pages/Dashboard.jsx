@@ -8,12 +8,14 @@ import { trackEngage } from '../lib/analytics'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import {
+  REFRESH_INTERVAL_MS,
   getLastMatchAt,
   getLastMatchMeta,
+  getNextRefreshAt,
   runMatchingForUser,
-  shouldWeeklyRefresh,
 } from '../lib/matchingService'
 import { goalLabelKey, resolveGoal } from '../lib/goal'
+import AutoRefreshCountdown from '../components/AutoRefreshCountdown'
 import MatchCard from '../components/MatchCard'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
@@ -35,9 +37,12 @@ export default function Dashboard() {
   const [engineNote, setEngineNote] = useState('')
   const [lastAt, setLastAt] = useState(null)
   const [meta, setMeta] = useState(null)
+  // The countdown must not arm itself before we know when the last scan ran.
+  const [scheduleReady, setScheduleReady] = useState(false)
   const listRef = useRef(null)
   const autoRan = useRef(false)
   const tabSeeded = useRef(false)
+  const refreshingRef = useRef(false)
 
   const goal = useMemo(() => resolveGoal(profile || {}), [profile])
   const goalLabel = t(goalLabelKey(goal))
@@ -86,14 +91,16 @@ export default function Dashboard() {
       setJobs([])
     } finally {
       setLoading(false)
+      setScheduleReady(true)
     }
   }, [user?.id])
 
   const refreshEngine = useCallback(
-    async (reason = 'manual') => {
-      if (!user?.id || refreshing) return
+    async (reason = 'scheduled') => {
+      if (!user?.id || refreshingRef.current) return
+      refreshingRef.current = true
       setRefreshing(true)
-      setEngineNote(reason === 'weekly' ? t('dashboard.weeklyNote') : t('dashboard.refreshingNote'))
+      setEngineNote(reason === 'scheduled' ? t('dashboard.weeklyNote') : t('dashboard.refreshingNote'))
       try {
         const result = await runMatchingForUser(user.id)
         trackEngage('rematch', { reason }, user.id)
@@ -108,23 +115,22 @@ export default function Dashboard() {
         setMeta(result.meta || null)
         await refreshProfile?.()
         await load()
-        if (reason === 'manual') {
-          toast.success(
-            t('dashboard.updated', {
-              scholarships: result.scholarships,
-              jobs: result.jobs,
-            }),
-          )
-        }
+        toast.success(
+          t('dashboard.updated', {
+            scholarships: result.scholarships,
+            jobs: result.jobs,
+          }),
+        )
       } catch (e) {
         const msg = e.message || t('dashboard.refreshFailed')
         setEngineNote(msg)
         toast.error(msg)
       } finally {
+        refreshingRef.current = false
         setRefreshing(false)
       }
     },
-    [user?.id, refreshing, load, refreshProfile, t, toast],
+    [user?.id, load, refreshProfile, t, toast],
   )
 
   useEffect(() => {
@@ -132,17 +138,25 @@ export default function Dashboard() {
     load()
   }, [load, t])
 
-  // Auto weekly refresh + empty dashboard bootstrap
+  // An empty board means there is nothing to wait for — scan straight away.
+  // Everything else is driven by the countdown reaching zero.
   useEffect(() => {
     if (!user?.id || loading || autoRan.current) return
     const empty =
       (showScholarships ? scholarships.length === 0 : true) &&
       (showJobs ? jobs.length === 0 : true)
-    if (empty || shouldWeeklyRefresh(user.id)) {
+    if (empty) {
       autoRan.current = true
-      refreshEngine(empty ? 'manual' : 'weekly')
+      refreshEngine('initial')
     }
   }, [user?.id, loading, scholarships.length, jobs.length, refreshEngine, showScholarships, showJobs])
+
+  const nextRefreshAt = useMemo(() => getNextRefreshAt(lastAt), [lastAt])
+
+  const onCountdownDue = useCallback(() => {
+    autoRan.current = true
+    refreshEngine(lastAt ? 'scheduled' : 'initial')
+  }, [refreshEngine, lastAt])
 
   useGSAP(
     () => {
@@ -257,14 +271,14 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="dash-hero-actions">
-            <button
-              type="button"
-              className="btn"
-              disabled={refreshing}
-              onClick={() => refreshEngine('manual')}
-            >
-              {refreshing ? t('dashboard.scanning') : t('dashboard.refresh')}
-            </button>
+            {scheduleReady ? (
+              <AutoRefreshCountdown
+                nextAt={nextRefreshAt}
+                intervalMs={REFRESH_INTERVAL_MS}
+                running={refreshing}
+                onDue={onCountdownDue}
+              />
+            ) : null}
             <Link className="btn btn-ghost" to="/profile">
               {t('dashboard.updateProfile')}
             </Link>
@@ -362,10 +376,7 @@ export default function Dashboard() {
                 <h3>{t('dashboard.empty')}</h3>
                 <p>{t('dashboard.emptyBody')}</p>
                 <div className="cta-row">
-                  <button type="button" className="btn" onClick={() => refreshEngine('manual')}>
-                    {t('dashboard.refresh')}
-                  </button>
-                  <Link className="btn btn-ghost" to="/profile">
+                  <Link className="btn" to="/profile">
                     {t('dashboard.updateProfile')}
                   </Link>
                 </div>
