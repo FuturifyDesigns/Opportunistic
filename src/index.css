@@ -3056,15 +3056,6 @@ sup {
   padding: 0.5rem 0.85rem;
 }
 
-.ad-slot {
-  border: 1px dashed var(--line);
-  border-radius: var(--radius);
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.7);
-  position: sticky;
-  top: 5rem;
-}
-
 .empty-state {
   background: #fff;
   border: 1px solid var(--line);
@@ -5973,10 +5964,6 @@ a.btn-auth {
 
   .float-card {
     display: none;
-  }
-
-  .ad-slot {
-    position: static;
   }
 
   .nav-toggle {

@@ -55,7 +55,6 @@ export default function Features() {
   const gridCards = [
     [t('features.gridReasonTitle'), t('features.gridReasonBody')],
     [t('features.gridMobileTitle'), t('features.gridMobileBody')],
-    [t('features.gridAdsTitle'), t('features.gridAdsBody')],
   ]
 
   useGSAP(
