@@ -22,6 +22,15 @@ export default function SiteHeader() {
   }
 
   useEffect(() => {
+    if (!open) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [open])
+
+  useEffect(() => {
     if (!accountOpen) return
     const onDoc = (e) => {
       if (!accountRef.current?.contains(e.target)) setAccountOpen(false)

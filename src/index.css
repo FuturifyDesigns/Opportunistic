@@ -24,17 +24,21 @@
 html {
   scroll-behavior: smooth;
   -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
   font-family: var(--font);
+  font-size: 16px;
   color: var(--ink);
   background: var(--bg);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   letter-spacing: 0;
   -webkit-tap-highlight-color: transparent;
+  overflow-x: clip;
 }
 
 a {
@@ -54,6 +58,32 @@ select,
 textarea {
   font: inherit;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* iOS Safari zooms focused fields under 16px — keep controls at least root size */
+input,
+select,
+textarea {
+  font-size: 16px;
+  max-width: 100%;
+}
+
+button,
+.btn,
+.chip,
+.segmented button,
+.choice-pill,
+.nav-toggle,
+.account-menu-trigger {
+  touch-action: manipulation;
+}
+
+.btn {
+  min-height: 2.75rem;
+}
+
+.btn-sm {
+  min-height: 2.25rem;
 }
 
 /* Kill default blue tap / focus flash on mobile; keep keyboard focus. */
@@ -848,6 +878,7 @@ textarea:focus-visible {
   letter-spacing: 0.01em;
   cursor: pointer;
   transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+  min-height: 2.75rem;
 }
 
 .btn:hover {
@@ -2012,6 +2043,7 @@ sup {
   padding: 0.7rem 0.8rem;
   background: #fff;
   color: var(--ink);
+  font-size: 16px;
 }
 
 .stack-form textarea {
@@ -2326,6 +2358,7 @@ sup {
   background: #fff;
   color: var(--ink);
   font: inherit;
+  font-size: 16px;
   font-weight: 500;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
@@ -2796,11 +2829,12 @@ sup {
 
 .dash-search {
   min-width: min(220px, 70vw);
-  padding: 0.45rem 0.75rem;
+  padding: 0.55rem 0.85rem;
   border: 1px solid var(--line);
   border-radius: 999px;
   font: inherit;
-  font-size: 0.88rem;
+  font-size: 16px;
+  min-height: 2.75rem;
 }
 
 .dashboard-layout {
@@ -3609,8 +3643,9 @@ sup {
   border: 1px solid var(--line);
   border-radius: calc(var(--radius) - 2px);
   font: inherit;
-  font-size: 0.92rem;
+  font-size: 16px;
   flex: 0 0 auto;
+  min-height: 2.75rem;
 }
 
 .lang-switch-list {
@@ -5951,8 +5986,17 @@ a.btn-auth {
     overflow: auto;
   }
 
-  .nav.open {
+  .nav a,
+  .account-links-mobile a,
+  .account-links-mobile .account-menu-signout {
+    min-height: 2.75rem;
     display: flex;
+    align-items: center;
+  }
+
+  .nav-toggle {
+    width: 44px;
+    height: 44px;
   }
 
   .account-menu-desktop {
@@ -7100,4 +7144,238 @@ body {
     width: 100%;
     justify-content: center;
   }
+}
+
+/* —— Phone edge cases (≤430 / ≤360) —— */
+@media (max-width: 430px) {
+  .container,
+  .narrow,
+  .auth-gateway,
+  .profile-page .profile-shell {
+    width: min(1120px, calc(100% - 0.85rem));
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  .brand-mark {
+    width: 44px;
+    height: 44px;
+  }
+
+  .brand-word {
+    font-size: 0.95rem;
+  }
+
+  .dash-hero {
+    padding: 0.9rem 0.85rem;
+  }
+
+  .dash-hero-copy h1 {
+    font-size: clamp(1.45rem, 7vw, 1.85rem);
+  }
+
+  .dash-hero-actions {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .dash-countdown {
+    padding: 0.75rem 0.8rem;
+  }
+
+  .dash-countdown-unit {
+    min-width: 2rem;
+  }
+
+  .dash-countdown-unit strong {
+    font-size: 1.2rem;
+  }
+
+  .dash-countdown-sep {
+    font-size: 1.05rem;
+  }
+
+  .dash-countdown-label,
+  .dash-countdown-hint {
+    font-size: 0.68rem;
+  }
+
+  .dash-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.45rem;
+  }
+
+  .dash-stat-label {
+    font-size: 0.72rem;
+  }
+
+  .dash-stat-value {
+    font-size: 1.3rem;
+  }
+
+  .dash-stat-hint {
+    font-size: 0.7rem;
+  }
+
+  .dash-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .dash-search {
+    flex: 1 1 100%;
+    min-height: 2.75rem;
+    font-size: 16px;
+  }
+
+  .segmented button,
+  .dash-filters .chip {
+    min-height: 2.5rem;
+    padding: 0.45rem 0.65rem;
+    font-size: 0.82rem;
+  }
+
+  .password-field {
+    grid-template-columns: 1fr;
+  }
+
+  .password-field .btn,
+  .password-field button {
+    width: 100%;
+  }
+
+  .auth-panel,
+  .glass-panel.hero-copy,
+  .glass-panel.hero-copy-block {
+    padding: 1rem 0.9rem;
+  }
+
+  .profile-identity {
+    padding: 1.1rem 0.95rem;
+  }
+
+  .profile-avatar {
+    width: 3.5rem;
+    height: 3.5rem;
+    font-size: 1.1rem;
+  }
+
+  .profile-save-bar {
+    inset-inline: 0;
+    width: 100%;
+    border-radius: 10px;
+    padding: 0.75rem 0.85rem;
+  }
+
+  .intro-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .intro-card {
+    min-height: 0;
+  }
+
+  .account-menu-panel {
+    right: 0;
+    left: auto;
+    width: min(18rem, calc(100vw - 1.5rem));
+  }
+
+  .toast-host {
+    width: calc(100% - 1rem);
+  }
+
+  /* Long unbroken strings (emails, URLs) shouldn't blow the layout */
+  .match-card h3,
+  .reasoning,
+  .dash-engine p,
+  .profile-identity-copy,
+  .auth-panel,
+  .lede {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+}
+
+@media (max-width: 360px) {
+  .dash-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .segmented {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-gallery {
+    grid-template-columns: 1fr;
+  }
+
+  .dash-countdown-units {
+    justify-content: space-between;
+    gap: 0.15rem;
+  }
+
+  .cta-row .btn {
+    min-width: 100%;
+  }
+}
+
+/* Landscape phones: keep sticky chrome usable */
+@media (max-height: 430px) and (orientation: landscape) {
+  .cookie-banner {
+    max-height: 42vh;
+    overflow-y: auto;
+  }
+
+  .lang-switch-panel.sheet {
+    max-height: min(88vh, 22rem);
+  }
+
+  .profile-save-bar {
+    position: static;
+    margin: 1rem 0 0;
+  }
+
+  .sticky-cta {
+    position: static;
+  }
+}
+
+/* Prefer dynamic viewport height where supported (mobile browser chrome) */
+@supports (height: 100dvh) {
+  .page,
+  .page-fg,
+  .intro-hit {
+    min-height: 100dvh;
+  }
+}
+
+/* Final form control size lock — beats nested `font: inherit` under small labels */
+.stack-form input,
+.stack-form select,
+.stack-form textarea,
+.profile-field input,
+.profile-field select,
+.profile-field textarea,
+.password-field input,
+.skill-other-row input,
+.skill-prof-default select,
+.skill-selected-row select,
+.ob-panel input,
+.ob-panel select,
+.ob-panel textarea,
+.dash-search,
+.cookie-banner input,
+.lang-switch-search,
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='search'],
+input[type='url'],
+input[type='tel'],
+input[type='number'],
+select,
+textarea {
+  font-size: 16px;
 }
