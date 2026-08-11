@@ -4243,7 +4243,7 @@ button.linkish {
 
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
 }
 
@@ -5976,6 +5976,7 @@ a.btn-auth {
     top: calc(100% + 0.35rem);
     right: 0.75rem;
     left: 0.75rem;
+    z-index: 60;
     background: #fff;
     border: 1px solid var(--line);
     border-radius: var(--radius);
@@ -5986,6 +5987,10 @@ a.btn-auth {
     gap: 0.45rem;
     max-height: min(80vh, 34rem);
     overflow: auto;
+  }
+
+  .nav.open {
+    display: flex;
   }
 
   .nav a,

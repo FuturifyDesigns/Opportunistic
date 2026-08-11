@@ -82,7 +82,7 @@ function noscriptBlock(route) {
 }
 
 function buildPage(route) {
-  const canonical = canonicalFor(route.path)
+  const canonical = canonicalFor(route.canonicalPath || route.path)
   let html = shell
 
   html = setTitle(html, route.title)

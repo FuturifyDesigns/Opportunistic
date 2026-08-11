@@ -39,7 +39,7 @@ export function applySeo(pathname = '/') {
   if (typeof document === 'undefined') return
 
   const route = seoForPath(pathname)
-  const canonical = canonicalFor(route.path)
+  const canonical = canonicalFor(route.canonicalPath || route.path)
 
   const link = upsert('link[rel="canonical"]', () => {
     const l = document.createElement('link')

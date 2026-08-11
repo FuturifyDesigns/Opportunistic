@@ -37,7 +37,7 @@ for (const route of SEO_ROUTES) {
   }
 
   const html = fs.readFileSync(file, 'utf8')
-  const canonical = canonicalFor(route.path)
+  const canonical = canonicalFor(route.canonicalPath || route.path)
   const expectedRobots = route.index ? 'index, follow, max-image-preview:large' : 'noindex, follow'
 
   const title = pick(html, /<title>[\s\S]*?<\/title>/)

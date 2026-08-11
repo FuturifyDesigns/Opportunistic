@@ -23,15 +23,16 @@ export const SEO_ROUTES = [
     index: true,
   },
   {
+    // App home after the intro splash. Same product surface as `/` for users,
+    // but must not rank as a second homepage — Google was showing both.
     path: '/home',
     title: `Scholarship & Job Matching for Students${BRAND_SUFFIX}`,
     description:
       'Find scholarships and jobs that fit your degree and skills. Every match is scored and explained, so you know why it fits before you apply.',
     heading: 'Match scholarships and jobs to a real profile',
     body: 'Enter your skills and qualifications. Opportunistic ranks openings from real boards and portals and explains the fit on every card.',
-    changefreq: 'weekly',
-    priority: '0.9',
-    index: true,
+    canonicalPath: '/',
+    index: false,
   },
   {
     path: '/how-it-works',
