@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
-import { prefersReducedMotion } from '../lib/animations'
+import { prefersReducedMotion, canHoverTilt } from '../lib/animations'
 
 gsap.registerPlugin(useGSAP)
 
@@ -16,7 +16,7 @@ export default function InteractiveCard({
   useGSAP(
     () => {
       const el = ref.current
-      if (!el || prefersReducedMotion()) return
+      if (!el || prefersReducedMotion() || !canHoverTilt()) return
 
       const onMove = (e) => {
         // Scramble hover must not drive card tilt (avoids position jumps).

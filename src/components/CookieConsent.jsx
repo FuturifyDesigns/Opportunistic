@@ -34,6 +34,20 @@ export default function CookieConsent() {
     }
   }, [prefsOpen, consent])
 
+  useEffect(() => {
+    document.body.classList.toggle('has-cookie-banner', Boolean(bannerOpen))
+    return () => document.body.classList.remove('has-cookie-banner')
+  }, [bannerOpen])
+
+  useEffect(() => {
+    if (!prefsOpen) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [prefsOpen])
+
   if (!bannerOpen && !prefsOpen) return null
 
   return (

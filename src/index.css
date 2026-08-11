@@ -169,6 +169,7 @@ textarea:focus-visible {
   background: rgba(242, 242, 240, 0.92);
   border-bottom: 1px solid var(--line);
   backdrop-filter: none;
+  padding-top: env(safe-area-inset-top);
 }
 
 .header-inner {
@@ -3811,11 +3812,18 @@ html[dir='rtl'] .lang-switch-list button {
   background: rgba(15, 23, 42, 0.45);
   display: grid;
   place-items: center;
-  padding: 1rem;
+  padding: max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right))
+    max(0.75rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .cookie-modal {
   width: min(480px, 100%);
+  max-height: min(90dvh, 100%);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   background: #fff;
   border: 1px solid var(--line);
   border-radius: calc(var(--radius) + 4px);
@@ -5545,6 +5553,7 @@ a.btn-auth {
   padding: 0.75rem 0.95rem;
   border-bottom: 1px solid var(--line);
   font-size: 0.92rem;
+  min-width: 0;
 }
 
 .ob-summary li:last-child {
@@ -5553,11 +5562,17 @@ a.btn-auth {
 
 .ob-summary span {
   color: var(--muted);
+  min-width: 0;
+  flex: 0 1 auto;
 }
 
 .ob-summary strong {
   font-weight: 600;
   text-align: right;
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .ob-assistant {
@@ -6361,6 +6376,10 @@ a.btn-auth {
   .auth-orb-info.show {
     transform: translate(-50%, 0) scale(1);
   }
+
+  .auth-orb:has(.auth-orb-info.show) {
+    margin-bottom: 7.5rem;
+  }
 }
 
 @media (max-width: 400px) {
@@ -6431,8 +6450,10 @@ a.btn-auth {
 
 .skill-check-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(11.5rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(11.5rem, 100%), 1fr));
   gap: 0.45rem;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .skill-check {
@@ -6778,9 +6799,8 @@ a.btn-auth {
 }
 
 /* —— Mobile density & placement —— */
-html,
-body {
-  overflow-x: hidden;
+html {
+  overflow-x: clip;
 }
 
 @media (max-width: 860px) {
@@ -7348,6 +7368,66 @@ body {
   .page-fg,
   .intro-hit {
     min-height: 100dvh;
+  }
+}
+
+/* Cookie banner lifts sticky chrome so actions stay tappable */
+body.has-cookie-banner .profile-save-bar,
+body.has-cookie-banner .sticky-cta {
+  bottom: max(7.25rem, calc(env(safe-area-inset-bottom) + 6.5rem));
+}
+
+body.has-cookie-banner .toast-host {
+  bottom: max(7.5rem, calc(env(safe-area-inset-bottom) + 6.75rem));
+}
+
+@media (hover: none), (pointer: coarse) {
+  .match-card.interactive,
+  .interactive-card {
+    transform: none !important;
+    will-change: auto;
+  }
+}
+
+.match-card-hit {
+  touch-action: manipulation;
+}
+
+@media (max-width: 560px) {
+  .password-field {
+    grid-template-columns: 1fr;
+  }
+
+  .password-field .btn,
+  .password-field button {
+    width: 100%;
+  }
+
+  .ob-summary li {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .ob-summary strong {
+    text-align: left;
+  }
+
+  .intro-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 400px) {
+  .cookie-banner-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cookie-banner-actions .btn {
+    width: 100%;
+    justify-content: center;
+    white-space: normal;
   }
 }
 

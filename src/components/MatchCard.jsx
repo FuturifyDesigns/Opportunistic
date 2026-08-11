@@ -2,7 +2,7 @@ import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
-import { prefersReducedMotion } from '../lib/animations'
+import { prefersReducedMotion, canHoverTilt } from '../lib/animations'
 import { getListingBySource } from '../lib/listingCatalog'
 import { unpackReasoning } from '../lib/skillMatch'
 import ListingImage, { DEFAULT_OPPORTUNITY_IMAGE } from './ListingImage'
@@ -27,7 +27,7 @@ export default function MatchCard({ match, kind, onSave, onDismiss, onOpen }) {
   useGSAP(
     () => {
       const el = ref.current
-      if (!el || prefersReducedMotion()) return
+      if (!el || prefersReducedMotion() || !canHoverTilt()) return
 
       const onMove = (e) => {
         const r = el.getBoundingClientRect()

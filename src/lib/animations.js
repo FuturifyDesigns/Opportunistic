@@ -7,6 +7,12 @@ export function prefersReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
+/** True only for mouse/trackpad — skip 3D tilt on touch so cards don't fight scroll. */
+export function canHoverTilt() {
+  if (typeof window === 'undefined') return false
+  return window.matchMedia('(hover: hover) and (pointer: fine)').matches
+}
+
 /** Alternate left / right / up reveals for elements with data-reveal */
 export function revealOnScroll(scope, selector = '[data-reveal]') {
   if (prefersReducedMotion()) {
