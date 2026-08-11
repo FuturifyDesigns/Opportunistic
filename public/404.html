@@ -5,95 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Page not found — Opportunistic</title>
     <meta name="robots" content="noindex" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="DENY" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta
+      http-equiv="Permissions-Policy"
+      content="accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), interest-cohort=()"
+    />
     <link rel="icon" href="/favicon.ico" sizes="any" />
-    <style>
-      :root {
-        color-scheme: light;
-        --ink: #141412;
-        --muted: #5a5a55;
-        --line: #e4e4de;
-        --bg: #f6f6f4;
-        --accent: #0b6e4f;
-      }
-      * {
-        box-sizing: border-box;
-      }
-      html,
-      body {
-        margin: 0;
-        min-height: 100%;
-      }
-      body {
-        font-family: Georgia, 'Times New Roman', serif;
-        background:
-          radial-gradient(ellipse 80% 40% at 10% -10%, rgba(11, 110, 79, 0.08), transparent 55%),
-          var(--bg);
-        color: var(--ink);
-        display: grid;
-        place-items: center;
-        padding: 2rem 1.25rem;
-      }
-      main {
-        text-align: center;
-        max-width: 22rem;
-      }
-      .code {
-        margin: 0 0 0.75rem;
-        font-family: system-ui, sans-serif;
-        font-size: 0.72rem;
-        font-weight: 600;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: var(--muted);
-      }
-      h1 {
-        margin: 0 0 0.65rem;
-        font-weight: 600;
-        font-size: clamp(1.85rem, 4vw, 2.4rem);
-        letter-spacing: -0.03em;
-        line-height: 1.15;
-      }
-      p {
-        margin: 0 0 1.35rem;
-        font-family: system-ui, sans-serif;
-        font-size: 1.02rem;
-        line-height: 1.45;
-        color: var(--muted);
-      }
-      a {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 2.75rem;
-        padding: 0.65rem 1.25rem;
-        border-radius: 999px;
-        background: var(--accent);
-        color: #fff;
-        text-decoration: none;
-        font-family: system-ui, sans-serif;
-        font-size: 0.95rem;
-        font-weight: 600;
-      }
-      a:hover {
-        filter: brightness(1.05);
-      }
-      noscript a {
-        margin-top: 0.25rem;
-      }
-    </style>
-    <script>
-      // GitHub Pages has no server rewrite — unknown paths hit this file.
-      // Save the deep link, then hand off to the SPA shell at /.
-      ;(function () {
-        try {
-          sessionStorage.setItem(
-            'opportunistic-redirect',
-            location.pathname + location.search + location.hash,
-          )
-        } catch (e) {}
-        location.replace('/' + location.search + location.hash)
-      })()
-    </script>
+    <link rel="stylesheet" href="/spa-fallback.css" />
+    <script src="/spa-fallback.js"></script>
   </head>
   <body>
     <main>
@@ -101,7 +22,7 @@
       <h1>Page not found</h1>
       <p>This page doesn’t exist — or we’re loading the app for you.</p>
       <noscript>
-        <a href="/home">Back to home</a>
+        <a href="/home/">Back to home</a>
       </noscript>
     </main>
   </body>

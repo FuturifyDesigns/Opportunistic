@@ -40,5 +40,4 @@ HTML ready to paste is in `supabase/email-templates/`:
 
 For each: **Authentication → Email Templates** → select type → paste Subject + Body from the matching files.
 
-Logo URL used in templates: `https://opportunistic.online/logo.png`  
-(Fallback while DNS settles: `https://futurifydesigns.github.io/Opportunistic/logo.png` — swap in the HTML if needed.)
+Logo URL used in templates: `https://opportunistic.online/logo.png`

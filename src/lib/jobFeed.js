@@ -7,6 +7,7 @@
 import i18n from '../i18n'
 import { countryFitScore, jobFitsSelectedCountry } from './countryMatch'
 import { evaluateJobListing } from './skillMatch'
+import { assertAllowed } from './rateLimit'
 
 function mapRemotive(job, profile) {
   const country = profile.country || ''
@@ -89,6 +90,7 @@ function mapArbeitnow(job, profile) {
 }
 
 async function fetchRemotive(query) {
+  assertAllowed('remotive', { limit: 4, windowMs: 60_000 })
   const url = `https://remotive.com/api/remote-jobs?search=${encodeURIComponent(query || 'developer')}&limit=50`
   const res = await fetch(url)
   if (!res.ok) throw new Error(`Remotive ${res.status}`)
@@ -97,6 +99,7 @@ async function fetchRemotive(query) {
 }
 
 async function fetchArbeitnow(query) {
+  assertAllowed('arbeitnow', { limit: 4, windowMs: 60_000 })
   const url = `https://www.arbeitnow.com/api/job-board-api`
   const res = await fetch(url)
   if (!res.ok) throw new Error(`Arbeitnow ${res.status}`)

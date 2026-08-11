@@ -1,8 +1,23 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// Custom domain (opportunistic.online) serves at site root.
 export default defineConfig({
   plugins: [react()],
   base: '/',
+  build: {
+    sourcemap: false,
+    cssCodeSplit: true,
+    reportCompressedSize: false,
+    rollupOptions: {
+      output: {
+        // Avoid predictable vendor chunk names that advertise tooling in Network panel.
+        chunkFileNames: 'assets/[hash].js',
+        entryFileNames: 'assets/[hash].js',
+        assetFileNames: 'assets/[hash][extname]',
+      },
+    },
+  },
+  esbuild: {
+    drop: ['debugger'],
+  },
 })

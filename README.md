@@ -1,32 +1,26 @@
 # Opportunistic
 
-Worldwide scholarship and job matching with visible reasoning — React (Vite) + Supabase, deployed on GitHub Pages.
+Worldwide scholarship and job matching with visible reasoning.
 
-**Live:** https://futurifydesigns.github.io/Opportunistic/
+**Live:** https://opportunistic.online/
 
 ## Setup
 
 1. Copy `.env.example` to `.env` and set your Supabase URL + anon key.
-2. In the [Supabase SQL Editor](https://supabase.com/dashboard/project/xtvrjamnorcaevnvvnez/sql), run `supabase/migrations/001_initial_schema.sql`.
-3. Under Authentication → URL configuration, add:
-   - Site URL: `https://futurifydesigns.github.io/Opportunistic/`
-   - Redirect URLs: `https://futurifydesigns.github.io/Opportunistic/**` and `http://localhost:5173/**`
+2. In the Supabase SQL Editor, run `supabase/migrations/001_initial_schema.sql`.
+3. Under Authentication → URL configuration, set Site URL to `https://opportunistic.online` and add redirect URLs for `/auth`, `/verified`, and `http://localhost:5173/**`.
 4. `npm install` then `npm run dev`
 
-## Deploy
+## Build
 
 ```bash
-npm run deploy
+npm run build
 ```
 
-This builds with `base: /Opportunistic/` and pushes the `dist` folder to the `gh-pages` branch.
-
-## Matching (current)
-
-Phase 1 ships a profile-aware matcher that scores curated scholarship boards and job search links with personalized reasoning, then stores results in Supabase. Phase 2 replaces this with SearXNG + Edge Function LLM scoring per the build plan.
+Output is written to `dist/`. Production deploys run through CI on push to `main`. Edge security (HSTS, CSP, header stripping) is configured at the CDN — see `ops/CDN-SECURITY.md` and `DOMAIN.md`.
 
 ## Stack
 
 - React + Vite + GSAP
 - Supabase Auth, Postgres, RLS
-- GitHub Pages
+- Cloudflare edge (TLS + security headers)

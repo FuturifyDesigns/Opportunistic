@@ -32,7 +32,7 @@ for (const route of SEO_ROUTES) {
   console.log(`\n${route.path}  →  ${path.relative(dist, file)}`)
 
   if (!fs.existsSync(file)) {
-    fail('file missing (route would return HTTP 404 on GitHub Pages)')
+    fail('file missing (route would return HTTP 404 on a rewrite-less static host)')
     continue
   }
 

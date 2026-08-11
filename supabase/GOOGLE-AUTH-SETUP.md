@@ -62,7 +62,7 @@ Under **Google Auth Platform → Audience / Branding**:
 2. Click **Continue with Google**
 3. After Google, you should land on **onboarding** (new account) or **dashboard** (existing, completed onboarding) — not “Choose a portal”
 
-If you bounce back to Choose a portal with no session, confirm Redirect URLs include `https://opportunistic.online/auth` and hard-refresh after deploy (OAuth `?code=` must survive the GitHub Pages SPA redirect).
+If you bounce back to Choose a portal with no session, confirm Redirect URLs include `https://opportunistic.online/auth` and hard-refresh after deploy (OAuth `?code=` must survive the SPA deep-link restore).
 
 ## Notes
 

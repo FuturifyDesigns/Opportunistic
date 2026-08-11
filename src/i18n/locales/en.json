@@ -725,7 +725,7 @@
     "childrenTitle": "Children",
     "childrenBody": "Opportunistic is not directed at children under 16 (or the higher digital-consent age in your country). Do not create an account if you are under that age. If we learn we hold such data, we will delete it.",
     "sharingTitle": "Processors & sharing",
-    "sharingBody": "We share data with processors who help run the service: Supabase (auth/database), Brevo (transactional email when enabled), and hosting (GitHub Pages). Listings open on third-party sites with their own policies. We do not sell personal data.",
+    "sharingBody": "We share data with processors who help run the service: Supabase (auth/database), Brevo (transactional email when enabled), and our CDN / hosting providers. Listings open on third-party sites with their own policies. We do not sell personal data.",
     "contactTitle": "Contact",
     "contactBody": "Privacy questions or rights requests:"
   },

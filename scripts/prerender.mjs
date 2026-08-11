@@ -1,7 +1,6 @@
 /**
- * GitHub Pages has no server-side rewrites, so every SPA route except "/" used to
- * fall through to 404.html and answer with an HTTP 404 — meaning Google could not
- * index /home, /features, /about, and friends.
+ * Static hosts often lack path rewrites, so SPA routes without a real file
+ * used to answer HTTP 404 and could not be indexed.
  *
  * This writes a real index.html for each route (200 OK) with route-specific
  * title/description/canonical/OG tags, plus a crawlable <noscript> summary.

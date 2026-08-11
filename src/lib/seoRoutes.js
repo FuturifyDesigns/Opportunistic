@@ -112,9 +112,10 @@ export const SEO_ROUTES = [
 export const DEFAULT_SEO = SEO_ROUTES[0]
 
 /**
- * GitHub Pages serves each prerendered route from <route>/index.html and
- * 301s the bare path to the trailing-slash form, so canonicals and sitemap
- * entries must use the trailing slash or they point at a redirect.
+ * Origin static hosting often serves each prerendered route from
+ * <route>/index.html and 301s the bare path to the trailing-slash form, so
+ * canonicals and sitemap entries must use the trailing slash or they point
+ * at a redirect.
  */
 export function canonicalFor(pathname = '/') {
   const clean = String(pathname || '/').split('?')[0].split('#')[0]

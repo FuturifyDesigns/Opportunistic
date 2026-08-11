@@ -1,38 +1,34 @@
-# Domain setup — opportunistic.online (Namecheap → GitHub Pages)
+# Domain & edge — opportunistic.online
 
-## 1. Namecheap DNS (Domain List → Manage → Advanced DNS)
+Public traffic must terminate on Cloudflare (proxied DNS). Origin hosting stays
+private; browsers, DNS, WHOIS, TLS, and response headers should only show the
+custom domain and Cloudflare.
 
-Delete conflicting URL Redirect / Parking records on `@` and `www`, then add:
+## 1. Cloudflare DNS
 
-| Type  | Host | Value                     | TTL  |
-|-------|------|---------------------------|------|
-| A     | @    | 185.199.108.153           | Auto |
-| A     | @    | 185.199.109.153           | Auto |
-| A     | @    | 185.199.110.153           | Auto |
-| A     | @    | 185.199.111.153           | Auto |
-| CNAME | www  | FuturifyDesigns.github.io | Auto |
+| Type  | Name | Target                         | Proxy    |
+|-------|------|--------------------------------|----------|
+| A / CNAME | `@` | origin addresses / hostname | Proxied  |
+| CNAME | `www` | `opportunistic.online`         | Proxied  |
 
-Save changes. DNS can take from a few minutes up to 24–48 hours.
+Enable registrar/WHOIS privacy. Do not publish CNAMEs that name the origin
+platform.
 
-## 2. GitHub Pages custom domain
+Full header/TLS checklist: [`ops/CDN-SECURITY.md`](ops/CDN-SECURITY.md).
 
-Already configured via `public/CNAME` → `opportunistic.online`.
+## 2. Auth redirects (Supabase)
 
-In the repo: **Settings → Pages → Custom domain** should show `opportunistic.online`.
-Enable **Enforce HTTPS** after the certificate provisions (can take up to an hour after DNS works).
+Site URL: `https://opportunistic.online`
 
-## 3. Supabase Auth redirects
+Redirect URLs:
 
-In Supabase → Authentication → URL configuration, add:
+- `https://opportunistic.online/**`
+- `https://opportunistic.online/auth`
+- `https://opportunistic.online/verified`
+- `http://localhost:5173/**` (local only)
 
-- Site URL: `https://opportunistic.online`
-- Redirect URLs:
-  - `https://opportunistic.online/**`
-  - `https://opportunistic.online/auth`
-  - `https://futurifydesigns.github.io/Opportunistic/**` (optional backup)
+## 3. Checks
 
-## 4. Check
-
-- https://opportunistic.online
-- https://www.opportunistic.online (should follow GitHub / DNS)
-- https://opportunistic.online/how-it-works
+- `https://opportunistic.online` and `https://www.opportunistic.online`
+- Response headers include HSTS + CSP (via Cloudflare Transform Rules)
+- `nslookup` shows Cloudflare anycast IPs, not origin platform addresses
