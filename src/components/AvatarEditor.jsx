@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { loadImageFromFile, renderAvatarBlob } from '../lib/avatar'
 
@@ -48,14 +49,12 @@ export default function AvatarEditor({ open, onClose, onSave }) {
     }
   }, [open, busy, onClose])
 
-  if (!open) return null
-
   async function onPick(e) {
     const file = e.target.files?.[0]
     e.target.value = ''
     if (!file) return
     setError('')
-      try {
+    try {
       const img = await loadImageFromFile(file)
       if (image?.src?.startsWith('blob:')) URL.revokeObjectURL(image.src)
       setImage(img)
@@ -117,7 +116,9 @@ export default function AvatarEditor({ open, onClose, onSave }) {
   const drawW = image ? image.naturalWidth * base * zoom : 0
   const drawH = image ? image.naturalHeight * base * zoom : 0
 
-  return (
+  if (!open) return null
+
+  const modal = (
     <div className="avatar-editor-backdrop" role="presentation" onClick={() => !busy && onClose?.()}>
       <div
         className="avatar-editor"
@@ -231,4 +232,6 @@ export default function AvatarEditor({ open, onClose, onSave }) {
       </div>
     </div>
   )
+
+  return createPortal(modal, document.body)
 }
