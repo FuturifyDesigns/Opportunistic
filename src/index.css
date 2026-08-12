@@ -2225,7 +2225,7 @@ sup {
   height: 4.25rem;
   display: grid;
   place-items: center;
-  border-radius: 14px;
+  border-radius: 999px;
   background: var(--ink);
   color: #fff;
   font-family: var(--display);
@@ -2316,7 +2316,7 @@ sup {
   position: relative;
   margin: 0 auto;
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: 999px;
   background: #121212;
   touch-action: none;
   cursor: grab;
@@ -2339,12 +2339,12 @@ sup {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  border-radius: 999px;
   box-shadow: inset 0 0 0 2px color-mix(in srgb, #fff 55%, transparent);
-  border-radius: 16px;
   background: radial-gradient(
     circle closest-side,
-    transparent 66%,
-    color-mix(in srgb, #000 42%, transparent) 67%
+    transparent 69%,
+    color-mix(in srgb, #000 48%, transparent) 70%
   );
 }
 
@@ -7802,6 +7802,7 @@ textarea {
   font-family: var(--display);
   font-weight: 700;
   overflow: hidden;
+  border-radius: 999px;
 }
 
 .hub-peer-avatar img {

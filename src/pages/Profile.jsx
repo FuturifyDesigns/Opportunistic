@@ -56,6 +56,7 @@ export default function Profile() {
   const [busy, setBusy] = useState(false)
   const [avatarBusy, setAvatarBusy] = useState(false)
   const [editorOpen, setEditorOpen] = useState(false)
+  const [baseline, setBaseline] = useState(null)
 
   useEffect(() => {
     document.title = t('profile.metaTitle')
@@ -91,6 +92,25 @@ export default function Profile() {
       } else {
         setSkills([])
       }
+
+      setBaseline({
+        country: profile?.country || 'Botswana',
+        goal: resolveGoal(profile || {}),
+        quals: JSON.stringify(
+          (q || []).map((row) => ({
+            type: row.type,
+            field: normalizeFieldName(row.field || ''),
+            institution: (row.institution || '').trim(),
+            year: Number(row.year) || null,
+          })),
+        ),
+        skills: JSON.stringify(
+          (s || []).map((row) => ({
+            skill_name: normalizeSkillName(row.skill_name || ''),
+            proficiency: row.proficiency || 'intermediate',
+          })),
+        ),
+      })
     }
     load()
   }, [profile, user.id])
@@ -124,6 +144,34 @@ export default function Profile() {
     if (form.goal === 'jobs') return t('onboarding.goalJobs')
     return t('onboarding.goalBoth')
   }, [form.goal, t])
+
+  const needsRematch = useMemo(() => {
+    if (!baseline) return true
+    const nextQuals = JSON.stringify(
+      qualifications
+        .filter((q) => q.field?.trim())
+        .map((q) => ({
+          type: q.type,
+          field: normalizeFieldName(q.field),
+          institution: (q.institution || '').trim(),
+          year: Number(q.year) || null,
+        })),
+    )
+    const nextSkills = JSON.stringify(
+      skills
+        .filter((s) => s.skill_name?.trim())
+        .map((s) => ({
+          skill_name: normalizeSkillName(s.skill_name),
+          proficiency: s.proficiency || 'intermediate',
+        })),
+    )
+    return (
+      form.country !== baseline.country ||
+      normalizeGoal(form.goal) !== baseline.goal ||
+      nextQuals !== baseline.quals ||
+      nextSkills !== baseline.skills
+    )
+  }, [baseline, form.country, form.goal, qualifications, skills])
 
   function updateQual(i, patch) {
     setQualifications((rows) => rows.map((row, idx) => (idx === i ? { ...row, ...patch } : row)))
@@ -181,9 +229,14 @@ export default function Profile() {
       if (qualRows.length) await supabase.from('qualifications').insert(qualRows)
       if (skillRows.length) await supabase.from('skills').insert(skillRows)
 
-      await runMatchingForUser(user.id)
-      await refreshProfile()
-      toast.success(t('profile.saveSuccess'))
+      if (needsRematch) {
+        await runMatchingForUser(user.id, { reason: 'profile' })
+        await refreshProfile()
+        toast.success(t('profile.saveSuccessRematch'))
+      } else {
+        await refreshProfile()
+        toast.success(t('profile.saveSuccessOnly'))
+      }
       setTimeout(() => navigate('/dashboard'), 700)
     } catch (err) {
       toast.error(err.message || t('profile.saveError'))
@@ -453,15 +506,21 @@ export default function Profile() {
 
           <div className="profile-save-bar">
             <div className="profile-save-copy">
-              <strong>{t('profile.saveBarTitle')}</strong>
-              <span>{t('profile.saveBarBody')}</span>
+              <strong>{needsRematch ? t('profile.saveBarTitleRematch') : t('profile.saveBarTitle')}</strong>
+              <span>{needsRematch ? t('profile.saveBarBodyRematch') : t('profile.saveBarBody')}</span>
             </div>
             <div className="profile-save-actions">
               <Link className="btn btn-ghost" to="/dashboard">
                 {t('common.cancel')}
               </Link>
               <button className="btn btn-match" type="submit" disabled={busy}>
-                {busy ? t('profile.saving') : t('profile.save')}
+                {busy
+                  ? needsRematch
+                    ? t('profile.savingRematch')
+                    : t('profile.saving')
+                  : needsRematch
+                    ? t('profile.saveRematch')
+                    : t('profile.save')}
               </button>
             </div>
           </div>

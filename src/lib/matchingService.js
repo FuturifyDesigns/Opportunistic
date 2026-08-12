@@ -8,8 +8,16 @@ function sourceKey(row) {
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000
 
-/** How long a set of matches stays fresh before the engine re-scans on its own. */
+/** How long between automatic web re-scans (countdown on the dashboard). */
 export const REFRESH_INTERVAL_MS = WEEK_MS
+
+function scheduleKey(userId) {
+  return `opp_match_schedule_${userId}`
+}
+
+function lastMatchKey(userId) {
+  return `opp_last_match_${userId}`
+}
 
 /** Strict focus: only keep the match types the user asked for. */
 function applyGoalFocus(goal, scholarships, jobs) {
@@ -22,11 +30,14 @@ function applyGoalFocus(goal, scholarships, jobs) {
 
 /**
  * Rebuild matches from the live profile + web job feeds.
- * Scholarships are filtered to programs eligible for the user’s country.
- * Jobs prefer live API postings, scored to skills/field, with country board searches.
+ * @param {string} userId
+ * @param {{ reason?: 'scheduled' | 'profile' | 'initial' | 'manual' }} [options]
+ * - scheduled/initial: advances the weekly auto-refresh countdown
+ * - profile/manual: refreshes cards now but keeps the existing weekly schedule
  */
-export async function runMatchingForUser(userId) {
+export async function runMatchingForUser(userId, options = {}) {
   if (!userId) throw new Error('Missing user')
+  const reason = options.reason || 'manual'
 
   const [{ data: profile, error: pErr }, { data: qualifications }, { data: skills }] =
     await Promise.all([
@@ -80,34 +91,33 @@ export async function runMatchingForUser(userId) {
   const savedJobs = new Set((prevJobs || []).filter((r) => r.saved).map(sourceKey))
   const dismissedJobs = new Set((prevJobs || []).filter((r) => r.dismissed).map(sourceKey))
 
+  const stamp = new Date().toISOString()
+
+  const scholarshipRows = focused.scholarships.map((row) => {
+    const key = sourceKey(row)
+    return {
+      ...row,
+      user_id: userId,
+      saved: savedSch.has(key),
+      dismissed: dismissedSch.has(key),
+      found_at: stamp,
+    }
+  })
+  const jobRows = focused.jobs.map((row) => {
+    const key = sourceKey(row)
+    return {
+      ...row,
+      user_id: userId,
+      saved: savedJobs.has(key),
+      dismissed: dismissedJobs.has(key),
+      found_at: stamp,
+    }
+  })
+
   await Promise.all([
     supabase.from('scholarship_matches').delete().eq('user_id', userId),
     supabase.from('job_matches').delete().eq('user_id', userId),
   ])
-
-  const scholarshipRows = focused.scholarships.map((m) => ({
-    user_id: userId,
-    title: m.title,
-    url: m.url,
-    source: m.source,
-    reasoning: m.reasoning,
-    match_score: m.match_score,
-    deadline: m.deadline ?? null,
-    saved: savedSch.has(sourceKey(m)),
-    dismissed: dismissedSch.has(sourceKey(m)),
-  }))
-
-  const jobRows = focused.jobs.map((m) => ({
-    user_id: userId,
-    title: m.title,
-    url: m.url,
-    company: m.company ?? null,
-    source: m.source,
-    reasoning: m.reasoning,
-    match_score: m.match_score,
-    saved: savedJobs.has(sourceKey(m)),
-    dismissed: dismissedJobs.has(sourceKey(m)),
-  }))
 
   if (scholarshipRows.length) {
     const { error: sErr } = await supabase.from('scholarship_matches').insert(scholarshipRows)
@@ -118,7 +128,6 @@ export async function runMatchingForUser(userId) {
     if (jErr) throw jErr
   }
 
-  const stamp = new Date().toISOString()
   await supabase.from('search_runs').insert([
     {
       user_id: userId,
@@ -134,13 +143,18 @@ export async function runMatchingForUser(userId) {
     },
   ])
 
-  // Best-effort stamp for weekly auto-refresh (ignore if column missing until migration applied)
   await supabase.from('profiles').update({ updated_at: stamp }).eq('user_id', userId)
 
   try {
-    localStorage.setItem(`opp_last_match_${userId}`, stamp)
-    localStorage.setItem(`opp_last_match_meta_${userId}`, JSON.stringify({ ...(jobMeta || {}), goal }))
+    localStorage.setItem(lastMatchKey(userId), stamp)
+    localStorage.setItem(`opp_last_match_meta_${userId}`, JSON.stringify({ ...(jobMeta || {}), goal, reason }))
     localStorage.setItem(`opp_goal_${userId}`, goal)
+
+    const existingSchedule = localStorage.getItem(scheduleKey(userId))
+    const advanceSchedule = reason === 'scheduled' || reason === 'initial' || !existingSchedule
+    if (advanceSchedule) {
+      localStorage.setItem(scheduleKey(userId), stamp)
+    }
   } catch {
     /* ignore */
   }
@@ -148,14 +162,14 @@ export async function runMatchingForUser(userId) {
   return {
     scholarships: scholarshipRows.filter((r) => !r.dismissed).length,
     jobs: jobRows.filter((r) => !r.dismissed).length,
-    meta: { ...(jobMeta || {}), goal },
+    meta: { ...(jobMeta || {}), goal, reason },
     refreshedAt: stamp,
   }
 }
 
 export function getLastMatchAt(userId) {
   try {
-    return localStorage.getItem(`opp_last_match_${userId}`)
+    return localStorage.getItem(lastMatchKey(userId))
   } catch {
     return null
   }
@@ -170,21 +184,39 @@ export function getLastMatchMeta(userId) {
   }
 }
 
-/** True if matches are older than 7 days (or never run). */
+/** Anchor for the weekly auto-scan clock (separate from last manual rematch). */
+export function getScheduleAnchor(userId) {
+  try {
+    const scheduled = localStorage.getItem(scheduleKey(userId))
+    if (scheduled) return scheduled
+    // Migrate older clients that only stored last match.
+    const last = getLastMatchAt(userId)
+    if (last) {
+      localStorage.setItem(scheduleKey(userId), last)
+      return last
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
+/** True when the weekly auto-scan is due (or never ran). */
 export function shouldWeeklyRefresh(userId) {
-  const last = getLastMatchAt(userId)
-  if (!last) return true
-  const age = Date.now() - new Date(last).getTime()
-  return Number.isNaN(age) || age >= WEEK_MS
+  const next = getNextRefreshAt(userId)
+  if (!next) return true
+  return Date.now() >= next
 }
 
 /**
- * Timestamp (ms) of the next automatic scan, or null when one is already due —
- * the dashboard counts down to this and re-runs matching when it lands.
+ * Timestamp (ms) of the next automatic scan.
+ * Profile rematches do not move this — only scheduled/initial scans do.
  */
-export function getNextRefreshAt(lastMatchAt) {
-  if (!lastMatchAt) return null
-  const last = new Date(lastMatchAt).getTime()
+export function getNextRefreshAt(userId) {
+  if (!userId) return null
+  const anchor = getScheduleAnchor(userId)
+  if (!anchor) return null
+  const last = new Date(anchor).getTime()
   if (Number.isNaN(last)) return null
   return last + WEEK_MS
 }

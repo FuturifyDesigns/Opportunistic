@@ -102,7 +102,9 @@ export default function Dashboard() {
       setRefreshing(true)
       setEngineNote(reason === 'scheduled' ? t('dashboard.weeklyNote') : t('dashboard.refreshingNote'))
       try {
-        const result = await runMatchingForUser(user.id)
+        const matchReason =
+          reason === 'scheduled' || reason === 'initial' ? reason : 'manual'
+        const result = await runMatchingForUser(user.id, { reason: matchReason })
         trackEngage('rematch', { reason }, user.id)
         setEngineNote(
           t('dashboard.updated', {
@@ -151,7 +153,7 @@ export default function Dashboard() {
     }
   }, [user?.id, loading, scholarships.length, jobs.length, refreshEngine, showScholarships, showJobs])
 
-  const nextRefreshAt = useMemo(() => getNextRefreshAt(lastAt), [lastAt])
+  const nextRefreshAt = useMemo(() => getNextRefreshAt(user?.id), [user?.id, lastAt])
 
   const onCountdownDue = useCallback(() => {
     autoRan.current = true

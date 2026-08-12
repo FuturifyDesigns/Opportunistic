@@ -269,7 +269,7 @@ export default function Onboarding() {
         if (sErr) throw sErr
       }
 
-      await runMatchingForUser(user.id)
+      await runMatchingForUser(user.id, { reason: 'initial' })
       await refreshProfile()
 
       window.clearInterval(lineTimer)

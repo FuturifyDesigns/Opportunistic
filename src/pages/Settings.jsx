@@ -52,7 +52,7 @@ export default function Settings() {
       /* ignore */
     }
     try {
-      await runMatchingForUser(user.id)
+      await runMatchingForUser(user.id, { reason: 'profile' })
     } catch {
       /* rematch best-effort */
     }
