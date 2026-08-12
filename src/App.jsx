@@ -17,6 +17,7 @@ import Auth from './pages/Auth'
 import EmailVerified from './pages/EmailVerified'
 import Onboarding from './pages/Onboarding'
 import Dashboard from './pages/Dashboard'
+import Hub from './pages/Hub'
 import Profile from './pages/Profile'
 import Settings from './pages/Settings'
 import MatchDetail from './pages/MatchDetail'
@@ -52,6 +53,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute requireOnboarding>
             <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/hub"
+        element={
+          <ProtectedRoute requireOnboarding>
+            <Hub />
           </ProtectedRoute>
         }
       />

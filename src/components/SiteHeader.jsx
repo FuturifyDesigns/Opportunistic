@@ -115,6 +115,9 @@ export default function SiteHeader() {
                     <NavLink role="menuitem" to="/dashboard" onClick={close}>
                       {t('nav.dashboard')}
                     </NavLink>
+                    <NavLink role="menuitem" to="/hub" onClick={close}>
+                      {t('nav.hub')}
+                    </NavLink>
                     <NavLink role="menuitem" to="/profile" onClick={close}>
                       {t('nav.profile')}
                     </NavLink>
@@ -145,6 +148,9 @@ export default function SiteHeader() {
                 <p className="account-menu-label">{firstName}</p>
                 <NavLink to="/dashboard" onClick={close}>
                   {t('nav.dashboard')}
+                </NavLink>
+                <NavLink to="/hub" onClick={close}>
+                  {t('nav.hub')}
                 </NavLink>
                 <NavLink to="/profile" onClick={close}>
                   {t('nav.profile')}

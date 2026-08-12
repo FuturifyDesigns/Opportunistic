@@ -282,6 +282,9 @@ export default function Dashboard() {
             <Link className="btn btn-ghost" to="/profile">
               {t('dashboard.updateProfile')}
             </Link>
+            <Link className="btn" to="/hub">
+              {t('nav.hub')}
+            </Link>
           </div>
         </section>
 

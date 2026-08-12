@@ -103,6 +103,7 @@ export const SEO_ROUTES = [
 
   // Signed-in / transactional routes — real pages, but never indexed.
   { path: '/dashboard', title: `Dashboard${BRAND_SUFFIX}`, index: false },
+  { path: '/hub', title: `Collab Hub${BRAND_SUFFIX}`, index: false },
   { path: '/onboarding', title: `Setup${BRAND_SUFFIX}`, index: false },
   { path: '/profile', title: `Profile${BRAND_SUFFIX}`, index: false },
   { path: '/settings', title: `Settings${BRAND_SUFFIX}`, index: false },
