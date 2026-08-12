@@ -385,7 +385,11 @@ export default function Hub() {
                   <li key={peer.user_id} className="hub-peer">
                     <div className="hub-peer-main">
                       <div className="hub-peer-avatar" aria-hidden="true">
-                        {(peer.full_name || '?').slice(0, 1).toUpperCase()}
+                        {peer.avatar_url ? (
+                          <img src={peer.avatar_url} alt="" />
+                        ) : (
+                          (peer.full_name || '?').slice(0, 1).toUpperCase()
+                        )}
                       </div>
                       <div>
                         <strong>{peer.full_name}</strong>
@@ -486,14 +490,23 @@ export default function Hub() {
                   {posts.map((post) => (
                     <li key={post.id} className="hub-post">
                       <div className="hub-post-top">
-                        <div>
-                          <strong>{post.title}</strong>
-                          <p className="hub-peer-meta">
-                            {post.author_name}
-                            {post.author_country ? ` · ${post.author_country}` : ''}
-                            {` · ${t(`hub.intent.${post.intent}`)}`}
-                            {` · ${formatWhen(post.created_at)}`}
-                          </p>
+                        <div className="hub-post-author">
+                          <div className="hub-peer-avatar" aria-hidden="true">
+                            {post.author_avatar ? (
+                              <img src={post.author_avatar} alt="" />
+                            ) : (
+                              (post.author_name || '?').slice(0, 1).toUpperCase()
+                            )}
+                          </div>
+                          <div>
+                            <strong>{post.title}</strong>
+                            <p className="hub-peer-meta">
+                              {post.author_name}
+                              {post.author_country ? ` · ${post.author_country}` : ''}
+                              {` · ${t(`hub.intent.${post.intent}`)}`}
+                              {` · ${formatWhen(post.created_at)}`}
+                            </p>
+                          </div>
                         </div>
                         {post.user_id === user?.id ? (
                           <button

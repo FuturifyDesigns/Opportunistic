@@ -90,27 +90,35 @@ create policy "collab_posts_delete" on public.collab_posts
   for delete to authenticated
   using (auth.uid() = user_id);
 
--- Threads: only members
+-- Threads / members / messages: membership checks via security-definer helper
+-- (avoids infinite recursion when policies query collab_thread_members under RLS)
+create or replace function public.is_collab_thread_member(p_thread_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.collab_thread_members m
+    where m.thread_id = p_thread_id
+      and m.user_id = auth.uid()
+  );
+$$;
+
+revoke all on function public.is_collab_thread_member(uuid) from public;
+grant execute on function public.is_collab_thread_member(uuid) to authenticated;
+
 drop policy if exists "collab_threads_select" on public.collab_threads;
 create policy "collab_threads_select" on public.collab_threads
   for select to authenticated
-  using (
-    exists (
-      select 1 from public.collab_thread_members m
-      where m.thread_id = id and m.user_id = auth.uid()
-    )
-  );
+  using (public.is_collab_thread_member(id));
 
 drop policy if exists "collab_thread_members_select" on public.collab_thread_members;
 create policy "collab_thread_members_select" on public.collab_thread_members
   for select to authenticated
-  using (
-    user_id = auth.uid()
-    or exists (
-      select 1 from public.collab_thread_members m
-      where m.thread_id = collab_thread_members.thread_id and m.user_id = auth.uid()
-    )
-  );
+  using (user_id = auth.uid());
 
 drop policy if exists "collab_thread_members_update" on public.collab_thread_members;
 create policy "collab_thread_members_update" on public.collab_thread_members
@@ -121,22 +129,14 @@ create policy "collab_thread_members_update" on public.collab_thread_members
 drop policy if exists "collab_messages_select" on public.collab_messages;
 create policy "collab_messages_select" on public.collab_messages
   for select to authenticated
-  using (
-    exists (
-      select 1 from public.collab_thread_members m
-      where m.thread_id = collab_messages.thread_id and m.user_id = auth.uid()
-    )
-  );
+  using (public.is_collab_thread_member(thread_id));
 
 drop policy if exists "collab_messages_insert" on public.collab_messages;
 create policy "collab_messages_insert" on public.collab_messages
   for insert to authenticated
   with check (
     auth.uid() = user_id
-    and exists (
-      select 1 from public.collab_thread_members m
-      where m.thread_id = collab_messages.thread_id and m.user_id = auth.uid()
-    )
+    and public.is_collab_thread_member(thread_id)
   );
 
 -- Peer discovery (limited profile fields for opted-in users)

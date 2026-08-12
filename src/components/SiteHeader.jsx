@@ -102,10 +102,11 @@ export default function SiteHeader() {
                   onClick={() => setAccountOpen((v) => !v)}
                 >
                   <img
-                    src={`${import.meta.env.BASE_URL}logo.png`}
+                    src={profile?.avatar_url || `${import.meta.env.BASE_URL}logo.png`}
                     alt=""
                     width="40"
                     height="40"
+                    className={profile?.avatar_url ? 'account-avatar-photo' : undefined}
                   />
                 </button>
 

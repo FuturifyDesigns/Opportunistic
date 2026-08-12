@@ -19,8 +19,10 @@ import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
 import PageBackdrop from '../components/PageBackdrop'
 import SkillPicker from '../components/SkillPicker'
+import AvatarEditor from '../components/AvatarEditor'
 import { normalizeSkillName, normalizeFieldName, suggestSkillsFromQualifications } from '../lib/skillCatalog'
 import { prefersReducedMotion } from '../lib/animations'
+import { removeAvatar, uploadAvatar } from '../lib/avatar'
 
 gsap.registerPlugin(useGSAP)
 
@@ -52,6 +54,8 @@ export default function Profile() {
   const [qualifications, setQualifications] = useState([{ ...emptyQual }])
   const [skills, setSkills] = useState([])
   const [busy, setBusy] = useState(false)
+  const [avatarBusy, setAvatarBusy] = useState(false)
+  const [editorOpen, setEditorOpen] = useState(false)
 
   useEffect(() => {
     document.title = t('profile.metaTitle')
@@ -188,14 +192,68 @@ export default function Profile() {
     }
   }
 
+  async function onSaveAvatar(blob) {
+    setAvatarBusy(true)
+    try {
+      await uploadAvatar(user.id, blob)
+      await refreshProfile?.(user.id, user)
+      toast.success(t('profile.avatarSaved'))
+    } catch (err) {
+      toast.error(err.message || t('profile.avatarSaveError'))
+      throw err
+    } finally {
+      setAvatarBusy(false)
+    }
+  }
+
+  async function onRemoveAvatar() {
+    if (avatarBusy) return
+    setAvatarBusy(true)
+    try {
+      await removeAvatar(user.id)
+      await refreshProfile?.(user.id, user)
+      toast.success(t('profile.avatarRemoved'))
+    } catch (err) {
+      toast.error(err.message || t('profile.avatarSaveError'))
+    } finally {
+      setAvatarBusy(false)
+    }
+  }
+
   return (
     <PageBackdrop image="auth.jpg" className="profile-page">
       <SiteHeader />
       <main className="profile-shell" ref={root}>
         <header className="profile-identity">
           <div className="profile-identity-main">
-            <div className="profile-avatar" aria-hidden="true">
-              {initialsFromName(form.full_name)}
+            <div className="profile-avatar-wrap">
+              <div className={`profile-avatar ${profile?.avatar_url ? 'has-photo' : ''}`}>
+                {profile?.avatar_url ? (
+                  <img src={profile.avatar_url} alt="" />
+                ) : (
+                  <span aria-hidden="true">{initialsFromName(form.full_name)}</span>
+                )}
+              </div>
+              <div className="profile-avatar-actions">
+                <button
+                  type="button"
+                  className="btn btn-sm"
+                  disabled={avatarBusy}
+                  onClick={() => setEditorOpen(true)}
+                >
+                  {profile?.avatar_url ? t('profile.avatarEdit') : t('profile.avatarUpload')}
+                </button>
+                {profile?.avatar_url ? (
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    disabled={avatarBusy}
+                    onClick={() => void onRemoveAvatar()}
+                  >
+                    {t('profile.avatarRemove')}
+                  </button>
+                ) : null}
+              </div>
             </div>
             <div className="profile-identity-copy">
               <p className="eyebrow">{t('profile.eyebrow')}</p>
@@ -220,6 +278,12 @@ export default function Profile() {
             {t('profile.backDashboard')}
           </Link>
         </header>
+
+        <AvatarEditor
+          open={editorOpen}
+          onClose={() => setEditorOpen(false)}
+          onSave={onSaveAvatar}
+        />
 
         <form className="profile-form" onSubmit={save}>
           <section className="profile-section" aria-labelledby="profile-about-heading">
