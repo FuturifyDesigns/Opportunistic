@@ -14,6 +14,7 @@ import { listMatchRecommendations } from '../lib/collabHub'
 import {
   evaluateRecommendation,
   ensureMatchFromRecommendation,
+  friendsWhoFitListing,
   listingForRecommendation,
 } from '../lib/recommendFit'
 import SiteHeader from '../components/SiteHeader'
@@ -34,7 +35,7 @@ function splitSentences(text = '') {
 export default function MatchDetail() {
   const { kind, id } = useParams()
   const { user, profile } = useAuth()
-  const { friendCount, dismissRec } = useNotifications()
+  const { fitFriends, dismissRec } = useNotifications()
   const toast = useToast()
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
@@ -243,6 +244,10 @@ export default function MatchDetail() {
   })
   const reasons = splitSentences(liveReason || storedReason)
   const locationLabel = match?.location || listing?.location || scorecard?.location?.label || null
+  const recFriends = useMemo(
+    () => (match ? friendsWhoFitListing(match, matchKind, fitFriends) : []),
+    [match, matchKind, fitFriends],
+  )
 
   return (
     <div className="page">
@@ -465,7 +470,7 @@ export default function MatchDetail() {
               <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => toggle('dismissed')}>
                 {recMode ? t('recommend.dismiss') : match.dismissed ? t('match.restore') : t('match.dismiss')}
               </button>
-              {friendCount ? (
+              {recFriends.length ? (
                 <button type="button" className="btn btn-ghost" onClick={() => setRecommendOpen(true)}>
                   {t('matchCard.recommend')}
                 </button>

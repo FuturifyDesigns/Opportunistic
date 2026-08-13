@@ -21,13 +21,17 @@ import RecommendMatchDialog from '../components/RecommendMatchDialog'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
 import { useNotifications } from '../context/NotificationContext'
-import { evaluateRecommendation, ensureMatchFromRecommendation } from '../lib/recommendFit'
+import {
+  evaluateRecommendation,
+  ensureMatchFromRecommendation,
+  friendsWhoFitListing,
+} from '../lib/recommendFit'
 
 gsap.registerPlugin(useGSAP)
 
 export default function Dashboard() {
   const { user, profile, refreshProfile } = useAuth()
-  const { friendCount, recs, dismissRec } = useNotifications()
+  const { recs, dismissRec, fitFriends } = useNotifications()
   const toast = useToast()
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -274,6 +278,16 @@ export default function Dashboard() {
     return list
   }, [pool, filter, query])
 
+  const recommendableIds = useMemo(() => {
+    const ids = new Set()
+    if (!fitFriends.length) return ids
+    const recKind = tab === 'jobs' ? 'job' : 'scholarship'
+    for (const m of rows) {
+      if (friendsWhoFitListing(m, recKind, fitFriends).length) ids.add(m.id)
+    }
+    return ids
+  }, [rows, tab, fitFriends])
+
   const savedCount = pool.filter((m) => m.saved).length
   const strongCount = pool.filter((m) => Number(m.match_score) >= 75).length
   const avgScore = pool.length
@@ -477,7 +491,7 @@ export default function Dashboard() {
                   }
                   onSave={onSave}
                   onDismiss={onDismiss}
-                  onRecommend={friendCount ? (m) => setRecommendFor(m) : undefined}
+                  onRecommend={recommendableIds.has(match.id) ? (m) => setRecommendFor(m) : undefined}
                 />
               ))
             )}

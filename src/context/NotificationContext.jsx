@@ -5,6 +5,7 @@ import { useAuth } from './AuthContext'
 import { useToast } from './ToastContext'
 import {
   dismissMatchRecommendation,
+  listFriendFitProfiles,
   listFriendRequests,
   listFriends,
   listMatchRecommendations,
@@ -19,6 +20,7 @@ export function NotificationProvider({ children }) {
   const toast = useToast()
   const { t } = useTranslation()
   const [friends, setFriends] = useState([])
+  const [fitFriends, setFitFriends] = useState([])
   const [requests, setRequests] = useState([])
   const [recs, setRecs] = useState([])
   const [unread, setUnread] = useState(0)
@@ -27,19 +29,22 @@ export function NotificationProvider({ children }) {
   const refresh = useCallback(async () => {
     if (!user?.id) {
       setFriends([])
+      setFitFriends([])
       setRequests([])
       setRecs([])
       setUnread(0)
       return
     }
     try {
-      const [friendRows, requestRows, recRows, threads] = await Promise.all([
+      const [friendRows, fitRows, requestRows, recRows, threads] = await Promise.all([
         listFriends().catch(() => []),
+        listFriendFitProfiles().catch(() => []),
         listFriendRequests().catch(() => []),
         listMatchRecommendations().catch(() => []),
         listMyThreads().catch(() => []),
       ])
       setFriends(friendRows)
+      setFitFriends(fitRows)
       setRequests(requestRows)
       setRecs(recRows)
       setUnread(threads.reduce((n, th) => n + Number(th.unread_count || 0), 0))
@@ -134,6 +139,7 @@ export function NotificationProvider({ children }) {
   const value = useMemo(
     () => ({
       friends,
+      fitFriends,
       friendCount: friends.length,
       requests,
       recs,
@@ -144,7 +150,7 @@ export function NotificationProvider({ children }) {
       declineRequest,
       dismissRec,
     }),
-    [friends, requests, recs, unread, refresh, acceptRequest, declineRequest, dismissRec],
+    [friends, fitFriends, requests, recs, unread, refresh, acceptRequest, declineRequest, dismissRec],
   )
 
   return <NotificationContext.Provider value={value}>{children}</NotificationContext.Provider>
@@ -152,6 +158,7 @@ export function NotificationProvider({ children }) {
 
 const EMPTY = {
   friends: [],
+  fitFriends: [],
   friendCount: 0,
   requests: [],
   recs: [],

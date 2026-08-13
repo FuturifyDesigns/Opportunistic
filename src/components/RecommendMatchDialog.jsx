@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
-import { listFriends, recommendMatch } from '../lib/collabHub'
+import { recommendMatch } from '../lib/collabHub'
+import { friendsWhoFitListing } from '../lib/recommendFit'
+import { useNotifications } from '../context/NotificationContext'
 import { useToast } from '../context/ToastContext'
 import UserAvatar from './UserAvatar'
 import CensoredText from './CensoredText'
@@ -9,38 +11,30 @@ import CensoredText from './CensoredText'
 export default function RecommendMatchDialog({ open, match, kind, onClose }) {
   const { t } = useTranslation()
   const toast = useToast()
-  const [people, setPeople] = useState([])
+  const { fitFriends } = useNotifications()
   const [query, setQuery] = useState('')
   const [note, setNote] = useState('')
   const [picked, setPicked] = useState(null)
-  const [loading, setLoading] = useState(false)
   const [sending, setSending] = useState(false)
+
+  const people = useMemo(
+    () => (open && match ? friendsWhoFitListing(match, kind, fitFriends) : []),
+    [open, match, kind, fitFriends],
+  )
 
   useEffect(() => {
     if (!open) return undefined
     setQuery('')
     setNote('')
     setPicked(null)
-    let live = true
-    setLoading(true)
-    listFriends()
-      .then((friends) => {
-        if (!live) return
-        setPeople((friends || []).filter((row) => row?.user_id))
-      })
-      .finally(() => {
-        if (live) setLoading(false)
-      })
-    return () => {
-      live = false
-    }
-  }, [open])
+    return undefined
+  }, [open, match?.url])
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase()
     if (!q) return people
     return people.filter((p) =>
-      [p.full_name, p.headline, p.country].join(' ').toLowerCase().includes(q),
+      [p.full_name, p.headline, p.country, ...(p.matchedSkills || [])].join(' ').toLowerCase().includes(q),
     )
   }, [people, query])
 
@@ -57,7 +51,7 @@ export default function RecommendMatchDialog({ open, match, kind, onClose }) {
         location: match.location,
         source: match.source,
         deadline: match.deadline,
-        matchScore: match.match_score,
+        matchScore: picked.fit_score ?? match.match_score,
         note,
       })
       toast.success(t('recommend.sent', { name: picked.full_name || t('hub.dmFallback') }))
@@ -95,8 +89,7 @@ export default function RecommendMatchDialog({ open, match, kind, onClose }) {
           />
         </label>
         <div className="rec-people" role="listbox" aria-label={t('recommend.people')}>
-          {loading ? <p className="muted">{t('common.loading')}</p> : null}
-          {!loading && !visible.length ? <p className="muted">{t('recommend.empty')}</p> : null}
+          {!visible.length ? <p className="muted">{t('recommend.empty')}</p> : null}
           {visible.map((person) => (
             <button
               key={person.user_id}
@@ -111,11 +104,10 @@ export default function RecommendMatchDialog({ open, match, kind, onClose }) {
                 <strong>
                   <CensoredText text={person.full_name} />
                 </strong>
-                {person.headline ? (
-                  <em>
-                    <CensoredText text={person.headline} />
-                  </em>
-                ) : null}
+                <em>
+                  {t('recommend.fitMeta', { score: Math.round(person.fit_score || 0) })}
+                  {person.matchedSkills?.length ? ` · ${person.matchedSkills.slice(0, 2).join(', ')}` : ''}
+                </em>
               </span>
             </button>
           ))}

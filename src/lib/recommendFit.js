@@ -41,39 +41,58 @@ export function listingForRecommendation(rec) {
   )
 }
 
-/** Score a received recommendation against the current user's skills. */
-export function evaluateRecommendation(rec, profile, qualifications = [], skills = []) {
-  const summary = summarizeProfile(profile, qualifications, skills)
-  const listing = listingForRecommendation(rec)
-  const kind = rec?.kind === 'job' ? 'job' : 'scholarship'
+export function listingKind(kind) {
+  if (kind === 'job' || kind === 'jobs') return 'job'
+  return 'scholarship'
+}
+
+/** Minimum overall score plus a real skill/field signal before recommending to a friend. */
+export const FRIEND_FIT_MIN = 58
+
+export function evaluateListingAgainstSummary(match, kind, summary) {
+  const listing = listingForRecommendation(match)
+  const k = listingKind(kind || match?.kind)
   let evaled
 
-  if (kind === 'job') {
+  if (k === 'job') {
     evaled = evaluateJobListing(
       {
-        title: rec.title,
-        description: listing?.summary || rec.note || rec.title,
+        title: match?.title,
+        description: listing?.summary || match?.note || match?.title,
         tags: listing?.tags || [],
-        company: rec.company || '',
-        location: rec.location || listing?.location || '',
-        source: rec.source || listing?.source || '',
-        url: rec.url,
+        company: match?.company || '',
+        location: match?.location || listing?.location || '',
+        source: match?.source || listing?.source || '',
+        url: match?.url,
       },
       summary,
     )
   } else {
-    const program = findScholarshipProgram(rec)
+    const program = findScholarshipProgram(match)
     const item = program || {
-      title: rec.title,
-      source: rec.source || listing?.source,
-      url: rec.url,
-      focus: listing?.summary || listing?.focus || rec.title,
+      title: match?.title,
+      source: match?.source || listing?.source,
+      url: match?.url,
+      focus: listing?.summary || listing?.focus || match?.title,
       fields: listing?.tags?.length ? listing.tags : ['any'],
       regions: ['global'],
       countries: ['*'],
     }
     evaled = evaluateScholarship(item, summary, regionHints(summary.country || ''))
   }
+
+  const matched = evaled.scorecard?.matched || []
+  const fieldScore = Number(evaled.scorecard?.field?.score || 0)
+  const hasSignal = Boolean(evaled.hasSignal) || matched.length > 0 || fieldScore >= 45
+  return { ...evaled, hasSignal, matched }
+}
+
+/** Score a received recommendation against the current user's skills. */
+export function evaluateRecommendation(rec, profile, qualifications = [], skills = []) {
+  const summary = summarizeProfile(profile, qualifications, skills)
+  const listing = listingForRecommendation(rec)
+  const kind = rec?.kind === 'job' ? 'job' : 'scholarship'
+  const evaled = evaluateListingAgainstSummary(rec, kind, summary)
 
   return {
     id: rec.id,
@@ -96,6 +115,32 @@ export function evaluateRecommendation(rec, profile, qualifications = [], skills
     saved: false,
     dismissed: false,
   }
+}
+
+export function friendsWhoFitListing(match, kind, friends = []) {
+  if (!match?.title && !match?.url) return []
+  return (friends || [])
+    .map((friend) => {
+      const summary = summarizeProfile(
+        {
+          country: friend.country,
+          headline: friend.headline,
+          bio: friend.bio,
+          goal: friend.goal,
+        },
+        friend.qualifications || [],
+        friend.skills || [],
+      )
+      const evaled = evaluateListingAgainstSummary(match, kind, summary)
+      return {
+        ...friend,
+        fit_score: evaled.match_score,
+        hasSignal: evaled.hasSignal,
+        matchedSkills: evaled.matched || [],
+      }
+    })
+    .filter((friend) => friend.hasSignal && Number(friend.fit_score) >= FRIEND_FIT_MIN)
+    .sort((a, b) => b.fit_score - a.fit_score)
 }
 
 export async function ensureMatchFromRecommendation(userId, recMatch) {

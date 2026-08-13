@@ -193,6 +193,16 @@ export async function listFriends() {
   return data || []
 }
 
+export async function listFriendFitProfiles() {
+  const { data, error } = await supabase.rpc('list_friend_fit_profiles')
+  if (error) throw error
+  return (data || []).map((row) => ({
+    ...row,
+    skills: Array.isArray(row.skills) ? row.skills : [],
+    qualifications: Array.isArray(row.qualifications) ? row.qualifications : [],
+  }))
+}
+
 export async function listFriendRequests() {
   const { data, error } = await supabase.rpc('list_friend_requests')
   if (error) throw error
