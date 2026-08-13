@@ -8,6 +8,7 @@ import { useToast } from '../context/ToastContext'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
 import UserAvatar from '../components/UserAvatar'
+import CensoredText from '../components/CensoredText'
 import {
   createCollabPost,
   deactivateCollabPost,
@@ -52,6 +53,21 @@ function threadLabel(thread, t) {
   if (thread?.kind === 'dm') return thread.peer_name || t('hub.dmFallback')
   if (thread?.kind === 'skill') return thread.title || t('hub.skillRoom', { skill: thread.skill_key })
   return thread?.title || t('hub.conversation')
+}
+
+function PersonMeta({ headline, country, extra }) {
+  const bits = [country, extra].filter(Boolean)
+  return (
+    <p className="hub-peer-meta">
+      {headline ? (
+        <>
+          <CensoredText text={headline} />
+          {bits.length ? ' · ' : null}
+        </>
+      ) : null}
+      {bits.join(' · ')}
+    </p>
+  )
 }
 
 export default function Hub() {
@@ -323,7 +339,12 @@ export default function Hub() {
   async function onLeaveThread() {
     if (!activeThreadId || leaving) return
     const isRoom = activeThread?.kind === 'skill'
-    const ok = window.confirm(isRoom ? t('hub.leaveConfirmRoom') : t('hub.leaveConfirmDm'))
+    const ok = await toast.confirm({
+      title: isRoom ? t('hub.leaveRoom') : t('hub.deleteChat'),
+      message: isRoom ? t('hub.leaveConfirmRoom') : t('hub.leaveConfirmDm'),
+      confirmLabel: isRoom ? t('hub.leaveRoom') : t('hub.deleteChat'),
+      danger: !isRoom,
+    })
     if (!ok) return
     setLeaving(true)
     try {
@@ -454,7 +475,7 @@ export default function Hub() {
                         className={`chip${joined ? ' active' : ''}`}
                         onClick={() => void enterSkillRoom(skill)}
                       >
-                        {joined ? t('hub.openSkill', { skill }) : t('hub.joinSkill', { skill })}
+                        <CensoredText text={joined ? t('hub.openSkill', { skill }) : t('hub.joinSkill', { skill })} />
                       </button>
                     )
                   })}
@@ -474,18 +495,20 @@ export default function Hub() {
                       </Link>
                       <div>
                         <Link to={`/hub/u/${peer.user_id}`} className="hub-person-name">
-                          <strong>{peer.full_name}</strong>
+                          <strong>
+                            <CensoredText text={peer.full_name} />
+                          </strong>
                         </Link>
-                        <p className="hub-peer-meta">
-                          {[peer.headline, peer.country, peer.collab_intent && t(`hub.intent.${peer.collab_intent}`)]
-                            .filter(Boolean)
-                            .join(' · ')}
-                        </p>
+                        <PersonMeta
+                          headline={peer.headline}
+                          country={peer.country}
+                          extra={peer.collab_intent ? t(`hub.intent.${peer.collab_intent}`) : ''}
+                        />
                         {peer.shared_skills?.length ? (
                           <div className="hub-shared">
                             {peer.shared_skills.slice(0, 6).map((s) => (
                               <span key={s} className="profile-chip">
-                                {s}
+                                <CensoredText text={s} />
                               </span>
                             ))}
                             <span className="hub-overlap">
@@ -531,9 +554,11 @@ export default function Hub() {
                         </Link>
                         <div>
                           <Link to={`/hub/u/${req.user_id}`} className="hub-person-name">
-                            <strong>{req.full_name}</strong>
+                            <strong>
+                              <CensoredText text={req.full_name} />
+                            </strong>
                           </Link>
-                          <p className="hub-peer-meta">{[req.headline, req.country].filter(Boolean).join(' · ')}</p>
+                          <PersonMeta headline={req.headline} country={req.country} />
                         </div>
                       </div>
                       <div className="hub-peer-actions">
@@ -565,9 +590,11 @@ export default function Hub() {
                       </Link>
                       <div>
                         <Link to={`/hub/u/${friend.user_id}`} className="hub-person-name">
-                          <strong>{friend.full_name}</strong>
+                          <strong>
+                            <CensoredText text={friend.full_name} />
+                          </strong>
                         </Link>
-                        <p className="hub-peer-meta">{[friend.headline, friend.country].filter(Boolean).join(' · ')}</p>
+                        <PersonMeta headline={friend.headline} country={friend.country} />
                       </div>
                     </div>
                     <div className="hub-peer-actions">
@@ -658,10 +685,12 @@ export default function Hub() {
                             <UserAvatar url={post.author_avatar} name={post.author_name} size={44} />
                           </Link>
                           <div>
-                            <strong>{post.title}</strong>
+                            <strong>
+                              <CensoredText text={post.title} />
+                            </strong>
                             <p className="hub-peer-meta">
                               <Link to={`/hub/u/${post.user_id}`} className="hub-person-name">
-                                {post.author_name}
+                                <CensoredText text={post.author_name} />
                               </Link>
                               {post.author_country ? ` · ${post.author_country}` : ''}
                               {` · ${t(`hub.intent.${post.intent}`)}`}
@@ -687,12 +716,14 @@ export default function Hub() {
                           </button>
                         )}
                       </div>
-                      <p>{post.body}</p>
+                      <p>
+                        <CensoredText text={post.body} />
+                      </p>
                       {post.skills?.length ? (
                         <div className="hub-shared">
                           {post.skills.map((s) => (
                             <span key={s} className="profile-chip">
-                              {s}
+                              <CensoredText text={s} />
                             </span>
                           ))}
                         </div>
@@ -724,8 +755,12 @@ export default function Hub() {
                       size={44}
                     />
                     <span className="hub-thread-copy">
-                      <span className="hub-thread-title">{threadLabel(th, t)}</span>
-                      <span className="hub-thread-preview">{th.last_body || t('hub.noMessagesYet')}</span>
+                      <span className="hub-thread-title">
+                        <CensoredText text={threadLabel(th, t)} />
+                      </span>
+                      <span className="hub-thread-preview">
+                        {th.last_body ? <CensoredText text={th.last_body} /> : t('hub.noMessagesYet')}
+                      </span>
                     </span>
                     <span className="hub-thread-meta">
                       {formatWhen(th.last_at)}
@@ -755,10 +790,14 @@ export default function Hub() {
                       <div className="hub-chat-head-copy">
                         {activeThread?.kind === 'dm' && activeThread.peer_user_id ? (
                           <Link to={`/hub/u/${activeThread.peer_user_id}`} className="hub-person-name">
-                            <strong>{threadLabel(activeThread, t)}</strong>
+                            <strong>
+                              <CensoredText text={threadLabel(activeThread, t)} />
+                            </strong>
                           </Link>
                         ) : (
-                          <strong>{threadLabel(activeThread, t)}</strong>
+                          <strong>
+                            <CensoredText text={threadLabel(activeThread, t)} />
+                          </strong>
                         )}
                         <span className="muted">
                           {activeThread?.kind === 'skill' ? t('hub.skillRoomLive') : t('hub.dmLive')}
@@ -793,8 +832,14 @@ export default function Hub() {
                             )
                           ) : null}
                           <div className={`hub-msg ${mine ? 'mine' : 'theirs'}`}>
-                            {showName ? <span className="hub-msg-name">{person?.full_name || t('hub.dmFallback')}</span> : null}
-                            <p>{m.body}</p>
+                            {showName ? (
+                              <span className="hub-msg-name">
+                                <CensoredText text={person?.full_name || t('hub.dmFallback')} />
+                              </span>
+                            ) : null}
+                            <p>
+                              <CensoredText text={m.body} />
+                            </p>
                             <time>{formatWhen(m.created_at)}</time>
                           </div>
                         </div>

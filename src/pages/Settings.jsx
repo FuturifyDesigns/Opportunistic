@@ -62,7 +62,13 @@ export default function Settings() {
   }
 
   async function deleteAccount() {
-    if (!window.confirm(t('settings.deleteConfirm'))) return
+    const ok = await toast.confirm({
+      title: t('settings.deleteData'),
+      message: t('settings.deleteConfirm'),
+      confirmLabel: t('settings.deleteData'),
+      danger: true,
+    })
+    if (!ok) return
     setBusy(true)
     try {
       await Promise.all([

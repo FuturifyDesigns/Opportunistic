@@ -916,6 +916,12 @@ textarea:focus-visible {
 
 .btn-danger {
   background: var(--danger);
+  border-color: var(--danger);
+}
+
+.btn-danger:hover {
+  background: color-mix(in srgb, var(--danger) 86%, #000);
+  border-color: color-mix(in srgb, var(--danger) 86%, #000);
 }
 
 .hero {
@@ -2156,6 +2162,60 @@ sup {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 280;
+  display: grid;
+  place-items: center;
+  padding: max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right))
+    max(0.75rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
+  background: color-mix(in srgb, #0a0a0a 55%, transparent);
+  backdrop-filter: blur(6px);
+}
+
+.confirm-dialog {
+  width: min(26rem, 100%);
+  background: var(--bg-elevated, #fff);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 1.15rem 1.2rem 1.2rem;
+  box-shadow: 0 24px 60px rgba(10, 10, 10, 0.22);
+  animation: toast-in 0.22s ease-out;
+}
+
+.confirm-dialog .eyebrow {
+  margin: 0 0 0.2rem;
+}
+
+.confirm-dialog h2 {
+  margin: 0 0 0.45rem;
+  font-family: var(--display);
+  font-size: 1.35rem;
+  letter-spacing: -0.03em;
+}
+
+.confirm-dialog p:not(.eyebrow) {
+  margin: 0 0 1.1rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.censored-word {
+  display: inline-block;
+  filter: blur(0.38em);
+  user-select: none;
+  pointer-events: none;
+  vertical-align: baseline;
 }
 
 @media (max-width: 860px) {

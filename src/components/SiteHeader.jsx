@@ -6,6 +6,7 @@ import { useToast } from '../context/ToastContext'
 import { isAdminEmail } from '../lib/analytics'
 import GetStartedLogo from './GetStartedLogo'
 import LanguageSwitcher from './LanguageSwitcher'
+import CensoredText from './CensoredText'
 
 export default function SiteHeader() {
   const { user, profile, signOut } = useAuth()
@@ -112,7 +113,9 @@ export default function SiteHeader() {
 
                 {accountOpen ? (
                   <div className="account-menu-panel" role="menu">
-                    <p className="account-menu-label">{firstName}</p>
+                    <p className="account-menu-label">
+                      <CensoredText text={firstName} />
+                    </p>
                     <NavLink role="menuitem" to="/dashboard" onClick={close}>
                       {t('nav.dashboard')}
                     </NavLink>
@@ -146,7 +149,9 @@ export default function SiteHeader() {
               </div>
 
               <div className="account-links-mobile">
-                <p className="account-menu-label">{firstName}</p>
+                <p className="account-menu-label">
+                  <CensoredText text={firstName} />
+                </p>
                 <NavLink to="/dashboard" onClick={close}>
                   {t('nav.dashboard')}
                 </NavLink>

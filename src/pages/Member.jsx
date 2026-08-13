@@ -6,6 +6,7 @@ import { useToast } from '../context/ToastContext'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
 import UserAvatar from '../components/UserAvatar'
+import CensoredText from '../components/CensoredText'
 import {
   cancelFriendRequest,
   getCollabProfile,
@@ -60,7 +61,17 @@ export default function Member() {
 
   async function onFriendAction(kind) {
     if (!userId || busy) return
-    if (kind === 'unfriend' && !window.confirm(t('hub.unfriendConfirm'))) return
+    if (
+      kind === 'unfriend' &&
+      !(await toast.confirm({
+        title: t('hub.unfriend'),
+        message: t('hub.unfriendConfirm'),
+        confirmLabel: t('hub.unfriend'),
+        danger: true,
+      }))
+    ) {
+      return
+    }
     setBusy(true)
     try {
       let next = person?.friendship
@@ -115,8 +126,12 @@ export default function Member() {
               <UserAvatar url={person.avatar_url} name={person.full_name} size={88} />
               <div>
                 <p className="eyebrow">{t('hub.memberEyebrow')}</p>
-                <h1>{person.full_name}</h1>
-                <p className="muted">{person.headline || t('hub.memberNoHeadline')}</p>
+                <h1>
+                  <CensoredText text={person.full_name} />
+                </h1>
+                <p className="muted">
+                  {person.headline ? <CensoredText text={person.headline} /> : t('hub.memberNoHeadline')}
+                </p>
                 <div className="hub-shared">
                   {person.country ? <span className="profile-chip">{person.country}</span> : null}
                   {person.collab_intent ? (
@@ -125,12 +140,16 @@ export default function Member() {
                 </div>
               </div>
             </div>
-            {person.bio ? <p className="member-bio">{person.bio}</p> : null}
+            {person.bio ? (
+              <p className="member-bio">
+                <CensoredText text={person.bio} />
+              </p>
+            ) : null}
             {person.skills?.length ? (
               <div className="hub-shared">
                 {person.skills.map((s) => (
                   <span key={s} className="profile-chip">
-                    {s}
+                    <CensoredText text={s} />
                   </span>
                 ))}
               </div>

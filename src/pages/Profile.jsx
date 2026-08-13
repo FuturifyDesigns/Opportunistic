@@ -20,6 +20,7 @@ import SiteFooter from '../components/SiteFooter'
 import PageBackdrop from '../components/PageBackdrop'
 import SkillPicker from '../components/SkillPicker'
 import AvatarEditor from '../components/AvatarEditor'
+import CensoredText from '../components/CensoredText'
 import { normalizeSkillName, normalizeFieldName, suggestSkillsFromQualifications } from '../lib/skillCatalog'
 import { prefersReducedMotion } from '../lib/animations'
 import { removeAvatar, uploadAvatar } from '../lib/avatar'
@@ -316,9 +317,15 @@ export default function Profile() {
             </div>
             <div className="profile-identity-copy">
               <p className="eyebrow">{t('profile.eyebrow')}</p>
-              <h1>{form.full_name?.trim() || t('profile.title')}</h1>
+              <h1>
+                {form.full_name?.trim() ? <CensoredText text={form.full_name.trim()} /> : t('profile.title')}
+              </h1>
               <p className="profile-identity-headline">
-                {form.headline?.trim() || t('profile.headlinePlaceholder')}
+                {form.headline?.trim() ? (
+                  <CensoredText text={form.headline.trim()} />
+                ) : (
+                  t('profile.headlinePlaceholder')
+                )}
               </p>
               <div className="profile-meta-row">
                 <span className="profile-chip">{form.country}</span>
