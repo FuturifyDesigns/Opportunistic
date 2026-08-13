@@ -173,6 +173,7 @@
     "orEmailSignIn": "or sign in with email",
     "orEmailSignUp": "or sign up with email",
     "haveAccount": "Already have an account?",
+    "accountExistsSignIn": "That email already has an account. Please sign in.",
     "needAccount": "Need an account?",
     "agreePrefix": "By continuing you agree to our",
     "and": "and",

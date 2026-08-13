@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 // intentionalSignIn: password/OAuth on this tab only — ignore email-confirm sessions from other tabs
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -64,6 +64,26 @@ function validate(mode, { fullName, email, password, confirm }, t) {
   return errors
 }
 
+function isExistingAccountError(err) {
+  if (!err) return false
+  const code = String(err.code || err.error_code || err.name || '').toLowerCase()
+  const msg = String(err.message || err.error_description || err.msg || err).toLowerCase()
+  return (
+    code === 'user_already_exists' ||
+    code === 'email_exists' ||
+    code === 'identity_already_exists' ||
+    /already (been )?registered/.test(msg) ||
+    /user already exists/.test(msg) ||
+    /email.+already/.test(msg) ||
+    /already exists/.test(msg)
+  )
+}
+
+function signupUserAlreadyExists(data) {
+  const identities = data?.user?.identities
+  return Boolean(data?.user && Array.isArray(identities) && identities.length === 0)
+}
+
 function RequiredMark() {
   return (
     <span className="field-required" aria-hidden="true">
@@ -112,6 +132,24 @@ export default function Auth() {
   const [oauthBusy, setOauthBusy] = useState(false)
   const intentionalSignIn = useRef(false)
   const sawLoggedOut = useRef(false)
+  const pendingSignInNotice = useRef(null)
+
+  const switchToSignIn = useCallback(
+    (existingEmail = '') => {
+      if (existingEmail) setEmail(existingEmail)
+      setPassword('')
+      setConfirm('')
+      setFullName('')
+      setTouched({})
+      setMode('login')
+      setPhase('form')
+      const msg = t('auth.accountExistsSignIn')
+      setMessage(msg)
+      toast.info(msg)
+      navigate('/auth?mode=login', { replace: true })
+    },
+    [navigate, t, toast],
+  )
 
   const title = mode === 'signup' ? t('auth.createAccount') : t('auth.signIn')
   const errors = useMemo(
@@ -133,12 +171,16 @@ export default function Auth() {
       (typeof window !== 'undefined'
         ? new URLSearchParams(window.location.hash.replace(/^#/, '')).get('error_description')
         : null)
-    if (err) {
-      const msg = decodeURIComponent(err.replace(/\+/g, ' '))
-      setMessage(msg)
-      toast.error(msg)
+    if (!err) return
+    const msg = decodeURIComponent(String(err).replace(/\+/g, ' '))
+    const code = params.get('error_code') || params.get('error')
+    if (isExistingAccountError({ message: msg, code })) {
+      switchToSignIn()
+      return
     }
-  }, [params, toast])
+    setMessage(msg)
+    toast.error(msg)
+  }, [params, toast, switchToSignIn])
 
   useEffect(() => {
     function clearOauthBusy() {
@@ -159,6 +201,11 @@ export default function Auth() {
     if (loading) return
     if (!user) {
       sawLoggedOut.current = true
+      if (pendingSignInNotice.current != null) {
+        const existingEmail = pendingSignInNotice.current
+        pendingSignInNotice.current = null
+        switchToSignIn(typeof existingEmail === 'string' ? existingEmail : '')
+      }
       return
     }
 
@@ -181,10 +228,26 @@ export default function Auth() {
 
     try {
       if (oauthIntent) {
-        sessionStorage.removeItem('opp_oauth_intent')
         const createdAt = user.created_at ? Date.parse(user.created_at) : 0
+        const providers = user.app_metadata?.providers || []
         const isFreshAccount =
-          Number.isFinite(createdAt) && Date.now() - createdAt < 10 * 60 * 1000
+          Number.isFinite(createdAt) &&
+          Date.now() - createdAt < 10 * 60 * 1000 &&
+          !profile?.onboarding_complete &&
+          !providers.includes('email')
+        if (oauthIntent === 'signup' && !isFreshAccount) {
+          pendingSignInNotice.current = user.email || true
+          sawLoggedOut.current = true
+          intentionalSignIn.current = false
+          try {
+            sessionStorage.removeItem('opp_oauth_intent')
+          } catch {
+            /* ignore */
+          }
+          void supabase.auth.signOut()
+          return
+        }
+        sessionStorage.removeItem('opp_oauth_intent')
         toast.success(isFreshAccount ? t('auth.googleWelcomeNew') : t('auth.googleWelcomeBack'))
       }
     } catch {
@@ -195,7 +258,7 @@ export default function Auth() {
       return
     }
     navigate('/dashboard', { replace: true })
-  }, [user, profile, loading, navigate, toast, t])
+  }, [user, profile, loading, navigate, toast, t, switchToSignIn])
 
   useGSAP(
     () => {
@@ -325,6 +388,10 @@ export default function Auth() {
             emailRedirectTo: `${window.location.origin}/verified`,
           },
         })
+        if (isExistingAccountError(error) || signupUserAlreadyExists(data)) {
+          switchToSignIn(email.trim())
+          return
+        }
         if (error) throw error
         if (!data.session) {
           const msg = t('auth.checkEmail')
@@ -344,6 +411,10 @@ export default function Auth() {
         navigate('/dashboard')
       }
     } catch (err) {
+      if (mode === 'signup' && isExistingAccountError(err)) {
+        switchToSignIn(email.trim())
+        return
+      }
       const msg = err.message || t('auth.genericError')
       setMessage(msg)
       toast.error(msg)
@@ -378,6 +449,11 @@ export default function Auth() {
       })
       if (error) throw error
     } catch (err) {
+      if (mode === 'signup' && isExistingAccountError(err)) {
+        switchToSignIn()
+        setOauthBusy(false)
+        return
+      }
       const msg = err.message || t('auth.googleError')
       setMessage(msg)
       toast.error(msg)
