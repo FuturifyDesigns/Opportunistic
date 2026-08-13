@@ -6,10 +6,10 @@ function sourceKey(row) {
   return String(row.source || '').toLowerCase() + '|' + String(row.url || '').toLowerCase()
 }
 
-const WEEK_MS = 7 * 24 * 60 * 60 * 1000
+const DAY_MS = 24 * 60 * 60 * 1000
 
 /** How long between automatic web re-scans (countdown on the dashboard). */
-export const REFRESH_INTERVAL_MS = WEEK_MS
+export const REFRESH_INTERVAL_MS = DAY_MS
 
 function scheduleKey(userId) {
   return `opp_match_schedule_${userId}`
@@ -32,8 +32,8 @@ function applyGoalFocus(goal, scholarships, jobs) {
  * Rebuild matches from the live profile + web job feeds.
  * @param {string} userId
  * @param {{ reason?: 'scheduled' | 'profile' | 'initial' | 'manual' }} [options]
- * - scheduled/initial: advances the weekly auto-refresh countdown
- * - profile/manual: refreshes cards now but keeps the existing weekly schedule
+ * - scheduled/initial: advances the daily auto-refresh countdown
+ * - profile/manual: refreshes cards now but keeps the existing daily schedule
  */
 export async function runMatchingForUser(userId, options = {}) {
   if (!userId) throw new Error('Missing user')
@@ -194,7 +194,7 @@ export function getLastMatchMeta(userId) {
   }
 }
 
-/** Anchor for the weekly auto-scan clock (separate from last manual rematch). */
+/** Anchor for the daily auto-scan clock (separate from last manual rematch). */
 export function getScheduleAnchor(userId) {
   try {
     const scheduled = localStorage.getItem(scheduleKey(userId))
@@ -211,7 +211,7 @@ export function getScheduleAnchor(userId) {
   }
 }
 
-/** True when the weekly auto-scan is due (or never ran). */
+/** True when the daily auto-scan is due (or never ran). */
 export function shouldWeeklyRefresh(userId) {
   const next = getNextRefreshAt(userId)
   if (!next) return true
@@ -228,5 +228,5 @@ export function getNextRefreshAt(userId) {
   if (!anchor) return null
   const last = new Date(anchor).getTime()
   if (Number.isNaN(last)) return null
-  return last + WEEK_MS
+  return last + REFRESH_INTERVAL_MS
 }

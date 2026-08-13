@@ -40,7 +40,7 @@ export const SEO_ROUTES = [
     description:
       'See how Opportunistic works: build a profile, run the matchers, and get ranked scholarships and jobs with reasoning on every card.',
     heading: 'How Opportunistic matching works',
-    body: 'Profile data goes in, queries run against scholarship and job sources, and results come back scored with reasons. Matching refreshes when your profile changes and on a weekly schedule.',
+    body: 'Profile data goes in, queries run against scholarship and job sources, and results come back scored with reasons. Matching refreshes when your profile changes and on a daily schedule.',
     changefreq: 'monthly',
     priority: '0.8',
     index: true,
