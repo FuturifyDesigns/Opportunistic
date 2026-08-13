@@ -620,7 +620,8 @@
     "save": "Save",
     "saved": "Saved",
     "dismiss": "Dismiss",
-    "recommend": "Recommend"
+    "recommend": "Recommend",
+    "seeDetails": "See details"
   },
   "recommend": {
     "eyebrow": "Share a match",
@@ -636,7 +637,7 @@
     "sent": "Recommended to {{name}}.",
     "error": "Couldn’t send that recommendation. You can only recommend to friends.",
     "inboxTitle": "Recommended for you",
-    "inboxHint": "Matches people on Opportunistic thought you’d want to see.",
+    "inboxHint": "Scored against your skills — open one to see why it fits and how to apply.",
     "from": "{{name}} recommended this",
     "dismiss": "Dismiss",
     "dismissed": "Recommendation dismissed."
@@ -652,7 +653,8 @@
     "unread": "{{count}} unread chat messages",
     "accept": "Accept",
     "decline": "Decline",
-    "viewDash": "Open dashboard"
+    "viewDash": "Open dashboard",
+    "viewRec": "See match"
   },
   "skillPicker": {
     "suggestedFrom": "Suggested from: {{fields}}",

@@ -20,9 +20,8 @@ import MatchCard from '../components/MatchCard'
 import RecommendMatchDialog from '../components/RecommendMatchDialog'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
-import UserAvatar from '../components/UserAvatar'
-import CensoredText from '../components/CensoredText'
 import { useNotifications } from '../context/NotificationContext'
+import { evaluateRecommendation, ensureMatchFromRecommendation } from '../lib/recommendFit'
 
 gsap.registerPlugin(useGSAP)
 
@@ -43,6 +42,7 @@ export default function Dashboard() {
   const [lastAt, setLastAt] = useState(null)
   const [meta, setMeta] = useState(null)
   const [recommendFor, setRecommendFor] = useState(null)
+  const [fitRecs, setFitRecs] = useState([])
   // The countdown must not arm itself before we know when the last scan ran.
   const [scheduleReady, setScheduleReady] = useState(false)
   const listRef = useRef(null)
@@ -65,6 +65,28 @@ export default function Dashboard() {
 
   const showScholarships = goal !== 'jobs'
   const showJobs = goal !== 'scholarships'
+
+  useEffect(() => {
+    if (!user?.id || !recs.length) {
+      setFitRecs([])
+      return undefined
+    }
+    let live = true
+    Promise.all([
+      supabase.from('qualifications').select('*').eq('user_id', user.id),
+      supabase.from('skills').select('*').eq('user_id', user.id),
+    ]).then(([qualRes, skillRes]) => {
+      if (!live) return
+      setFitRecs(
+        recs.map((rec) =>
+          evaluateRecommendation(rec, profile, qualRes.data || [], skillRes.data || []),
+        ),
+      )
+    })
+    return () => {
+      live = false
+    }
+  }, [user?.id, recs, profile])
 
   const load = useCallback(async () => {
     if (!user?.id) return
@@ -199,6 +221,22 @@ export default function Dashboard() {
     try {
       await dismissRec(id)
       toast.info(t('recommend.dismissed'))
+    } catch (err) {
+      toast.error(err.message || t('common.toast.genericError'))
+    }
+  }
+
+  async function onSaveRec(recMatch) {
+    try {
+      const { kind, row } = await ensureMatchFromRecommendation(user.id, recMatch)
+      const nextSaved = !row.saved
+      const table = kind === 'job' ? 'job_matches' : 'scholarship_matches'
+      const { error } = await supabase.from(table).update({ saved: nextSaved }).eq('id', row.id)
+      if (error) throw error
+      trackEngage(nextSaved ? 'save' : 'unsave', { kind, matchId: row.id }, user?.id)
+      toast.success(nextSaved ? t('common.toast.matchSaved') : t('common.toast.matchUnsaved'))
+      setFitRecs((list) => list.map((item) => (item.recId === recMatch.recId ? { ...item, saved: nextSaved } : item)))
+      load()
     } catch (err) {
       toast.error(err.message || t('common.toast.genericError'))
     }
@@ -386,42 +424,27 @@ export default function Dashboard() {
 
         <div className="dashboard-layout dash-grid">
           <div className="match-list">
-            {recs.length ? (
-              <section className="dash-recs glass-panel">
+            {fitRecs.length ? (
+              <section className="dash-recs">
                 <div className="hub-panel-head">
                   <h2>{t('recommend.inboxTitle')}</h2>
                   <p>{t('recommend.inboxHint')}</p>
                 </div>
                 <ul className="dash-rec-list">
-                  {recs.map((rec) => (
-                    <li key={rec.id} className="dash-rec">
-                      <UserAvatar url={rec.from_avatar} name={rec.from_name} size={40} />
-                      <div>
-                        <p className="dash-rec-from">
-                          {t('recommend.from', { name: rec.from_name })}
-                        </p>
-                        <strong>
-                          <CensoredText text={rec.title} />
-                        </strong>
-                        <p className="muted">
-                          {[rec.company, rec.source, rec.kind === 'scholarship' ? t('dashboard.statScholarships') : t('dashboard.statJobs')]
-                            .filter(Boolean)
-                            .join(' · ')}
-                        </p>
-                        {rec.note ? (
-                          <p className="dash-rec-note">
-                            <CensoredText text={rec.note} />
-                          </p>
-                        ) : null}
-                      </div>
-                      <div className="dash-rec-actions">
-                        <a className="btn btn-sm" href={rec.url} target="_blank" rel="noreferrer noopener">
-                          {t('matchCard.openListing')}
-                        </a>
-                        <button type="button" className="btn btn-ghost btn-sm" onClick={() => void onDismissRec(rec.id)}>
-                          {t('recommend.dismiss')}
-                        </button>
-                      </div>
+                  {fitRecs.map((recMatch) => (
+                    <li key={recMatch.recId}>
+                      <MatchCard
+                        match={recMatch}
+                        kind={recMatch.kind === 'job' ? 'jobs' : 'scholarships'}
+                        country={profile?.country}
+                        recommendedBy={recMatch.from_name}
+                        recNote={recMatch.note}
+                        recAvatar={recMatch.from_avatar}
+                        showDetails
+                        onOpen={() => navigate(`/match/rec/${recMatch.recId}`)}
+                        onSave={() => void onSaveRec(recMatch)}
+                        onDismiss={() => void onDismissRec(recMatch.recId)}
+                      />
                     </li>
                   ))}
                 </ul>

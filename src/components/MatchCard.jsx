@@ -8,10 +8,24 @@ import { unpackReasoning } from '../lib/skillMatch'
 import { shortMatchReason } from '../lib/matchReason'
 import ListingImage, { DEFAULT_OPPORTUNITY_IMAGE } from './ListingImage'
 import SkillScorecard from './SkillScorecard'
+import UserAvatar from './UserAvatar'
+import CensoredText from './CensoredText'
 
 gsap.registerPlugin(useGSAP)
 
-export default function MatchCard({ match, kind, country = '', onSave, onDismiss, onOpen, onRecommend }) {
+export default function MatchCard({
+  match,
+  kind,
+  country = '',
+  onSave,
+  onDismiss,
+  onOpen,
+  onRecommend,
+  showDetails = false,
+  recommendedBy = '',
+  recNote = '',
+  recAvatar = '',
+}) {
   const { t, i18n } = useTranslation()
   const score = Math.round(Number(match.match_score) || 0)
   const ref = useRef(null)
@@ -80,7 +94,20 @@ export default function MatchCard({ match, kind, country = '', onSave, onDismiss
   })
 
   return (
-    <article ref={ref} className="match-card interactive">
+    <article ref={ref} className={`match-card interactive${recommendedBy ? ' rec-match-card' : ''}`}>
+      {recommendedBy ? (
+        <div className="match-rec-banner">
+          <UserAvatar url={recAvatar} name={recommendedBy} size={28} />
+          <div>
+            <p>{t('recommend.from', { name: recommendedBy })}</p>
+            {recNote ? (
+              <p className="match-rec-note">
+                <CensoredText text={recNote} />
+              </p>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
       <button
         type="button"
         className="match-card-hit"
@@ -114,6 +141,11 @@ export default function MatchCard({ match, kind, country = '', onSave, onDismiss
       </button>
 
       <div className="match-actions">
+        {showDetails && onOpen ? (
+          <button type="button" className="btn btn-sm" onClick={() => onOpen(match)}>
+            {t('matchCard.seeDetails')}
+          </button>
+        ) : null}
         <a className="btn btn-sm" href={match.url} target="_blank" rel="noreferrer noopener">
           {t('matchCard.openListing')}
         </a>

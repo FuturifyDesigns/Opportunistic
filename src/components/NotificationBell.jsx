@@ -107,8 +107,8 @@ export default function NotificationBell() {
                   {t('notify.recItem', { name: rec.from_name, title: rec.title })}
                 </p>
                 <div className="notify-item-actions">
-                  <NavLink className="btn btn-sm" to="/dashboard" onClick={() => setOpen(false)}>
-                    {t('notify.viewDash')}
+                  <NavLink className="btn btn-sm" to={`/match/rec/${rec.id}`} onClick={() => setOpen(false)}>
+                    {t('notify.viewRec')}
                   </NavLink>
                   <button type="button" className="btn btn-ghost btn-sm" onClick={() => void onDismissRec(rec.id)}>
                     {t('recommend.dismiss')}

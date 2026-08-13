@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
@@ -10,11 +10,19 @@ import { generateWinTips } from '../lib/tipEngine'
 import { unpackReasoning } from '../lib/skillMatch'
 import { explainMatch } from '../lib/matchReason'
 import { trackEngage } from '../lib/analytics'
+import { listMatchRecommendations } from '../lib/collabHub'
+import {
+  evaluateRecommendation,
+  ensureMatchFromRecommendation,
+  listingForRecommendation,
+} from '../lib/recommendFit'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
 import ListingImage, { DEFAULT_OPPORTUNITY_IMAGE } from '../components/ListingImage'
 import SkillScorecard from '../components/SkillScorecard'
 import RecommendMatchDialog from '../components/RecommendMatchDialog'
+import UserAvatar from '../components/UserAvatar'
+import CensoredText from '../components/CensoredText'
 
 function splitSentences(text = '') {
   return text
@@ -26,9 +34,10 @@ function splitSentences(text = '') {
 export default function MatchDetail() {
   const { kind, id } = useParams()
   const { user, profile } = useAuth()
-  const { friendCount } = useNotifications()
+  const { friendCount, dismissRec } = useNotifications()
   const toast = useToast()
   const { t, i18n } = useTranslation()
+  const navigate = useNavigate()
   const [match, setMatch] = useState(null)
   const [qualifications, setQualifications] = useState([])
   const [skills, setSkills] = useState([])
@@ -39,14 +48,33 @@ export default function MatchDetail() {
   const [tipNonce, setTipNonce] = useState(0)
   const [recommendOpen, setRecommendOpen] = useState(false)
 
-  const table = kind === 'job' ? 'job_matches' : kind === 'scholarship' ? 'scholarship_matches' : null
-  const listing = useMemo(() => getListingBySource(match?.source), [match?.source])
+  const recMode = kind === 'rec'
+  const matchKind = recMode
+    ? match?.kind === 'job'
+      ? 'job'
+      : 'scholarship'
+    : kind === 'job'
+      ? 'job'
+      : kind === 'scholarship'
+        ? 'scholarship'
+        : null
+  const table = recMode
+    ? null
+    : matchKind === 'job'
+      ? 'job_matches'
+      : matchKind === 'scholarship'
+        ? 'scholarship_matches'
+        : null
+  const listing = useMemo(
+    () => listingForRecommendation(match) || getListingBySource(match?.source),
+    [match],
+  )
 
   const winTips = useMemo(() => {
     if (!match) return { tips: [] }
     const { scorecard } = unpackReasoning(match.reasoning || '')
     return generateWinTips({
-      kind: kind === 'job' ? 'job' : 'scholarship',
+      kind: matchKind === 'job' ? 'job' : 'scholarship',
       profile,
       qualifications,
       skills,
@@ -55,7 +83,7 @@ export default function MatchDetail() {
       scorecard,
       count: 6,
     })
-  }, [match, profile, qualifications, skills, listing, kind, tipNonce, i18n.language])
+  }, [match, profile, qualifications, skills, listing, matchKind, tipNonce, i18n.language])
 
   useEffect(() => {
     document.title = match?.title ? `${match.title} — Opportunistic` : t('match.metaTitle')
@@ -69,13 +97,38 @@ export default function MatchDetail() {
     setActiveImage(null)
     setTipNonce(0)
 
-    if (!table) {
-      setError(t('match.unknownType'))
+    if (!user?.id || !id) {
+      setError(t('match.missingRef'))
       setNotFound(true)
       return undefined
     }
-    if (!user?.id || !id) {
-      setError(t('match.missingRef'))
+
+    if (kind === 'rec') {
+      Promise.all([
+        listMatchRecommendations().catch(() => []),
+        supabase.from('qualifications').select('*').eq('user_id', user.id),
+        supabase.from('skills').select('*').eq('user_id', user.id),
+      ]).then(([recRows, qualRes, skillRes]) => {
+        if (cancelled) return
+        const rec = (recRows || []).find((row) => String(row.id) === String(id))
+        if (!rec) {
+          setNotFound(true)
+          setError(t('match.gone'))
+          return
+        }
+        const quals = qualRes.data || []
+        const sk = skillRes.data || []
+        setQualifications(quals)
+        setSkills(sk)
+        setMatch(evaluateRecommendation(rec, profile, quals, sk))
+      })
+      return () => {
+        cancelled = true
+      }
+    }
+
+    if (!table) {
+      setError(t('match.unknownType'))
       setNotFound(true)
       return undefined
     }
@@ -104,28 +157,63 @@ export default function MatchDetail() {
     return () => {
       cancelled = true
     }
-  }, [table, id, user?.id, t])
+  }, [kind, table, id, user?.id, t, profile])
 
   async function toggle(field) {
-    if (!match || !table || busy) return
+    if (!match || busy) return
+    if (recMode && field === 'dismissed') {
+      setBusy(true)
+      try {
+        await dismissRec(match.recId)
+        toast.info(t('recommend.dismissed'))
+        navigate('/dashboard', { replace: true })
+      } catch (err) {
+        toast.error(err.message || t('match.updateFailed'))
+      } finally {
+        setBusy(false)
+      }
+      return
+    }
+
     setBusy(true)
     try {
-      const nextValue = !match[field]
-      const next = { [field]: nextValue }
+      let row = match
+      let persistTable = table
+      let persistKind = matchKind
+      if (recMode) {
+        const ensured = await ensureMatchFromRecommendation(user.id, match)
+        persistTable = ensured.kind === 'job' ? 'job_matches' : 'scholarship_matches'
+        persistKind = ensured.kind
+        row = { ...match, ...ensured.row, recId: match.recId, recommended: true }
+      }
+      if (!persistTable) return
+
+      const nextValue = !row[field]
       const { data, error: err } = await supabase
-        .from(table)
-        .update(next)
-        .eq('id', match.id)
+        .from(persistTable)
+        .update({ [field]: nextValue })
+        .eq('id', row.id)
         .eq('user_id', user.id)
         .select()
         .single()
       if (err) throw err
-      if (data) setMatch(data)
+      if (data) {
+        setMatch({
+          ...data,
+          recId: match.recId,
+          recommended: recMode,
+          from_name: match.from_name,
+          from_avatar: match.from_avatar,
+          note: match.note,
+          kind: persistKind,
+          location: match.location || data.location,
+        })
+      }
       if (field === 'saved') {
-        trackEngage(nextValue ? 'save' : 'unsave', { kind, matchId: match.id }, user?.id)
+        trackEngage(nextValue ? 'save' : 'unsave', { kind: persistKind, matchId: row.id }, user?.id)
         toast.success(nextValue ? t('match.savedToast') : t('match.unsavedToast'))
       } else if (field === 'dismissed') {
-        trackEngage(nextValue ? 'dismiss' : 'restore', { kind, matchId: match.id }, user?.id)
+        trackEngage(nextValue ? 'dismiss' : 'restore', { kind: persistKind, matchId: row.id }, user?.id)
         toast.info(nextValue ? t('match.dismissedToast') : t('match.restoredToast'))
       }
     } catch (err) {
@@ -141,7 +229,7 @@ export default function MatchDetail() {
   const cover = listing?.cover || gallery[0] || DEFAULT_OPPORTUNITY_IMAGE
   const { text: storedReason, scorecard } = unpackReasoning(match?.reasoning || '')
   const liveReason = explainMatch({
-    kind: kind === 'job' ? 'job' : 'scholarship',
+    kind: matchKind === 'job' ? 'job' : 'scholarship',
     title: match?.title,
     company: match?.company,
     location: match?.location || listing?.location || scorecard?.location?.label,
@@ -184,6 +272,19 @@ export default function MatchDetail() {
 
         {match ? (
           <article className="detail detail-rich">
+            {recMode && match.from_name ? (
+              <div className="detail-rec-banner">
+                <UserAvatar url={match.from_avatar} name={match.from_name} size={40} />
+                <div>
+                  <p>{t('recommend.from', { name: match.from_name })}</p>
+                  {match.note ? (
+                    <p className="detail-rec-note">
+                      <CensoredText text={match.note} />
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
             <div className="detail-hero">
               <ListingImage
                 src={cover}
@@ -192,7 +293,7 @@ export default function MatchDetail() {
                 onClick={() => setActiveImage(cover)}
               />
               <div className="detail-hero-meta">
-                <p className="eyebrow">{match.source || kind}</p>
+                <p className="eyebrow">{match.source || matchKind}</p>
                 <h1>{match.title}</h1>
                 {match.company ? <p className="muted">{match.company}</p> : null}
                 <div className="detail-badges">
@@ -362,7 +463,7 @@ export default function MatchDetail() {
                 {match.saved ? t('match.unsave') : t('match.save')}
               </button>
               <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => toggle('dismissed')}>
-                {match.dismissed ? t('match.restore') : t('match.dismiss')}
+                {recMode ? t('recommend.dismiss') : match.dismissed ? t('match.restore') : t('match.dismiss')}
               </button>
               {friendCount ? (
                 <button type="button" className="btn btn-ghost" onClick={() => setRecommendOpen(true)}>
@@ -383,7 +484,7 @@ export default function MatchDetail() {
       <RecommendMatchDialog
         open={recommendOpen}
         match={match}
-        kind={kind}
+        kind={matchKind}
         onClose={() => setRecommendOpen(false)}
       />
     </div>
