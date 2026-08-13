@@ -1,12 +1,30 @@
-export default function UserAvatar({ url, name = '', size = 40, className = '' }) {
-  const initial = String(name || '?')
+import { usePresenceFor } from '../context/PresenceContext'
+
+function initials(name) {
+  const parts = String(name || '')
     .trim()
-    .slice(0, 1)
-    .toUpperCase() || '?'
+    .split(/\s+/)
+    .filter(Boolean)
+  if (!parts.length) return '?'
+  return parts
+    .slice(0, 2)
+    .map((p) => p[0])
+    .join('')
+    .toUpperCase()
+}
+
+export default function UserAvatar({ url, name = '', size = 40, className = '', presenceUserId, lastSeenAt, showPresence = false }) {
+  const { online } = usePresenceFor(showPresence ? presenceUserId : null, lastSeenAt)
+  const showDot = Boolean(showPresence && presenceUserId)
 
   return (
-    <span className={`user-avatar ${className}`.trim()} style={{ width: size, height: size }}>
-      {url ? <img src={url} alt="" /> : <span className="user-avatar-fallback">{initial}</span>}
+    <span className={`user-avatar-wrap ${className}`.trim()} style={{ width: size, height: size }}>
+      <span className="user-avatar" style={{ width: size, height: size }} aria-hidden={!url}>
+        {url ? <img src={url} alt="" /> : initials(name)}
+      </span>
+      {showDot ? (
+        <span className={`user-presence-dot ${online ? 'online' : 'offline'}`} aria-hidden />
+      ) : null}
     </span>
   )
 }

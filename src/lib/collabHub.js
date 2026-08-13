@@ -20,6 +20,12 @@ export async function listCollabPeers(limit = 40) {
   return data || []
 }
 
+export async function listOpportunisticMembers(limit = 80) {
+  const { data, error } = await supabase.rpc('list_opportunistic_members', { limit_count: limit })
+  if (error) throw error
+  return data || []
+}
+
 export async function listCollabPosts(limit = 50) {
   const { data, error } = await supabase.rpc('list_collab_posts', { limit_count: limit })
   if (error) throw error
@@ -122,6 +128,21 @@ export async function markThreadRead(threadId) {
 export async function leaveThread(threadId) {
   const { error } = await supabase.rpc('leave_collab_thread', { p_thread_id: threadId })
   if (error) throw error
+}
+
+export function subscribeCollabPosts(onChange) {
+  const channel = supabase
+    .channel('collab-posts-live')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'collab_posts' },
+      (payload) => onChange?.(payload),
+    )
+    .subscribe()
+
+  return () => {
+    supabase.removeChannel(channel)
+  }
 }
 
 export function subscribeThreadMessages(threadId, onInsert) {

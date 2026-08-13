@@ -7916,6 +7916,8 @@ textarea {
 
 .hub-tabs {
   align-self: start;
+  flex-wrap: wrap;
+  overflow: visible;
 }
 
 .hub-loading {
@@ -8082,6 +8084,12 @@ textarea {
   min-width: 0;
 }
 
+.user-avatar-wrap {
+  position: relative;
+  display: inline-grid;
+  flex: 0 0 auto;
+}
+
 .user-avatar {
   display: inline-grid;
   place-items: center;
@@ -8093,6 +8101,51 @@ textarea {
   font-family: var(--display);
   font-weight: 700;
   line-height: 1;
+}
+
+.user-presence-dot {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  border: 2px solid var(--bg-elevated, #fff);
+  box-sizing: border-box;
+}
+
+.user-presence-dot.online {
+  background: #22c55e;
+}
+
+.user-presence-dot.offline {
+  background: #9ca3af;
+}
+
+.presence-status {
+  display: block;
+  margin: 0.12rem 0 0.2rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.presence-status.is-online {
+  color: #16a34a;
+}
+
+.presence-status.is-offline {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.hub-people-search {
+  display: block;
+  margin: 0 0 1rem;
+}
+
+.hub-people-search input {
+  width: 100%;
+  max-width: 28rem;
 }
 
 .user-avatar img {

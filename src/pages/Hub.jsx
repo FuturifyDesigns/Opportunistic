@@ -4,12 +4,15 @@ import { useTranslation } from 'react-i18next'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { useAuth } from '../context/AuthContext'
+import { usePresence } from '../context/PresenceContext'
 import { useToast } from '../context/ToastContext'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
 import UserAvatar from '../components/UserAvatar'
+import PresenceStatus from '../components/PresenceStatus'
 import CensoredText from '../components/CensoredText'
 import {
+  cancelFriendRequest,
   createCollabPost,
   deactivateCollabPost,
   joinSkillRoom,
@@ -19,6 +22,7 @@ import {
   listFriendRequests,
   listFriends,
   listMyThreads,
+  listOpportunisticMembers,
   listThreadPeople,
   loadMessages,
   loadMySkills,
@@ -28,6 +32,7 @@ import {
   sendMessage,
   setOpenToCollab,
   startDm,
+  subscribeCollabPosts,
   subscribeThreadMessages,
 } from '../lib/collabHub'
 
@@ -72,17 +77,20 @@ function PersonMeta({ headline, country, extra }) {
 
 export default function Hub() {
   const { user, profile, refreshProfile } = useAuth()
+  const { isOnline, seedLastSeen } = usePresence()
   const toast = useToast()
   const { t } = useTranslation()
   const location = useLocation()
   const navigate = useNavigate()
   const root = useRef(null)
 
-  const [tab, setTab] = useState(location.state?.tab || 'peers')
+  const [tab, setTab] = useState(location.state?.tab || 'people')
   const [open, setOpen] = useState(Boolean(profile?.open_to_collab))
   const [intent, setIntent] = useState(profile?.collab_intent || 'collaborate')
   const [busyOptIn, setBusyOptIn] = useState(false)
 
+  const [people, setPeople] = useState([])
+  const [peopleQuery, setPeopleQuery] = useState('')
   const [peers, setPeers] = useState([])
   const [posts, setPosts] = useState([])
   const [threads, setThreads] = useState([])
@@ -121,7 +129,8 @@ export default function Hub() {
     if (!user?.id) return
     setLoading(true)
     try {
-      const [peerRows, postRows, threadRows, skills, friendRows, requestRows] = await Promise.all([
+      const [memberRows, peerRows, postRows, threadRows, skills, friendRows, requestRows] = await Promise.all([
+        listOpportunisticMembers(),
         listCollabPeers(),
         listCollabPosts(),
         listMyThreads(),
@@ -129,23 +138,52 @@ export default function Hub() {
         listFriends(),
         listFriendRequests(),
       ])
+      setPeople(memberRows)
       setPeers(peerRows)
       setPosts(postRows)
       setThreads(threadRows)
       setMySkills(skills)
       setFriends(friendRows)
       setRequests(requestRows)
+      seedLastSeen([
+        ...memberRows,
+        ...peerRows,
+        ...friendRows,
+        ...requestRows,
+        ...threadRows,
+      ])
     } catch (err) {
       console.error(err)
       toast.error(err.message || t('common.toast.loadFailed'))
     } finally {
       setLoading(false)
     }
-  }, [user?.id, toast, t])
+  }, [user?.id, toast, t, seedLastSeen])
 
   useEffect(() => {
     void refresh()
   }, [refresh])
+
+  const refreshPosts = useCallback(async () => {
+    try {
+      setPosts(await listCollabPosts())
+    } catch (err) {
+      console.error(err)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!user?.id) return undefined
+    let timer = null
+    const unsub = subscribeCollabPosts(() => {
+      window.clearTimeout(timer)
+      timer = window.setTimeout(() => void refreshPosts(), 120)
+    })
+    return () => {
+      window.clearTimeout(timer)
+      unsub()
+    }
+  }, [user?.id, refreshPosts])
 
   useGSAP(
     () => {
@@ -174,6 +212,28 @@ export default function Hub() {
     return keys
   }, [threads])
 
+  const onlineMemberCount = useMemo(
+    () => people.filter((p) => isOnline(p.user_id)).length,
+    [people, isOnline],
+  )
+
+  const visiblePeople = useMemo(() => {
+    const q = peopleQuery.trim().toLowerCase()
+    const rows = q
+      ? people.filter((p) =>
+          [p.full_name, p.headline, p.country, ...(p.skills || [])].join(' ').toLowerCase().includes(q),
+        )
+      : people
+    return [...rows].sort((a, b) => {
+      const ao = isOnline(a.user_id) ? 1 : 0
+      const bo = isOnline(b.user_id) ? 1 : 0
+      if (ao !== bo) return bo - ao
+      const at = new Date(a.last_seen_at || 0).getTime()
+      const bt = new Date(b.last_seen_at || 0).getTime()
+      return bt - at
+    })
+  }, [people, peopleQuery, isOnline])
+
   const openThread = useCallback(
     async (threadId) => {
       if (!threadId) return
@@ -186,6 +246,7 @@ export default function Hub() {
         const map = {}
         for (const p of people) map[p.user_id] = p
         setPeopleById(map)
+        seedLastSeen(people)
         await markThreadRead(threadId)
         setThreads((prev) =>
           prev.map((th) => (th.thread_id === threadId ? { ...th, unread_count: 0 } : th)),
@@ -196,7 +257,7 @@ export default function Hub() {
         setChatBusy(false)
       }
     },
-    [toast, t],
+    [toast, t, seedLastSeen],
   )
 
   useEffect(() => {
@@ -326,6 +387,15 @@ export default function Hub() {
     }
   }
 
+  async function onCancelRequest(userId) {
+    try {
+      await cancelFriendRequest(userId)
+      await refresh()
+    } catch (err) {
+      toast.error(err.message || t('common.toast.genericError'))
+    }
+  }
+
   async function onRespondRequest(userId, accept) {
     try {
       await respondFriendRequest(userId, accept)
@@ -422,12 +492,12 @@ export default function Hub() {
           </div>
           <div className="hub-hero-side">
             <div className="hub-stat">
-              <strong>{peers.length}</strong>
-              <span>{t('hub.statPeers')}</span>
+              <strong>{people.length}</strong>
+              <span>{t('hub.statPeople')}</span>
             </div>
             <div className="hub-stat">
-              <strong>{posts.length}</strong>
-              <span>{t('hub.statPosts')}</span>
+              <strong>{onlineMemberCount}</strong>
+              <span>{t('hub.statOnline')}</span>
             </div>
             <div className="hub-stat">
               <strong>{threads.reduce((n, th) => n + Number(th.unread_count || 0), 0)}</strong>
@@ -437,6 +507,10 @@ export default function Hub() {
         </section>
 
         <div className="segmented hub-tabs" role="tablist">
+          <button type="button" className={tab === 'people' ? 'active' : ''} onClick={() => setTab('people')}>
+            {t('hub.tabPeople')}
+            {people.length ? ` (${people.length})` : ''}
+          </button>
           <button type="button" className={tab === 'peers' ? 'active' : ''} onClick={() => setTab('peers')}>
             {t('hub.tabPeers')}
           </button>
@@ -446,6 +520,7 @@ export default function Hub() {
           </button>
           <button type="button" className={tab === 'board' ? 'active' : ''} onClick={() => setTab('board')}>
             {t('hub.tabBoard')}
+            {posts.length ? ` (${posts.length})` : ''}
           </button>
           <button type="button" className={tab === 'chats' ? 'active' : ''} onClick={() => setTab('chats')}>
             {t('hub.tabChats')}
@@ -453,6 +528,95 @@ export default function Hub() {
         </div>
 
         {loading ? <p className="muted hub-loading">{t('common.loading')}</p> : null}
+
+        {!loading && tab === 'people' ? (
+          <section className="hub-panel glass-panel">
+            <div className="hub-panel-head">
+              <h2>{t('hub.peopleTitle')}</h2>
+              <p>{t('hub.peopleHint')}</p>
+            </div>
+            <label className="hub-people-search">
+              <input
+                value={peopleQuery}
+                onChange={(e) => setPeopleQuery(e.target.value)}
+                placeholder={t('hub.peopleSearchPh')}
+                aria-label={t('hub.peopleSearch')}
+              />
+            </label>
+            {!visiblePeople.length ? (
+              <p className="muted">{people.length ? t('hub.peopleSearchEmpty') : t('hub.peopleEmpty')}</p>
+            ) : (
+              <ul className="hub-peer-list">
+                {visiblePeople.map((person) => (
+                  <li key={person.user_id} className="hub-peer">
+                    <div className="hub-peer-main">
+                      <Link to={`/hub/u/${person.user_id}`} className="hub-person-link">
+                        <UserAvatar
+                          url={person.avatar_url}
+                          name={person.full_name}
+                          size={44}
+                          showPresence
+                          presenceUserId={person.user_id}
+                          lastSeenAt={person.last_seen_at}
+                        />
+                      </Link>
+                      <div>
+                        <Link to={`/hub/u/${person.user_id}`} className="hub-person-name">
+                          <strong>
+                            <CensoredText text={person.full_name} />
+                          </strong>
+                        </Link>
+                        <PresenceStatus userId={person.user_id} lastSeenAt={person.last_seen_at} />
+                        <PersonMeta
+                          headline={person.headline}
+                          country={person.country}
+                          extra={person.collab_intent ? t(`hub.intent.${person.collab_intent}`) : ''}
+                        />
+                        {person.skills?.length ? (
+                          <div className="hub-shared">
+                            {person.skills.slice(0, 6).map((s) => (
+                              <span key={s} className="profile-chip">
+                                <CensoredText text={s} />
+                              </span>
+                            ))}
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>
+                    <div className="hub-peer-actions">
+                      <Link className="btn btn-ghost btn-sm" to={`/hub/u/${person.user_id}`}>
+                        {t('hub.viewProfile')}
+                      </Link>
+                      {person.friendship === 'none' ? (
+                        <button type="button" className="btn btn-ghost btn-sm" onClick={() => void onAddFriend(person.user_id)}>
+                          {t('hub.addFriend')}
+                        </button>
+                      ) : null}
+                      {person.friendship === 'outgoing' ? (
+                        <button type="button" className="btn btn-ghost btn-sm" onClick={() => void onCancelRequest(person.user_id)}>
+                          {t('hub.cancelRequest')}
+                        </button>
+                      ) : null}
+                      {person.friendship === 'incoming' ? (
+                        <>
+                          <button type="button" className="btn btn-sm" onClick={() => void onRespondRequest(person.user_id, true)}>
+                            {t('hub.acceptFriend')}
+                          </button>
+                          <button type="button" className="btn btn-ghost btn-sm" onClick={() => void onRespondRequest(person.user_id, false)}>
+                            {t('hub.declineFriend')}
+                          </button>
+                        </>
+                      ) : null}
+                      <button type="button" className="btn btn-sm" onClick={() => void messagePeer(person.user_id)}>
+                        {t('hub.message')}
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        ) : null}
 
         {!loading && tab === 'peers' ? (
           <section className="hub-panel glass-panel">
@@ -491,7 +655,14 @@ export default function Hub() {
                   <li key={peer.user_id} className="hub-peer">
                     <div className="hub-peer-main">
                       <Link to={`/hub/u/${peer.user_id}`} className="hub-person-link">
-                        <UserAvatar url={peer.avatar_url} name={peer.full_name} size={44} />
+                        <UserAvatar
+                          url={peer.avatar_url}
+                          name={peer.full_name}
+                          size={44}
+                          showPresence
+                          presenceUserId={peer.user_id}
+                          lastSeenAt={peer.last_seen_at}
+                        />
                       </Link>
                       <div>
                         <Link to={`/hub/u/${peer.user_id}`} className="hub-person-name">
@@ -499,6 +670,7 @@ export default function Hub() {
                             <CensoredText text={peer.full_name} />
                           </strong>
                         </Link>
+                        <PresenceStatus userId={peer.user_id} lastSeenAt={peer.last_seen_at} />
                         <PersonMeta
                           headline={peer.headline}
                           country={peer.country}
@@ -550,7 +722,14 @@ export default function Hub() {
                     <li key={req.user_id} className="hub-peer">
                       <div className="hub-peer-main">
                         <Link to={`/hub/u/${req.user_id}`} className="hub-person-link">
-                          <UserAvatar url={req.avatar_url} name={req.full_name} size={44} />
+                          <UserAvatar
+                            url={req.avatar_url}
+                            name={req.full_name}
+                            size={44}
+                            showPresence
+                            presenceUserId={req.user_id}
+                            lastSeenAt={req.last_seen_at}
+                          />
                         </Link>
                         <div>
                           <Link to={`/hub/u/${req.user_id}`} className="hub-person-name">
@@ -558,6 +737,7 @@ export default function Hub() {
                               <CensoredText text={req.full_name} />
                             </strong>
                           </Link>
+                          <PresenceStatus userId={req.user_id} lastSeenAt={req.last_seen_at} />
                           <PersonMeta headline={req.headline} country={req.country} />
                         </div>
                       </div>
@@ -586,7 +766,14 @@ export default function Hub() {
                   <li key={friend.user_id} className="hub-peer">
                     <div className="hub-peer-main">
                       <Link to={`/hub/u/${friend.user_id}`} className="hub-person-link">
-                        <UserAvatar url={friend.avatar_url} name={friend.full_name} size={44} />
+                        <UserAvatar
+                          url={friend.avatar_url}
+                          name={friend.full_name}
+                          size={44}
+                          showPresence
+                          presenceUserId={friend.user_id}
+                          lastSeenAt={friend.last_seen_at}
+                        />
                       </Link>
                       <div>
                         <Link to={`/hub/u/${friend.user_id}`} className="hub-person-name">
@@ -594,6 +781,7 @@ export default function Hub() {
                             <CensoredText text={friend.full_name} />
                           </strong>
                         </Link>
+                        <PresenceStatus userId={friend.user_id} lastSeenAt={friend.last_seen_at} />
                         <PersonMeta headline={friend.headline} country={friend.country} />
                       </div>
                     </div>
@@ -682,7 +870,13 @@ export default function Hub() {
                       <div className="hub-post-top">
                         <div className="hub-post-author">
                           <Link to={`/hub/u/${post.user_id}`} className="hub-person-link">
-                            <UserAvatar url={post.author_avatar} name={post.author_name} size={44} />
+                            <UserAvatar
+                              url={post.author_avatar}
+                              name={post.author_name}
+                              size={44}
+                              showPresence
+                              presenceUserId={post.user_id}
+                            />
                           </Link>
                           <div>
                             <strong>
@@ -753,6 +947,9 @@ export default function Hub() {
                       url={th.kind === 'dm' ? th.peer_avatar : null}
                       name={th.kind === 'dm' ? th.peer_name : threadLabel(th, t)}
                       size={44}
+                      showPresence={th.kind === 'dm'}
+                      presenceUserId={th.peer_user_id}
+                      lastSeenAt={th.peer_last_seen}
                     />
                     <span className="hub-thread-copy">
                       <span className="hub-thread-title">
@@ -782,7 +979,14 @@ export default function Hub() {
                     <div className="hub-chat-head-person">
                       {activeThread?.kind === 'dm' && activeThread.peer_user_id ? (
                         <Link to={`/hub/u/${activeThread.peer_user_id}`} className="hub-person-link">
-                          <UserAvatar url={activeThread.peer_avatar} name={activeThread.peer_name} size={40} />
+                          <UserAvatar
+                            url={activeThread.peer_avatar}
+                            name={activeThread.peer_name}
+                            size={40}
+                            showPresence
+                            presenceUserId={activeThread.peer_user_id}
+                            lastSeenAt={activeThread.peer_last_seen}
+                          />
                         </Link>
                       ) : (
                         <UserAvatar name={threadLabel(activeThread, t)} size={40} />
@@ -799,9 +1003,11 @@ export default function Hub() {
                             <CensoredText text={threadLabel(activeThread, t)} />
                           </strong>
                         )}
-                        <span className="muted">
-                          {activeThread?.kind === 'skill' ? t('hub.skillRoomLive') : t('hub.dmLive')}
-                        </span>
+                        {activeThread?.kind === 'dm' && activeThread.peer_user_id ? (
+                          <PresenceStatus userId={activeThread.peer_user_id} lastSeenAt={activeThread.peer_last_seen} />
+                        ) : (
+                          <span className="muted">{t('hub.skillRoomLive')}</span>
+                        )}
                       </div>
                     </div>
                     <button
@@ -825,7 +1031,14 @@ export default function Hub() {
                           {!mine ? (
                             person?.user_id ? (
                               <Link to={`/hub/u/${person.user_id}`} className="hub-person-link">
-                                <UserAvatar url={person.avatar_url} name={person.full_name} size={32} />
+                                <UserAvatar
+                                  url={person.avatar_url}
+                                  name={person.full_name}
+                                  size={32}
+                                  showPresence
+                                  presenceUserId={person.user_id}
+                                  lastSeenAt={person.last_seen_at}
+                                />
                               </Link>
                             ) : (
                               <UserAvatar url={activeThread?.peer_avatar} name={activeThread?.peer_name} size={32} />

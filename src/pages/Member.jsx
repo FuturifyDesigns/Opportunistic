@@ -6,6 +6,7 @@ import { useToast } from '../context/ToastContext'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
 import UserAvatar from '../components/UserAvatar'
+import PresenceStatus from '../components/PresenceStatus'
 import CensoredText from '../components/CensoredText'
 import {
   cancelFriendRequest,
@@ -123,12 +124,20 @@ export default function Member() {
         {!loading && person ? (
           <section className="hub-panel glass-panel member-card">
             <div className="member-identity">
-              <UserAvatar url={person.avatar_url} name={person.full_name} size={88} />
+              <UserAvatar
+                url={person.avatar_url}
+                name={person.full_name}
+                size={88}
+                showPresence
+                presenceUserId={person.user_id}
+                lastSeenAt={person.last_seen_at}
+              />
               <div>
                 <p className="eyebrow">{t('hub.memberEyebrow')}</p>
                 <h1>
                   <CensoredText text={person.full_name} />
                 </h1>
+                <PresenceStatus userId={person.user_id} lastSeenAt={person.last_seen_at} />
                 <p className="muted">
                   {person.headline ? <CensoredText text={person.headline} /> : t('hub.memberNoHeadline')}
                 </p>

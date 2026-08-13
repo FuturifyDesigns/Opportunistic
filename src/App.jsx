@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AuthProvider } from './context/AuthContext'
+import { PresenceProvider } from './context/PresenceContext'
 import { ConsentProvider } from './context/ConsentContext'
 import { ToastProvider } from './context/ToastContext'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -113,18 +114,20 @@ function AppRoutes() {
 export default function App() {
   return (
     <AuthProvider>
-      <ConsentProvider>
-        <ToastProvider>
-          <BrowserRouter>
-            <GlitchHeadings />
-            <PageLifecycle />
-            <CookieConsent />
-            <div id="page-shell" className="page-shell">
-              <AppRoutes />
-            </div>
-          </BrowserRouter>
-        </ToastProvider>
-      </ConsentProvider>
+      <PresenceProvider>
+        <ConsentProvider>
+          <ToastProvider>
+            <BrowserRouter>
+              <GlitchHeadings />
+              <PageLifecycle />
+              <CookieConsent />
+              <div id="page-shell" className="page-shell">
+                <AppRoutes />
+              </div>
+            </BrowserRouter>
+          </ToastProvider>
+        </ConsentProvider>
+      </PresenceProvider>
     </AuthProvider>
   )
 }
