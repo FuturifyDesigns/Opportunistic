@@ -8,7 +8,6 @@ const VIEWPORT = 280
 export default function AvatarEditor({ open, onClose, onSave }) {
   const { t } = useTranslation()
   const fileRef = useRef(null)
-  const stageRef = useRef(null)
   const drag = useRef(null)
 
   const [image, setImage] = useState(null)
@@ -131,16 +130,12 @@ export default function AvatarEditor({ open, onClose, onSave }) {
           <div>
             <p className="eyebrow">{t('profile.avatarEyebrow')}</p>
             <h2 id="avatar-editor-title">{t('profile.avatarTitle')}</h2>
-            <p className="muted">{t('profile.avatarHint')}</p>
+            <p className="muted">{image ? t('profile.avatarHintEdit') : t('profile.avatarHint')}</p>
           </div>
-          <button type="button" className="btn btn-ghost btn-sm" onClick={() => !busy && onClose?.()}>
-            {t('common.close')}
-          </button>
         </header>
 
         <div
-          className="avatar-editor-stage"
-          ref={stageRef}
+          className={`avatar-editor-stage${image ? '' : ' is-empty'}`}
           style={{ width: VIEWPORT, height: VIEWPORT }}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
@@ -163,6 +158,7 @@ export default function AvatarEditor({ open, onClose, onSave }) {
             <button
               type="button"
               className="avatar-editor-empty"
+              disabled={busy}
               onClick={() => fileRef.current?.click()}
             >
               {t('profile.avatarPick')}
@@ -171,45 +167,52 @@ export default function AvatarEditor({ open, onClose, onSave }) {
           <div className="avatar-editor-mask" aria-hidden="true" />
         </div>
 
-        <div className="avatar-editor-controls">
-          <label className="avatar-editor-zoom">
-            <span>{t('profile.avatarZoom')}</span>
-            <input
-              type="range"
-              min="1"
-              max="3"
-              step="0.02"
-              value={zoom}
-              disabled={!image || busy}
-              onChange={(e) => setZoom(Number(e.target.value))}
-            />
-          </label>
-          <div className="avatar-editor-actions-row">
-            <button
-              type="button"
-              className="btn btn-ghost btn-sm"
-              disabled={!image || busy}
-              onClick={() => setRotation((r) => (r + 90) % 360)}
-            >
-              {t('profile.avatarRotate')}
-            </button>
-            <button
-              type="button"
-              className="btn btn-ghost btn-sm"
-              disabled={!image || busy}
-              onClick={() => {
-                setZoom(1)
-                setOffset({ x: 0, y: 0 })
-                setRotation(0)
-              }}
-            >
-              {t('profile.avatarReset')}
-            </button>
-            <button type="button" className="btn btn-ghost btn-sm" disabled={busy} onClick={() => fileRef.current?.click()}>
-              {image ? t('profile.avatarChange') : t('profile.avatarPick')}
-            </button>
+        {image ? (
+          <div className="avatar-editor-controls">
+            <label className="avatar-editor-zoom">
+              <span>{t('profile.avatarZoom')}</span>
+              <input
+                type="range"
+                min="1"
+                max="3"
+                step="0.02"
+                value={zoom}
+                disabled={busy}
+                onChange={(e) => setZoom(Number(e.target.value))}
+              />
+            </label>
+            <div className="avatar-editor-actions-row">
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                disabled={busy}
+                onClick={() => setRotation((r) => (r + 90) % 360)}
+              >
+                {t('profile.avatarRotate')}
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                disabled={busy}
+                onClick={() => {
+                  setZoom(1)
+                  setOffset({ x: 0, y: 0 })
+                  setRotation(0)
+                }}
+              >
+                {t('profile.avatarReset')}
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                disabled={busy}
+                onClick={() => fileRef.current?.click()}
+              >
+                {t('profile.avatarChange')}
+              </button>
+            </div>
           </div>
-        </div>
+        ) : null}
 
         {error ? <p className="avatar-editor-error">{error}</p> : null}
 

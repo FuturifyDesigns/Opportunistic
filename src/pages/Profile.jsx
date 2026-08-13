@@ -146,7 +146,7 @@ export default function Profile() {
   }, [form.goal, t])
 
   const needsRematch = useMemo(() => {
-    if (!baseline) return true
+    if (!baseline) return false
     const nextQuals = JSON.stringify(
       qualifications
         .filter((q) => q.field?.trim())
@@ -249,7 +249,7 @@ export default function Profile() {
     setAvatarBusy(true)
     try {
       await uploadAvatar(user.id, blob)
-      await refreshProfile?.(user.id, user)
+      await refreshProfile?.()
       toast.success(t('profile.avatarSaved'))
     } catch (err) {
       toast.error(err.message || t('profile.avatarSaveError'))
@@ -264,7 +264,7 @@ export default function Profile() {
     setAvatarBusy(true)
     try {
       await removeAvatar(user.id)
-      await refreshProfile?.(user.id, user)
+      await refreshProfile?.()
       toast.success(t('profile.avatarRemoved'))
     } catch (err) {
       toast.error(err.message || t('profile.avatarSaveError'))
@@ -280,13 +280,19 @@ export default function Profile() {
         <header className="profile-identity">
           <div className="profile-identity-main">
             <div className="profile-avatar-wrap">
-              <div className={`profile-avatar ${profile?.avatar_url ? 'has-photo' : ''}`}>
+              <button
+                type="button"
+                className={`profile-avatar ${profile?.avatar_url ? 'has-photo' : ''}`}
+                disabled={avatarBusy}
+                onClick={() => setEditorOpen(true)}
+                aria-label={profile?.avatar_url ? t('profile.avatarEdit') : t('profile.avatarUpload')}
+              >
                 {profile?.avatar_url ? (
                   <img src={profile.avatar_url} alt="" />
                 ) : (
                   <span aria-hidden="true">{initialsFromName(form.full_name)}</span>
                 )}
-              </div>
+              </button>
               <div className="profile-avatar-actions">
                 <button
                   type="button"
