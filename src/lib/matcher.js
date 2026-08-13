@@ -79,9 +79,7 @@ export function buildScholarshipMatches(profile, qualifications, skills) {
         source: item.source,
         reasoning: evaled.reasoning,
         match_score: evaled.match_score,
-        scorecard: evaled.scorecard,
         deadline: null,
-        listingId: item.id,
       }
     })
     .sort((a, b) => b.match_score - a.match_score)

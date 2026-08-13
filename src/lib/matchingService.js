@@ -96,8 +96,13 @@ export async function runMatchingForUser(userId, options = {}) {
   const scholarshipRows = focused.scholarships.map((row) => {
     const key = sourceKey(row)
     return {
-      ...row,
       user_id: userId,
+      title: row.title,
+      url: row.url,
+      source: row.source || null,
+      reasoning: row.reasoning || '',
+      match_score: row.match_score,
+      deadline: row.deadline || null,
       saved: savedSch.has(key),
       dismissed: dismissedSch.has(key),
       found_at: stamp,
@@ -106,8 +111,13 @@ export async function runMatchingForUser(userId, options = {}) {
   const jobRows = focused.jobs.map((row) => {
     const key = sourceKey(row)
     return {
-      ...row,
       user_id: userId,
+      title: row.title,
+      url: row.url,
+      company: row.company || null,
+      source: row.source || null,
+      reasoning: row.reasoning || '',
+      match_score: row.match_score,
       saved: savedJobs.has(key),
       dismissed: dismissedJobs.has(key),
       found_at: stamp,
