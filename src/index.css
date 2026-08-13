@@ -5227,6 +5227,29 @@ a.btn-auth {
   font-weight: 500;
 }
 
+.headline-hint {
+  margin: 0.15rem 0 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.headline-hint-example {
+  display: block;
+  margin-top: 0.3rem;
+  padding: 0.35rem 0.55rem;
+  width: fit-content;
+  max-width: 100%;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+}
+
 .stack-form label.invalid input,
 .stack-form label.invalid select,
 .stack-form label.invalid textarea,

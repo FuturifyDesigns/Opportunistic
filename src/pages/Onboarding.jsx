@@ -14,6 +14,7 @@ import SkillPicker from '../components/SkillPicker'
 import MatchBeacon from '../components/MatchBeacon'
 import { prefersReducedMotion } from '../lib/animations'
 import { normalizeSkillName, normalizeFieldName } from '../lib/skillCatalog'
+import { applyHeadlineCaret, finalizeHeadline, nextHeadlineValue } from '../lib/headline'
 import { validateOnboardingStep } from '../lib/fieldValidation'
 import { defaultBioForGoal, goalLabelKey, normalizeGoal, upsertProfile } from '../lib/goal'
 
@@ -224,7 +225,7 @@ export default function Onboarding() {
       const { error: pErr } = await upsertProfile(supabase, {
         user_id: user.id,
         full_name: fullName.trim(),
-        headline: headline.trim() || `${fullName.trim()} · ${country}`,
+        headline: finalizeHeadline(headline) || `${fullName.trim()} · ${country}`,
         bio,
         country,
         goal: focus,
@@ -378,16 +379,25 @@ export default function Onboarding() {
                   <input
                     value={headline}
                     onChange={(e) => {
-                      setHeadline(e.target.value)
+                      const el = e.target
+                      const { value, caret } = nextHeadlineValue(el.value, el.selectionStart)
+                      setHeadline(value)
+                      applyHeadlineCaret(el, caret)
                       setFieldErrors((p) => ({ ...p, headline: undefined }))
                     }}
                     onBlur={() => {
+                      setHeadline((prev) => finalizeHeadline(prev))
                       markTouched('headline')
                       validateCurrent()
                     }}
                     placeholder={t('onboarding.headlinePlaceholder')}
                     aria-invalid={Boolean(errMsg('headline'))}
+                    aria-describedby="onboarding-headline-hint"
                   />
+                  <p id="onboarding-headline-hint" className="headline-hint">
+                    {t('onboarding.headlineHint')}
+                    <span className="headline-hint-example">{t('onboarding.headlineHintExample')}</span>
+                  </p>
                   {errMsg('headline') ? <span className="field-error">{errMsg('headline')}</span> : null}
                 </label>
               </div>

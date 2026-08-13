@@ -22,6 +22,7 @@ import SkillPicker from '../components/SkillPicker'
 import AvatarEditor from '../components/AvatarEditor'
 import CensoredText from '../components/CensoredText'
 import { normalizeSkillName, normalizeFieldName, suggestSkillsFromQualifications } from '../lib/skillCatalog'
+import { applyHeadlineCaret, finalizeHeadline, nextHeadlineValue } from '../lib/headline'
 import { prefersReducedMotion } from '../lib/animations'
 import { removeAvatar, uploadAvatar } from '../lib/avatar'
 
@@ -190,7 +191,7 @@ export default function Profile() {
       const bioText = stripGoalTag(form.bio).trim() || stripGoalTag(defaultBioForGoal(focus, t))
       const { error: pErr } = await updateProfile(supabase, user.id, {
         full_name: form.full_name,
-        headline: form.headline,
+        headline: finalizeHeadline(form.headline),
         bio: bioText,
         country: form.country,
         goal: focus,
@@ -373,14 +374,21 @@ export default function Profile() {
                 <input
                   value={form.headline}
                   placeholder={t('profile.headlinePlaceholder')}
-                  onChange={(e) => setForm({ ...form, headline: e.target.value })}
+                  aria-describedby="profile-headline-hint"
+                  onChange={(e) => {
+                    const el = e.target
+                    const { value, caret } = nextHeadlineValue(el.value, el.selectionStart)
+                    setForm((f) => ({ ...f, headline: value }))
+                    applyHeadlineCaret(el, caret)
+                  }}
                   onBlur={() => {
-                    const fixed = normalizeFieldName(form.headline)
-                    if (fixed && fixed !== form.headline) {
-                      setForm((f) => ({ ...f, headline: fixed }))
-                    }
+                    setForm((f) => ({ ...f, headline: finalizeHeadline(f.headline) }))
                   }}
                 />
+                <p id="profile-headline-hint" className="headline-hint">
+                  {t('profile.headlineHint')}
+                  <span className="headline-hint-example">{t('profile.headlineHintExample')}</span>
+                </p>
               </label>
               <label className="profile-field profile-field-full">
                 <span>{t('profile.bio')}</span>
