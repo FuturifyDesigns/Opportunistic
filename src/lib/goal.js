@@ -1,5 +1,7 @@
 /** Onboarding / profile focus: both | scholarships | jobs */
 
+import { stripInternalMarkup } from './internalMarkup'
+
 export const GOAL_VALUES = ['both', 'scholarships', 'jobs']
 
 export function normalizeGoal(value) {
@@ -13,9 +15,7 @@ export function parseGoalFromBio(bio = '') {
 }
 
 export function stripGoalTag(bio = '') {
-  return String(bio || '')
-    .replace(/\[opp_goal:(both|scholarships|jobs)\]\s*/gi, '')
-    .trim()
+  return stripInternalMarkup(bio)
 }
 
 export function withGoalTag(bio, goal) {
@@ -54,7 +54,7 @@ export function defaultBioForGoal(goal, t) {
       : g === 'jobs'
         ? t('onboarding.bioJobs')
         : t('onboarding.bioBoth')
-  return withGoalTag(text, g)
+  return text
 }
 
 /**
@@ -63,11 +63,8 @@ export function defaultBioForGoal(goal, t) {
  */
 export async function upsertProfile(supabase, row) {
   const payload = { ...row }
-  if (payload.goal != null) {
-    const goal = normalizeGoal(payload.goal)
-    payload.goal = goal
-    if (payload.bio != null) payload.bio = withGoalTag(payload.bio, goal)
-  }
+  if (payload.bio != null) payload.bio = stripGoalTag(payload.bio)
+  if (payload.goal != null) payload.goal = normalizeGoal(payload.goal)
 
   const { error } = await supabase.from('profiles').upsert(payload)
   if (!error) return { error: null }
@@ -76,7 +73,9 @@ export async function upsertProfile(supabase, row) {
     error.code === '42703' || /column.*goal|goal.*does not exist/i.test(error.message || '')
 
   if (payload.goal != null && missingGoalCol) {
+    const goal = payload.goal
     const { goal: _drop, ...withoutGoal } = payload
+    if (withoutGoal.bio != null) withoutGoal.bio = withGoalTag(withoutGoal.bio, goal)
     return supabase.from('profiles').upsert(withoutGoal).then(({ error: e }) => ({ error: e }))
   }
 
@@ -88,11 +87,8 @@ export async function upsertProfile(supabase, row) {
  */
 export async function updateProfile(supabase, userId, fields) {
   const payload = { ...fields }
-  if (payload.goal != null) {
-    const goal = normalizeGoal(payload.goal)
-    payload.goal = goal
-    if (payload.bio != null) payload.bio = withGoalTag(payload.bio, goal)
-  }
+  if (payload.bio != null) payload.bio = stripGoalTag(payload.bio)
+  if (payload.goal != null) payload.goal = normalizeGoal(payload.goal)
 
   const { error } = await supabase.from('profiles').update(payload).eq('user_id', userId)
   if (!error) return { error: null }
@@ -101,7 +97,9 @@ export async function updateProfile(supabase, userId, fields) {
     error.code === '42703' || /column.*goal|goal.*does not exist/i.test(error.message || '')
 
   if (payload.goal != null && missingGoalCol) {
+    const goal = payload.goal
     const { goal: _drop, ...withoutGoal } = payload
+    if (withoutGoal.bio != null) withoutGoal.bio = withGoalTag(withoutGoal.bio, goal)
     return supabase
       .from('profiles')
       .update(withoutGoal)

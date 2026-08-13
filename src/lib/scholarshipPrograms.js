@@ -15,7 +15,7 @@ export const SCHOLARSHIP_PROGRAMS = [
     countries: ['*'], // eligible list is large; Chevening covers Botswana and most Commonwealth
     level: 'Master’s',
     funding: 'Fully funded',
-    deadlineLabel: 'Usually Nov (check cycle)',
+    deadlineLabel: 'Usually November — check this year’s dates',
   },
   {
     id: 'commonwealth_shared',
@@ -42,7 +42,7 @@ export const SCHOLARSHIP_PROGRAMS = [
     ],
     level: 'Master’s',
     funding: 'Fully funded',
-    deadlineLabel: 'Check CSC cycle',
+    deadlineLabel: 'See this year’s CSC dates',
   },
   {
     id: 'mastercard',
@@ -55,7 +55,7 @@ export const SCHOLARSHIP_PROGRAMS = [
     countries: ['*africa'],
     level: 'Undergrad · Master’s',
     funding: 'Fully / substantially funded',
-    deadlineLabel: 'Partner university cycles',
+    deadlineLabel: 'Dates depend on the partner university',
   },
   {
     id: 'daad',
@@ -68,7 +68,7 @@ export const SCHOLARSHIP_PROGRAMS = [
     countries: ['*'],
     level: 'Bachelor · Master · PhD',
     funding: 'Varies by program',
-    deadlineLabel: 'Program-specific',
+    deadlineLabel: 'Dates depend on the program',
   },
   {
     id: 'fulbright',
@@ -81,7 +81,7 @@ export const SCHOLARSHIP_PROGRAMS = [
     countries: ['*'],
     level: 'Graduate',
     funding: 'Fully funded (typical)',
-    deadlineLabel: 'Country embassy cycle',
+    deadlineLabel: 'Dates depend on your embassy',
   },
   {
     id: 'gates_cambridge',
@@ -94,7 +94,7 @@ export const SCHOLARSHIP_PROGRAMS = [
     countries: ['*'],
     level: 'Postgraduate',
     funding: 'Fully funded',
-    deadlineLabel: 'Usually Oct / Dec / Jan',
+    deadlineLabel: 'Usually October, December, or January',
   },
   {
     id: 'mandela_rhodes',
@@ -107,7 +107,7 @@ export const SCHOLARSHIP_PROGRAMS = [
     countries: ['*africa'],
     level: 'Honours · Master’s',
     funding: 'Tuition + stipend',
-    deadlineLabel: 'Usually Apr',
+    deadlineLabel: 'Usually April',
   },
   {
     id: 'canon_collins',
@@ -131,7 +131,7 @@ export const SCHOLARSHIP_PROGRAMS = [
     ],
     level: 'Master’s · PhD',
     funding: 'Partial / full (program dependent)',
-    deadlineLabel: 'Check trust cycle',
+    deadlineLabel: 'See this year’s dates on their site',
   },
   {
     id: 'ashinaga',
@@ -144,7 +144,7 @@ export const SCHOLARSHIP_PROGRAMS = [
     countries: ['*africa'],
     level: 'Undergraduate',
     funding: 'Fully funded',
-    deadlineLabel: 'Check AAI cycle',
+    deadlineLabel: 'See this year’s AAI dates',
   },
   {
     id: 'yali',
@@ -157,7 +157,7 @@ export const SCHOLARSHIP_PROGRAMS = [
     countries: ['*africa'],
     level: 'Fellowship',
     funding: 'Program-funded',
-    deadlineLabel: 'RLC cohort cycles',
+    deadlineLabel: 'Dates depend on the cohort',
   },
   {
     id: 'erasmus_mundus',
@@ -170,7 +170,7 @@ export const SCHOLARSHIP_PROGRAMS = [
     countries: ['*'],
     level: 'Master’s',
     funding: 'EMJM scholarship possible',
-    deadlineLabel: 'Program catalogues (usually winter)',
+    deadlineLabel: 'See program catalogues (usually winter)',
   },
   {
     id: 'sweden_institute',
@@ -183,7 +183,7 @@ export const SCHOLARSHIP_PROGRAMS = [
     countries: ['*'],
     level: 'Master’s',
     funding: 'Fully funded',
-    deadlineLabel: 'Usually Feb',
+    deadlineLabel: 'Usually February',
   },
   {
     id: 'orange_knowledge',
@@ -210,7 +210,7 @@ export const SCHOLARSHIP_PROGRAMS = [
     ],
     level: 'Short course · Master’s',
     funding: 'Fully funded (typical)',
-    deadlineLabel: 'Round-based',
+    deadlineLabel: 'Opens in application rounds',
   },
   {
     id: 'unesco_fellowships',
@@ -223,7 +223,7 @@ export const SCHOLARSHIP_PROGRAMS = [
     countries: ['*'],
     level: 'Fellowship',
     funding: 'Varies',
-    deadlineLabel: 'Call-specific',
+    deadlineLabel: 'Dates depend on each call',
   },
   {
     id: 'african_union',
@@ -236,7 +236,7 @@ export const SCHOLARSHIP_PROGRAMS = [
     countries: ['*africa'],
     level: 'Various',
     funding: 'Program dependent',
-    deadlineLabel: 'Call-specific',
+    deadlineLabel: 'Dates depend on each call',
   },
   {
     id: 'scholarshipportal',
@@ -249,7 +249,7 @@ export const SCHOLARSHIP_PROGRAMS = [
     countries: ['*'],
     level: 'Bachelor · Master · PhD',
     funding: 'Varies',
-    deadlineLabel: 'Listing-specific',
+    deadlineLabel: 'See each listing for dates',
   },
   {
     id: 'mo_ibrahim',
@@ -262,7 +262,7 @@ export const SCHOLARSHIP_PROGRAMS = [
     countries: ['*africa'],
     level: 'Fellowship · Master’s partners',
     funding: 'Program dependent',
-    deadlineLabel: 'Check foundation',
+    deadlineLabel: 'See the foundation’s site for dates',
   },
   {
     id: 'aga_khan',
@@ -275,7 +275,7 @@ export const SCHOLARSHIP_PROGRAMS = [
     countries: ['*'],
     level: 'Master’s · PhD',
     funding: 'Loan-grant hybrid typical',
-    deadlineLabel: 'Usually Mar',
+    deadlineLabel: 'Usually March',
   },
   {
     id: 'botswana_hrdc',
@@ -288,7 +288,7 @@ export const SCHOLARSHIP_PROGRAMS = [
     countries: ['botswana'],
     level: 'Various',
     funding: 'National sponsorship (where open)',
-    deadlineLabel: 'Ministry / HRDC notices',
+    deadlineLabel: 'Watch ministry or HRDC notices',
   },
   {
     id: 'ub_scholarships',
@@ -301,7 +301,7 @@ export const SCHOLARSHIP_PROGRAMS = [
     countries: ['botswana', 'namibia', 'south africa', 'zambia', 'zimbabwe'],
     level: 'Undergrad · Postgrad',
     funding: 'Varies',
-    deadlineLabel: 'Faculty notices',
+    deadlineLabel: 'Watch faculty notices',
   },
 ]
 

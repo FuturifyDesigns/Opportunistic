@@ -1,10 +1,11 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { stripInternalMarkup } from '../lib/internalMarkup'
 import { splitProfanity } from '../lib/profanity'
 
 export default function CensoredText({ text, as: Tag = 'span', className }) {
   const { t } = useTranslation()
-  const value = text == null ? '' : String(text)
+  const value = stripInternalMarkup(text == null ? '' : String(text))
   const parts = useMemo(() => splitProfanity(value), [value])
   if (!value) return null
 

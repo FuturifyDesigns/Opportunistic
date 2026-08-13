@@ -6,7 +6,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import { openCookiePreferences } from '../lib/consent'
-import { normalizeGoal, resolveGoal, updateProfile, withGoalTag, stripGoalTag } from '../lib/goal'
+import { normalizeGoal, resolveGoal, updateProfile } from '../lib/goal'
 import { runMatchingForUser } from '../lib/matchingService'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
@@ -34,12 +34,10 @@ export default function Settings() {
   async function save() {
     setBusy(true)
     const focus = normalizeGoal(goal)
-    const bio = withGoalTag(stripGoalTag(profile?.bio || ''), focus)
     const { error } = await updateProfile(supabase, user.id, {
       digest_frequency: digest,
       country,
       goal: focus,
-      bio,
     })
     if (error) {
       setBusy(false)

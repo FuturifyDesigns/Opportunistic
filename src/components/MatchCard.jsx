@@ -62,7 +62,11 @@ export default function MatchCard({ match, kind, onSave, onDismiss, onOpen }) {
     { scope: ref },
   )
 
-  const foundDate = new Date(match.found_at || Date.now()).toLocaleDateString(i18n.language)
+  const foundDate = new Date(match.found_at || Date.now()).toLocaleDateString(i18n.language, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
 
   return (
     <article ref={ref} className="match-card interactive">
@@ -93,9 +97,7 @@ export default function MatchCard({ match, kind, onSave, onDismiss, onOpen }) {
             <span>{t('matchCard.deadline', { date: match.deadline })}</span>
           ) : listing?.deadlineLabel ? (
             <span>{listing.deadlineLabel}</span>
-          ) : (
-            <span>{t('matchCard.rolling')}</span>
-          )}
+          ) : null}
           <span>{t('matchCard.found', { date: foundDate })}</span>
         </div>
       </button>

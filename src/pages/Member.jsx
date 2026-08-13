@@ -8,6 +8,7 @@ import SiteFooter from '../components/SiteFooter'
 import UserAvatar from '../components/UserAvatar'
 import PresenceStatus from '../components/PresenceStatus'
 import CensoredText from '../components/CensoredText'
+import { stripInternalMarkup } from '../lib/internalMarkup'
 import {
   cancelFriendRequest,
   getCollabProfile,
@@ -149,7 +150,7 @@ export default function Member() {
                 </div>
               </div>
             </div>
-            {person.bio ? (
+            {stripInternalMarkup(person.bio) ? (
               <p className="member-bio">
                 <CensoredText text={person.bio} />
               </p>

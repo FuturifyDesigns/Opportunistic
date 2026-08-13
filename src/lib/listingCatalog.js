@@ -36,7 +36,7 @@ export const LISTING_CATALOG = {
     level: 'Postgraduate (master’s)',
     location: 'United Kingdom',
     funding: 'Fully funded (typical package)',
-    deadlineLabel: 'Usually November (check current cycle)',
+    deadlineLabel: 'Usually November — check this year’s dates',
     howToApply: [
       'Create a Chevening account and complete the online application',
       'Upload references and education documents',
@@ -80,7 +80,7 @@ export const LISTING_CATALOG = {
     level: 'Bachelor · Master · PhD · Research',
     location: 'Germany (and partner programs)',
     funding: 'Program-dependent',
-    deadlineLabel: 'Multiple cycles — filter on DAAD site',
+    deadlineLabel: 'Several deadlines — filter on the DAAD site',
     howToApply: [
       'Search the DAAD database with your degree level and field',
       'Open a specific call and read host/country rules carefully',
@@ -123,7 +123,7 @@ export const LISTING_CATALOG = {
     level: 'Undergraduate · Postgraduate',
     location: 'Partner universities (Africa & global)',
     funding: 'Comprehensive support at partners',
-    deadlineLabel: 'Per partner university',
+    deadlineLabel: 'Dates depend on the partner university',
     howToApply: [
       'Identify a Mastercard Foundation partner university in your field',
       'Apply to that university’s Scholars Program call',
@@ -166,7 +166,7 @@ export const LISTING_CATALOG = {
     level: 'Graduate · Research',
     location: 'United States',
     funding: 'Grant package via country commission',
-    deadlineLabel: 'Country-specific (often Feb–Oct window)',
+    deadlineLabel: 'Depends on your country (often February to October)',
     howToApply: [
       'Find your country’s Fulbright commission / US embassy page',
       'Confirm open programs and deadlines for this year',
@@ -206,7 +206,7 @@ export const LISTING_CATALOG = {
     level: 'Fellowship · Short program',
     location: 'International (host-dependent)',
     funding: 'Call-dependent',
-    deadlineLabel: 'Rolling / per announcement',
+    deadlineLabel: 'Open when calls are announced',
     howToApply: [
       'Browse open UNESCO fellowship announcements',
       'Confirm whether your National Commission must endorse you',
@@ -244,7 +244,7 @@ export const LISTING_CATALOG = {
     level: 'Postgraduate (Cambridge)',
     location: 'Cambridge, United Kingdom',
     funding: 'Full-cost',
-    deadlineLabel: 'Aligned with Cambridge course deadlines',
+    deadlineLabel: 'Follows Cambridge course deadlines',
     howToApply: [
       'Apply for admission to Cambridge and complete the Gates section',
       'Submit references and Gates statement',
@@ -283,7 +283,7 @@ export const LISTING_CATALOG = {
     level: 'Varies by call',
     location: 'Africa & partner institutions',
     funding: 'Call-dependent',
-    deadlineLabel: 'Per announcement',
+    deadlineLabel: 'See each announcement for dates',
     howToApply: [
       'Monitor AU education announcements and partner portals',
       'Confirm nationality and field eligibility',
@@ -318,7 +318,7 @@ export const LISTING_CATALOG = {
     level: 'Directory (all levels)',
     location: 'Europe',
     funding: 'Varies by listing',
-    deadlineLabel: 'Per listing',
+    deadlineLabel: 'See the listing for dates',
     howToApply: [
       'Search by your field and degree level',
       'Open promising results and jump to the official university page',
@@ -354,7 +354,7 @@ export const LISTING_CATALOG = {
     level: 'Entry to senior (role-dependent)',
     location: 'Global + remote filters',
     funding: null,
-    deadlineLabel: 'Rolling postings',
+    deadlineLabel: 'New jobs posted regularly',
     howToApply: [
       'Open the pre-filled LinkedIn search from Opportunistic',
       'Filter by experience level, remote, and date posted',
@@ -391,7 +391,7 @@ export const LISTING_CATALOG = {
     level: 'All levels',
     location: 'Country-biased search',
     funding: null,
-    deadlineLabel: 'Rolling postings',
+    deadlineLabel: 'New jobs posted regularly',
     howToApply: [
       'Open the Indeed link generated for your profile',
       'Refine with experience and salary filters',
@@ -427,7 +427,7 @@ export const LISTING_CATALOG = {
     level: 'Mostly mid-level tech',
     location: 'Remote',
     funding: null,
-    deadlineLabel: 'Fast-moving board',
+    deadlineLabel: 'Listings change quickly',
     howToApply: [
       'Open the skill-slug search Opportunistic builds',
       'Read location restrictions in each post',
@@ -460,7 +460,7 @@ export const LISTING_CATALOG = {
     level: 'All levels',
     location: 'Global',
     funding: null,
-    deadlineLabel: 'Rolling postings',
+    deadlineLabel: 'New jobs posted regularly',
     howToApply: [
       'Open the Glassdoor search with your profile keywords',
       'Read recent reviews before applying',
@@ -496,7 +496,7 @@ export const LISTING_CATALOG = {
     level: 'Entry to specialist',
     location: 'Global duty stations',
     funding: null,
-    deadlineLabel: 'Per vacancy',
+    deadlineLabel: 'See each job for the deadline',
     howToApply: [
       'Browse ReliefWeb jobs filtered to your themes',
       'Read duty station and language requirements carefully',

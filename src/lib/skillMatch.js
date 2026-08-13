@@ -3,6 +3,7 @@
  */
 
 import i18n from '../i18n'
+import { stripInternalMarkup } from './internalMarkup'
 
 const SCORECARD_START = '[[opp_scorecard]]'
 const SCORECARD_END = '[[/opp_scorecard]]'
@@ -362,7 +363,7 @@ export function unpackReasoning(reasoning = '') {
   const start = raw.indexOf(SCORECARD_START)
   const end = raw.indexOf(SCORECARD_END)
   if (start === -1 || end === -1 || end <= start) {
-    return { text: raw.trim(), scorecard: null }
+    return { text: stripInternalMarkup(raw), scorecard: null }
   }
   const json = raw.slice(start + SCORECARD_START.length, end)
   let scorecard = null
@@ -371,7 +372,7 @@ export function unpackReasoning(reasoning = '') {
   } catch {
     scorecard = null
   }
-  const text = `${raw.slice(0, start)}${raw.slice(end + SCORECARD_END.length)}`.trim()
+  const text = stripInternalMarkup(`${raw.slice(0, start)} ${raw.slice(end + SCORECARD_END.length)}`)
   return { text, scorecard }
 }
 
