@@ -5,19 +5,30 @@ import { useGSAP } from '@gsap/react'
 import { prefersReducedMotion, canHoverTilt } from '../lib/animations'
 import { getListingBySource } from '../lib/listingCatalog'
 import { unpackReasoning } from '../lib/skillMatch'
+import { shortMatchReason } from '../lib/matchReason'
 import ListingImage, { DEFAULT_OPPORTUNITY_IMAGE } from './ListingImage'
 import SkillScorecard from './SkillScorecard'
 
 gsap.registerPlugin(useGSAP)
 
-export default function MatchCard({ match, kind, onSave, onDismiss, onOpen }) {
+export default function MatchCard({ match, kind, country = '', onSave, onDismiss, onOpen, onRecommend }) {
   const { t, i18n } = useTranslation()
   const score = Math.round(Number(match.match_score) || 0)
   const ref = useRef(null)
   const listing = getListingBySource(match.source)
   const thumb = listing?.cover || listing?.gallery?.[0] || DEFAULT_OPPORTUNITY_IMAGE
-  const { text: reasonText, scorecard } = unpackReasoning(match.reasoning || '')
-  const shortReason = reasonText
+  const { text: storedReason, scorecard } = unpackReasoning(match.reasoning || '')
+  const liveReason = shortMatchReason({
+    kind: kind === 'scholarships' || kind === 'scholarship' ? 'scholarship' : 'job',
+    title: match.title,
+    company: match.company,
+    location: match.location || scorecard?.location?.label,
+    source: match.source,
+    country,
+    scorecard,
+    focus: listing?.summary || listing?.focus || '',
+  })
+  const shortReason = liveReason || storedReason
     .split(/(?<=\.)\s+/)
     .map((s) => s.trim())
     .filter(Boolean)
@@ -112,6 +123,11 @@ export default function MatchCard({ match, kind, onSave, onDismiss, onOpen }) {
         <button type="button" className="btn btn-ghost btn-sm" onClick={() => onDismiss?.(match)}>
           {t('matchCard.dismiss')}
         </button>
+        {onRecommend ? (
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => onRecommend(match)}>
+            {t('matchCard.recommend')}
+          </button>
+        ) : null}
       </div>
     </article>
   )

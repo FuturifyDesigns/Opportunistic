@@ -4,6 +4,7 @@
 
 import i18n from '../i18n'
 import { stripInternalMarkup } from './internalMarkup'
+import { explainMatch } from './matchReason'
 
 const SCORECARD_START = '[[opp_scorecard]]'
 const SCORECARD_END = '[[/opp_scorecard]]'
@@ -160,80 +161,32 @@ export function buildSkillScorecard(skills = [], listingText = '', options = {})
   }
 }
 
-function readableJobReason({ title, company, scorecard, fieldScore, locScore, country, location }) {
-  const t = (key, opts) => i18n.t(`reasons.${key}`, opts)
-  const lines = []
-  const matched = scorecard.matched || []
-  const gaps = scorecard.gaps || []
-  const total = (scorecard.skills || []).length
-
-  if (matched.length && total) {
-    lines.push(
-      t('skillMatchStrong', {
-        count: matched.length,
-        total,
-        skills: matched.slice(0, 3).join(', '),
-        title: title || t('thisRole'),
-      }),
-    )
-  } else if (total) {
-    lines.push(t('skillMatchWeak', { title: title || t('thisRole') }))
-  } else {
-    lines.push(t('skillMatchNoSkills', { title: title || t('thisRole') }))
-  }
-
-  if (fieldScore >= 60) lines.push(t('fieldAligns'))
-  else if (fieldScore >= 35) lines.push(t('fieldPartial'))
-  else lines.push(t('fieldWeak'))
-
-  if (locScore >= 80) lines.push(t('locStrong', { place: country || location || t('yourArea') }))
-  else if (locScore >= 55) lines.push(t('locRemoteOk', { place: country || t('yourArea') }))
-  else if (country) lines.push(t('locCheck', { place: country }))
-
-  if (gaps.length) {
-    lines.push(t('skillGaps', { skills: gaps.slice(0, 3).join(', ') }))
-  }
-
-  if (company) lines.push(t('employerLine', { company }))
-  lines.push(t('verifyOfficial'))
-  return lines.join(' ')
+function readableJobReason({ title, company, scorecard, country, location, source }) {
+  return explainMatch({
+    kind: 'job',
+    title,
+    company,
+    location,
+    source,
+    country,
+    scorecard,
+  })
 }
 
-function readableScholarshipReason({ item, summary, scorecard, fieldScore }) {
-  const t = (key, opts) => i18n.t(`reasons.${key}`, opts)
-  const lines = []
-  const matched = scorecard.matched || []
-
-  lines.push(t('schIntro', { title: item.title, focus: item.focus || '' }))
-
-  if (summary.primary) {
-    lines.push(
-      t('schQual', {
-        kind: summary.primary.type === 'certificate' ? t('certificate') : t('degree'),
-        field: summary.primary.field,
-        institution: summary.institution ? t('fromInstitution', { institution: summary.institution }) : '',
-      }),
-    )
-  }
-
-  if (item.focus) {
-    lines.push(t('focusField', { field: item.focus }))
-  }
-
-  if (fieldScore >= 70) lines.push(t('schFieldStrong'))
-  else if (fieldScore >= 40) lines.push(t('schFieldOk'))
-  else lines.push(t('schFieldWeak'))
-
-  if (matched.length) {
-    lines.push(t('schSkills', { skills: matched.slice(0, 4).join(', ') }))
-  }
-
-  if (summary.country) {
-    lines.push(t('schCountry', { country: summary.country }))
-  }
-
-  lines.push(t('officialUrl'))
-  return lines.join(' ')
+function readableScholarshipReason({ item, summary, scorecard }) {
+  const primary = summary?.primary
+  const qualification = primary
+    ? `${primary.type === 'certificate' ? i18n.t('reasons.certificate') : i18n.t('reasons.degree')} in ${primary.field}`
+    : ''
+  return explainMatch({
+    kind: 'scholarship',
+    title: item?.title,
+    source: item?.source,
+    country: summary?.country,
+    scorecard,
+    focus: item?.focus || '',
+    qualification,
+  })
 }
 
 /**
@@ -282,10 +235,9 @@ export function evaluateJobListing(
     title,
     company,
     scorecard: fullScorecard,
-    fieldScore,
-    locScore,
     country: summary.country,
     location,
+    source,
   })
 
   return {

@@ -17,8 +17,12 @@ import {
 import { goalLabelKey, resolveGoal } from '../lib/goal'
 import AutoRefreshCountdown from '../components/AutoRefreshCountdown'
 import MatchCard from '../components/MatchCard'
+import RecommendMatchDialog from '../components/RecommendMatchDialog'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
+import UserAvatar from '../components/UserAvatar'
+import CensoredText from '../components/CensoredText'
+import { dismissMatchRecommendation, listMatchRecommendations } from '../lib/collabHub'
 
 gsap.registerPlugin(useGSAP)
 
@@ -37,6 +41,8 @@ export default function Dashboard() {
   const [engineNote, setEngineNote] = useState('')
   const [lastAt, setLastAt] = useState(null)
   const [meta, setMeta] = useState(null)
+  const [recs, setRecs] = useState([])
+  const [recommendFor, setRecommendFor] = useState(null)
   // The countdown must not arm itself before we know when the last scan ran.
   const [scheduleReady, setScheduleReady] = useState(false)
   const listRef = useRef(null)
@@ -86,6 +92,11 @@ export default function Dashboard() {
       setJobs(j || [])
       setLastAt(getLastMatchAt(user.id))
       setMeta(getLastMatchMeta(user.id))
+      try {
+        setRecs(await listMatchRecommendations())
+      } catch {
+        setRecs([])
+      }
     } catch {
       setScholarships([])
       setJobs([])
@@ -184,6 +195,16 @@ export default function Dashboard() {
       trackEngage(nextSaved ? 'save' : 'unsave', { kind: tab, matchId: match.id }, user?.id)
       toast.success(nextSaved ? t('common.toast.matchSaved') : t('common.toast.matchUnsaved'))
       load()
+    } catch (err) {
+      toast.error(err.message || t('common.toast.genericError'))
+    }
+  }
+
+  async function onDismissRec(id) {
+    try {
+      await dismissMatchRecommendation(id)
+      setRecs((list) => list.filter((r) => r.id !== id))
+      toast.info(t('recommend.dismissed'))
     } catch (err) {
       toast.error(err.message || t('common.toast.genericError'))
     }
@@ -371,6 +392,47 @@ export default function Dashboard() {
 
         <div className="dashboard-layout dash-grid">
           <div className="match-list">
+            {recs.length ? (
+              <section className="dash-recs glass-panel">
+                <div className="hub-panel-head">
+                  <h2>{t('recommend.inboxTitle')}</h2>
+                  <p>{t('recommend.inboxHint')}</p>
+                </div>
+                <ul className="dash-rec-list">
+                  {recs.map((rec) => (
+                    <li key={rec.id} className="dash-rec">
+                      <UserAvatar url={rec.from_avatar} name={rec.from_name} size={40} />
+                      <div>
+                        <p className="dash-rec-from">
+                          {t('recommend.from', { name: rec.from_name })}
+                        </p>
+                        <strong>
+                          <CensoredText text={rec.title} />
+                        </strong>
+                        <p className="muted">
+                          {[rec.company, rec.source, rec.kind === 'scholarship' ? t('dashboard.statScholarships') : t('dashboard.statJobs')]
+                            .filter(Boolean)
+                            .join(' · ')}
+                        </p>
+                        {rec.note ? (
+                          <p className="dash-rec-note">
+                            <CensoredText text={rec.note} />
+                          </p>
+                        ) : null}
+                      </div>
+                      <div className="dash-rec-actions">
+                        <a className="btn btn-sm" href={rec.url} target="_blank" rel="noreferrer noopener">
+                          {t('matchCard.openListing')}
+                        </a>
+                        <button type="button" className="btn btn-ghost btn-sm" onClick={() => void onDismissRec(rec.id)}>
+                          {t('recommend.dismiss')}
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
             {loading || refreshing ? (
               <div className="dash-loading">
                 <div className="spinner" />
@@ -392,11 +454,13 @@ export default function Dashboard() {
                   key={match.id}
                   match={match}
                   kind={tab}
+                  country={profile?.country}
                   onOpen={(m) =>
                     navigate(`/match/${tab === 'scholarships' ? 'scholarship' : 'job'}/${m.id}`)
                   }
                   onSave={onSave}
                   onDismiss={onDismiss}
+                  onRecommend={(m) => setRecommendFor(m)}
                 />
               ))
             )}
@@ -432,6 +496,12 @@ export default function Dashboard() {
         </div>
       </main>
       <SiteFooter />
+      <RecommendMatchDialog
+        open={Boolean(recommendFor)}
+        match={recommendFor}
+        kind={tab}
+        onClose={() => setRecommendFor(null)}
+      />
     </div>
   )
 }

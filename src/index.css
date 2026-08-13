@@ -3277,6 +3277,120 @@ sup {
   padding: 0 1.2rem 1.15rem;
 }
 
+.rec-dialog {
+  width: min(28rem, 100%);
+  max-height: min(88vh, 40rem);
+  overflow: auto;
+}
+
+.rec-listing {
+  margin: 0 0 0.85rem;
+}
+
+.rec-search,
+.rec-note {
+  display: block;
+  margin: 0 0 0.75rem;
+}
+
+.rec-search input,
+.rec-note textarea {
+  width: 100%;
+}
+
+.rec-note span {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.rec-people {
+  display: grid;
+  gap: 0.4rem;
+  max-height: 14rem;
+  overflow: auto;
+  margin: 0 0 0.85rem;
+}
+
+.rec-person {
+  display: flex;
+  gap: 0.7rem;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--line);
+  background: var(--bg-elevated, #fff);
+  padding: 0.55rem 0.7rem;
+  cursor: pointer;
+}
+
+.rec-person.selected,
+.rec-person:hover {
+  border-color: var(--ink);
+}
+
+.rec-person span {
+  display: grid;
+  min-width: 0;
+}
+
+.rec-person em {
+  color: var(--muted);
+  font-style: normal;
+  font-size: 0.82rem;
+}
+
+.dash-recs {
+  padding: 1.1rem 1.2rem 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.dash-rec-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.dash-rec {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.85rem;
+  align-items: start;
+  border: 1px solid var(--line);
+  padding: 0.85rem;
+  background: var(--bg-elevated, #fff);
+}
+
+.dash-rec-from {
+  margin: 0 0 0.15rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.dash-rec-note {
+  margin: 0.35rem 0 0;
+}
+
+.dash-rec-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: flex-end;
+}
+
+@media (max-width: 720px) {
+  .dash-rec {
+    grid-template-columns: auto 1fr;
+  }
+
+  .dash-rec-actions {
+    grid-column: 1 / -1;
+  }
+}
+
 .score-pill {
   background: var(--accent-soft);
   color: var(--accent);

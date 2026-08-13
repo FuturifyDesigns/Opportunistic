@@ -7,11 +7,13 @@ import { useToast } from '../context/ToastContext'
 import { getListingBySource } from '../lib/listingCatalog'
 import { generateWinTips } from '../lib/tipEngine'
 import { unpackReasoning } from '../lib/skillMatch'
+import { explainMatch } from '../lib/matchReason'
 import { trackEngage } from '../lib/analytics'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
 import ListingImage, { DEFAULT_OPPORTUNITY_IMAGE } from '../components/ListingImage'
 import SkillScorecard from '../components/SkillScorecard'
+import RecommendMatchDialog from '../components/RecommendMatchDialog'
 
 function splitSentences(text = '') {
   return text
@@ -33,6 +35,7 @@ export default function MatchDetail() {
   const [activeImage, setActiveImage] = useState(null)
   const [busy, setBusy] = useState(false)
   const [tipNonce, setTipNonce] = useState(0)
+  const [recommendOpen, setRecommendOpen] = useState(false)
 
   const table = kind === 'job' ? 'job_matches' : kind === 'scholarship' ? 'scholarship_matches' : null
   const listing = useMemo(() => getListingBySource(match?.source), [match?.source])
@@ -134,8 +137,21 @@ export default function MatchDetail() {
 
   const gallery = listing?.gallery?.filter(Boolean) || []
   const cover = listing?.cover || gallery[0] || DEFAULT_OPPORTUNITY_IMAGE
-  const { text: reasonPlain, scorecard } = unpackReasoning(match?.reasoning || '')
-  const reasons = splitSentences(reasonPlain)
+  const { text: storedReason, scorecard } = unpackReasoning(match?.reasoning || '')
+  const liveReason = explainMatch({
+    kind: kind === 'job' ? 'job' : 'scholarship',
+    title: match?.title,
+    company: match?.company,
+    location: match?.location || listing?.location || scorecard?.location?.label,
+    source: match?.source,
+    country: profile?.country || '',
+    scorecard,
+    focus: listing?.summary || listing?.focus || '',
+    qualification: qualifications?.[0]
+      ? `${qualifications[0].type === 'certificate' ? t('reasons.certificate') : t('reasons.degree')} in ${qualifications[0].field}`
+      : '',
+  })
+  const reasons = splitSentences(liveReason || storedReason)
   const locationLabel = match?.location || listing?.location || scorecard?.location?.label || null
 
   return (
@@ -346,6 +362,9 @@ export default function MatchDetail() {
               <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => toggle('dismissed')}>
                 {match.dismissed ? t('match.restore') : t('match.dismiss')}
               </button>
+              <button type="button" className="btn btn-ghost" onClick={() => setRecommendOpen(true)}>
+                {t('matchCard.recommend')}
+              </button>
             </div>
           </article>
         ) : null}
@@ -357,6 +376,12 @@ export default function MatchDetail() {
         ) : null}
       </main>
       <SiteFooter />
+      <RecommendMatchDialog
+        open={recommendOpen}
+        match={match}
+        kind={kind}
+        onClose={() => setRecommendOpen(false)}
+      />
     </div>
   )
 }

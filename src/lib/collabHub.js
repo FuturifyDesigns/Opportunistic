@@ -225,3 +225,42 @@ export async function unfriend(userId) {
   if (error) throw error
   return data
 }
+
+export async function recommendMatch({
+  toUserId,
+  kind,
+  title,
+  url,
+  company,
+  location,
+  source,
+  deadline,
+  matchScore,
+  note,
+}) {
+  const { data, error } = await supabase.rpc('recommend_match', {
+    p_to_user: toUserId,
+    p_kind: kind === 'scholarships' ? 'scholarship' : kind,
+    p_title: title,
+    p_url: url,
+    p_company: company || null,
+    p_location: location || null,
+    p_source: source || null,
+    p_deadline: deadline || null,
+    p_match_score: matchScore ?? null,
+    p_note: note || null,
+  })
+  if (error) throw error
+  return data
+}
+
+export async function listMatchRecommendations() {
+  const { data, error } = await supabase.rpc('list_match_recommendations')
+  if (error) throw error
+  return data || []
+}
+
+export async function dismissMatchRecommendation(id) {
+  const { error } = await supabase.rpc('dismiss_match_recommendation', { p_id: id })
+  if (error) throw error
+}
