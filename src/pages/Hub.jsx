@@ -5,6 +5,7 @@ import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { useAuth } from '../context/AuthContext'
 import { usePresence } from '../context/PresenceContext'
+import { useNotifications } from '../context/NotificationContext'
 import { useToast } from '../context/ToastContext'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
@@ -19,8 +20,6 @@ import {
   leaveThread,
   listCollabPeers,
   listCollabPosts,
-  listFriendRequests,
-  listFriends,
   listMyThreads,
   listOpportunisticMembers,
   listThreadPeople,
@@ -78,6 +77,7 @@ function PersonMeta({ headline, country, extra }) {
 export default function Hub() {
   const { user, profile, refreshProfile } = useAuth()
   const { isOnline, seedLastSeen } = usePresence()
+  const { friends, requests, refresh: refreshNotes } = useNotifications()
   const toast = useToast()
   const { t } = useTranslation()
   const location = useLocation()
@@ -94,8 +94,6 @@ export default function Hub() {
   const [peers, setPeers] = useState([])
   const [posts, setPosts] = useState([])
   const [threads, setThreads] = useState([])
-  const [friends, setFriends] = useState([])
-  const [requests, setRequests] = useState([])
   const [mySkills, setMySkills] = useState([])
   const [loading, setLoading] = useState(true)
   const [peopleById, setPeopleById] = useState({})
@@ -106,7 +104,7 @@ export default function Hub() {
   const [sending, setSending] = useState(false)
   const [chatBusy, setChatBusy] = useState(false)
   const [leaving, setLeaving] = useState(false)
-  const messagesEnd = useRef(null)
+  const messagesPane = useRef(null)
 
   const [postForm, setPostForm] = useState({
     title: '',
@@ -129,40 +127,35 @@ export default function Hub() {
     if (!user?.id) return
     setLoading(true)
     try {
-      const [memberRows, peerRows, postRows, threadRows, skills, friendRows, requestRows] = await Promise.all([
+      const [memberRows, peerRows, postRows, threadRows, skills] = await Promise.all([
         listOpportunisticMembers(),
         listCollabPeers(),
         listCollabPosts(),
         listMyThreads(),
         loadMySkills(user.id),
-        listFriends(),
-        listFriendRequests(),
+        refreshNotes(),
       ])
       setPeople(memberRows)
       setPeers(peerRows)
       setPosts(postRows)
       setThreads(threadRows)
       setMySkills(skills)
-      setFriends(friendRows)
-      setRequests(requestRows)
-      seedLastSeen([
-        ...memberRows,
-        ...peerRows,
-        ...friendRows,
-        ...requestRows,
-        ...threadRows,
-      ])
+      seedLastSeen([...memberRows, ...peerRows, ...threadRows])
     } catch (err) {
       console.error(err)
       toast.error(err.message || t('common.toast.loadFailed'))
     } finally {
       setLoading(false)
     }
-  }, [user?.id, toast, t, seedLastSeen])
+  }, [user?.id, toast, t, seedLastSeen, refreshNotes])
 
   useEffect(() => {
     void refresh()
   }, [refresh])
+
+  useEffect(() => {
+    seedLastSeen([...friends, ...requests])
+  }, [friends, requests, seedLastSeen])
 
   const refreshPosts = useCallback(async () => {
     try {
@@ -248,6 +241,7 @@ export default function Hub() {
         setPeopleById(map)
         seedLastSeen(people)
         await markThreadRead(threadId)
+        void refreshNotes()
         setThreads((prev) =>
           prev.map((th) => (th.thread_id === threadId ? { ...th, unread_count: 0 } : th)),
         )
@@ -257,7 +251,7 @@ export default function Hub() {
         setChatBusy(false)
       }
     },
-    [toast, t, seedLastSeen],
+    [toast, t, seedLastSeen, refreshNotes],
   )
 
   useEffect(() => {
@@ -274,7 +268,7 @@ export default function Hub() {
         if (prev.some((m) => m.id === row.id)) return prev
         return [...prev, row]
       })
-      void markThreadRead(activeThreadId)
+      void markThreadRead(activeThreadId).then(() => void refreshNotes())
       if (row.user_id && !peopleById[row.user_id]) {
         void listThreadPeople(activeThreadId).then((people) => {
           const map = {}
@@ -287,8 +281,10 @@ export default function Hub() {
   }, [activeThreadId])
 
   useEffect(() => {
-    messagesEnd.current?.scrollIntoView?.({ behavior: 'smooth' })
-  }, [messages, activeThreadId])
+    const el = messagesPane.current
+    if (!el) return
+    el.scrollTop = el.scrollHeight
+  }, [messages, activeThreadId, chatBusy])
 
   async function toggleOpenToCollab() {
     if (!user?.id || busyOptIn) return
@@ -1019,7 +1015,7 @@ export default function Hub() {
                       {activeThread?.kind === 'skill' ? t('hub.leaveRoom') : t('hub.deleteChat')}
                     </button>
                   </header>
-                  <div className="hub-messages" role="log" aria-live="polite">
+                  <div className="hub-messages" ref={messagesPane} role="log" aria-live="polite">
                     {chatBusy ? <p className="muted">{t('common.loading')}</p> : null}
                     {!chatBusy && !messages.length ? <p className="muted">{t('hub.noMessagesYet')}</p> : null}
                     {messages.map((m) => {
@@ -1058,7 +1054,6 @@ export default function Hub() {
                         </div>
                       )
                     })}
-                    <div ref={messagesEnd} />
                   </div>
                   <form className="hub-composer" onSubmit={onSend}>
                     <input

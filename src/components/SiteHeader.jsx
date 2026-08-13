@@ -7,6 +7,7 @@ import { isAdminEmail } from '../lib/analytics'
 import GetStartedLogo from './GetStartedLogo'
 import LanguageSwitcher from './LanguageSwitcher'
 import CensoredText from './CensoredText'
+import NotificationBell from './NotificationBell'
 
 export default function SiteHeader() {
   const { user, profile, signOut } = useAuth()
@@ -63,19 +64,22 @@ export default function SiteHeader() {
           <span className="brand-word">{t('common.brand')}</span>
         </NavLink>
 
-        <button
-          type="button"
-          className="nav-toggle"
-          aria-expanded={open}
-          aria-label={t('common.menu')}
-          onClick={() => {
-            setAccountOpen(false)
-            setOpen((v) => !v)
-          }}
-        >
-          <span />
-          <span />
-        </button>
+        <div className="header-actions">
+          {user ? <NotificationBell /> : null}
+          <button
+            type="button"
+            className="nav-toggle"
+            aria-expanded={open}
+            aria-label={t('common.menu')}
+            onClick={() => {
+              setAccountOpen(false)
+              setOpen((v) => !v)
+            }}
+          >
+            <span />
+            <span />
+          </button>
+        </div>
 
         <nav className={`nav ${open ? 'open' : ''}`}>
           <NavLink to="/how-it-works" onClick={close}>

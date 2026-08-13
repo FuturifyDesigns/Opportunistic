@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
-import { listFriends, listOpportunisticMembers, recommendMatch } from '../lib/collabHub'
+import { listFriends, recommendMatch } from '../lib/collabHub'
 import { useToast } from '../context/ToastContext'
 import UserAvatar from './UserAvatar'
 import CensoredText from './CensoredText'
@@ -23,17 +23,10 @@ export default function RecommendMatchDialog({ open, match, kind, onClose }) {
     setPicked(null)
     let live = true
     setLoading(true)
-    Promise.all([listFriends().catch(() => []), listOpportunisticMembers().catch(() => [])])
-      .then(([friends, members]) => {
+    listFriends()
+      .then((friends) => {
         if (!live) return
-        const seen = new Set()
-        const rows = []
-        for (const row of [...friends, ...members]) {
-          if (!row?.user_id || seen.has(row.user_id)) continue
-          seen.add(row.user_id)
-          rows.push(row)
-        }
-        setPeople(rows)
+        setPeople((friends || []).filter((row) => row?.user_id))
       })
       .finally(() => {
         if (live) setLoading(false)

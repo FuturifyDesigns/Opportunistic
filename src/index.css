@@ -175,7 +175,6 @@ textarea:focus-visible {
 .header-inner {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 1rem;
   padding: 0.9rem 0;
 }
@@ -184,8 +183,15 @@ textarea:focus-visible {
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
+  margin-right: auto;
   font-weight: 700;
   letter-spacing: -0.02em;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .brand-logo {
@@ -3339,6 +3345,114 @@ sup {
   color: var(--muted);
   font-style: normal;
   font-size: 0.82rem;
+}
+
+.notify-bell {
+  position: relative;
+  z-index: 55;
+}
+
+.notify-bell-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.notify-bell.open .notify-bell-btn,
+.notify-bell-btn:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(11, 110, 79, 0.12);
+}
+
+.notify-badge {
+  position: absolute;
+  top: -0.2rem;
+  right: -0.2rem;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  padding: 0 0.28rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.15rem;
+  text-align: center;
+}
+
+.notify-panel {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  right: 0;
+  width: min(22rem, calc(100vw - 1.5rem));
+  max-height: min(70vh, 28rem);
+  overflow: auto;
+  padding: 0.7rem 0.75rem 0.8rem;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.14);
+  display: grid;
+  gap: 0.55rem;
+}
+
+.notify-panel-title {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.notify-empty {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.notify-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.65rem;
+  align-items: start;
+  padding: 0.55rem 0.15rem;
+  border-top: 1px solid var(--line);
+}
+
+.notify-item p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+.notify-item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.45rem;
+}
+
+.notify-link {
+  text-decoration: none;
+  color: inherit;
+  align-items: center;
+}
+
+.notify-unread-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: var(--accent);
+  margin-top: 0.35rem;
 }
 
 .dash-recs {
@@ -8329,7 +8443,8 @@ textarea {
 .hub-chat {
   display: grid;
   grid-template-columns: minmax(220px, 0.9fr) 1.4fr;
-  min-height: min(70vh, 640px);
+  height: min(70vh, 640px);
+  min-height: 0;
   padding: 0;
   overflow: hidden;
 }
@@ -8337,7 +8452,7 @@ textarea {
 .hub-thread-list {
   border-right: 1px solid var(--line);
   overflow: auto;
-  max-height: min(70vh, 640px);
+  min-height: 0;
 }
 
 .hub-thread {
@@ -8403,6 +8518,8 @@ textarea {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  height: 100%;
+  overflow: hidden;
 }
 
 .hub-chat-head {
@@ -8412,6 +8529,7 @@ textarea {
   align-items: center;
   padding: 0.9rem 1rem;
   border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
 }
 
 .hub-chat-head-person {
@@ -8435,7 +8553,10 @@ textarea {
 
 .hub-messages {
   flex: 1;
+  min-height: 0;
   overflow: auto;
+  overscroll-behavior: contain;
+  overflow-anchor: none;
   padding: 1rem;
   display: flex;
   flex-direction: column;
@@ -8503,6 +8624,10 @@ textarea {
   padding: 0.85rem 1rem;
   border-top: 1px solid var(--line);
   background: var(--bg-elevated);
+  flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
 }
 
 .hub-composer input {
@@ -8530,17 +8655,23 @@ textarea {
   }
 
   .hub-thread-list {
-    max-height: 220px;
+    max-height: 180px;
     border-right: 0;
     border-bottom: 1px solid var(--line);
   }
 
   .hub-chat {
+    height: auto;
     min-height: 0;
   }
 
   .hub-chat-pane {
-    min-height: 420px;
+    height: min(58dvh, 520px);
+    min-height: 280px;
+  }
+
+  .hub-composer input {
+    font-size: 16px;
   }
 }
 

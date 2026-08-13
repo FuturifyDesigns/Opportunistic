@@ -22,12 +22,13 @@ import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
 import UserAvatar from '../components/UserAvatar'
 import CensoredText from '../components/CensoredText'
-import { dismissMatchRecommendation, listMatchRecommendations } from '../lib/collabHub'
+import { useNotifications } from '../context/NotificationContext'
 
 gsap.registerPlugin(useGSAP)
 
 export default function Dashboard() {
   const { user, profile, refreshProfile } = useAuth()
+  const { friendCount, recs, dismissRec } = useNotifications()
   const toast = useToast()
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -41,7 +42,6 @@ export default function Dashboard() {
   const [engineNote, setEngineNote] = useState('')
   const [lastAt, setLastAt] = useState(null)
   const [meta, setMeta] = useState(null)
-  const [recs, setRecs] = useState([])
   const [recommendFor, setRecommendFor] = useState(null)
   // The countdown must not arm itself before we know when the last scan ran.
   const [scheduleReady, setScheduleReady] = useState(false)
@@ -92,11 +92,6 @@ export default function Dashboard() {
       setJobs(j || [])
       setLastAt(getLastMatchAt(user.id))
       setMeta(getLastMatchMeta(user.id))
-      try {
-        setRecs(await listMatchRecommendations())
-      } catch {
-        setRecs([])
-      }
     } catch {
       setScholarships([])
       setJobs([])
@@ -202,8 +197,7 @@ export default function Dashboard() {
 
   async function onDismissRec(id) {
     try {
-      await dismissMatchRecommendation(id)
-      setRecs((list) => list.filter((r) => r.id !== id))
+      await dismissRec(id)
       toast.info(t('recommend.dismissed'))
     } catch (err) {
       toast.error(err.message || t('common.toast.genericError'))
@@ -460,7 +454,7 @@ export default function Dashboard() {
                   }
                   onSave={onSave}
                   onDismiss={onDismiss}
-                  onRecommend={(m) => setRecommendFor(m)}
+                  onRecommend={friendCount ? (m) => setRecommendFor(m) : undefined}
                 />
               ))
             )}

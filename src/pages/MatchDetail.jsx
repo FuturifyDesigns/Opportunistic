@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
+import { useNotifications } from '../context/NotificationContext'
 import { useToast } from '../context/ToastContext'
 import { getListingBySource } from '../lib/listingCatalog'
 import { generateWinTips } from '../lib/tipEngine'
@@ -25,6 +26,7 @@ function splitSentences(text = '') {
 export default function MatchDetail() {
   const { kind, id } = useParams()
   const { user, profile } = useAuth()
+  const { friendCount } = useNotifications()
   const toast = useToast()
   const { t, i18n } = useTranslation()
   const [match, setMatch] = useState(null)
@@ -362,9 +364,11 @@ export default function MatchDetail() {
               <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => toggle('dismissed')}>
                 {match.dismissed ? t('match.restore') : t('match.dismiss')}
               </button>
-              <button type="button" className="btn btn-ghost" onClick={() => setRecommendOpen(true)}>
-                {t('matchCard.recommend')}
-              </button>
+              {friendCount ? (
+                <button type="button" className="btn btn-ghost" onClick={() => setRecommendOpen(true)}>
+                  {t('matchCard.recommend')}
+                </button>
+              ) : null}
             </div>
           </article>
         ) : null}

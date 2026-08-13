@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AuthProvider } from './context/AuthContext'
 import { PresenceProvider } from './context/PresenceContext'
+import { NotificationProvider } from './context/NotificationContext'
 import { ConsentProvider } from './context/ConsentContext'
 import { ToastProvider } from './context/ToastContext'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -116,16 +117,18 @@ export default function App() {
     <AuthProvider>
       <PresenceProvider>
         <ConsentProvider>
-          <ToastProvider>
-            <BrowserRouter>
+        <ToastProvider>
+          <NotificationProvider>
+          <BrowserRouter>
               <GlitchHeadings />
               <PageLifecycle />
               <CookieConsent />
               <div id="page-shell" className="page-shell">
                 <AppRoutes />
               </div>
-            </BrowserRouter>
-          </ToastProvider>
+          </BrowserRouter>
+          </NotificationProvider>
+        </ToastProvider>
         </ConsentProvider>
       </PresenceProvider>
     </AuthProvider>
