@@ -274,3 +274,8 @@ export async function dismissMatchRecommendation(id) {
   const { error } = await supabase.rpc('dismiss_match_recommendation', { p_id: id })
   if (error) throw error
 }
+
+export async function markNotificationsRead() {
+  const { error } = await supabase.rpc('mark_notifications_read')
+  if (error) throw error
+}

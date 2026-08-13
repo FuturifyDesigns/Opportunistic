@@ -5,6 +5,7 @@ import { useAuth } from './AuthContext'
 import { useToast } from './ToastContext'
 import {
   dismissMatchRecommendation,
+  markNotificationsRead,
   listFriendFitProfiles,
   listFriendRequests,
   listFriends,
@@ -136,6 +137,14 @@ export function NotificationProvider({ children }) {
     [],
   )
 
+  const unseenRecs = useMemo(() => recs.filter((r) => !r.seen_at), [recs])
+
+  const markAllRead = useCallback(async () => {
+    await markNotificationsRead()
+    setRecs((list) => list.map((r) => (r.seen_at ? r : { ...r, seen_at: new Date().toISOString() })))
+    setUnread(0)
+  }, [])
+
   const value = useMemo(
     () => ({
       friends,
@@ -143,14 +152,16 @@ export function NotificationProvider({ children }) {
       friendCount: friends.length,
       requests,
       recs,
+      unseenRecs,
       unread,
-      count: requests.length + recs.length + (unread > 0 ? 1 : 0),
+      count: requests.length + unseenRecs.length + (unread > 0 ? 1 : 0),
       refresh,
       acceptRequest,
       declineRequest,
       dismissRec,
+      markAllRead,
     }),
-    [friends, fitFriends, requests, recs, unread, refresh, acceptRequest, declineRequest, dismissRec],
+    [friends, fitFriends, requests, recs, unseenRecs, unread, refresh, acceptRequest, declineRequest, dismissRec, markAllRead],
   )
 
   return <NotificationContext.Provider value={value}>{children}</NotificationContext.Provider>
@@ -162,12 +173,14 @@ const EMPTY = {
   friendCount: 0,
   requests: [],
   recs: [],
+  unseenRecs: [],
   unread: 0,
   count: 0,
   refresh: async () => {},
   acceptRequest: async () => {},
   declineRequest: async () => {},
   dismissRec: async () => {},
+  markAllRead: async () => {},
 }
 
 export function useNotifications() {

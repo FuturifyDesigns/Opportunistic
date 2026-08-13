@@ -8,7 +8,8 @@ import UserAvatar from './UserAvatar'
 export default function NotificationBell() {
   const { t } = useTranslation()
   const toast = useToast()
-  const { count, requests, recs, unread, acceptRequest, declineRequest, dismissRec } = useNotifications()
+  const { count, requests, unseenRecs, unread, acceptRequest, declineRequest, dismissRec, markAllRead } =
+    useNotifications()
   const [open, setOpen] = useState(false)
   const rootRef = useRef(null)
 
@@ -53,6 +54,16 @@ export default function NotificationBell() {
     }
   }
 
+  async function onMarkAllRead() {
+    try {
+      await markAllRead()
+    } catch (err) {
+      toast.error(err.message || t('common.toast.genericError'))
+    }
+  }
+
+  const canMarkRead = unseenRecs.length > 0 || unread > 0
+
   return (
     <div className={`notify-bell ${open ? 'open' : ''}`} ref={rootRef}>
       <button
@@ -77,7 +88,14 @@ export default function NotificationBell() {
 
       {open ? (
         <div className="notify-panel" role="menu">
-          <p className="notify-panel-title">{t('notify.title')}</p>
+          <div className="notify-panel-head">
+            <p className="notify-panel-title">{t('notify.title')}</p>
+            {canMarkRead ? (
+              <button type="button" className="notify-mark-read" onClick={() => void onMarkAllRead()}>
+                {t('notify.markAllRead')}
+              </button>
+            ) : null}
+          </div>
           {!count ? <p className="muted notify-empty">{t('notify.empty')}</p> : null}
 
           {requests.map((req) => (
@@ -99,7 +117,7 @@ export default function NotificationBell() {
             </div>
           ))}
 
-          {recs.map((rec) => (
+          {unseenRecs.map((rec) => (
             <div key={`rec-${rec.id}`} className="notify-item">
               <UserAvatar url={rec.from_avatar} name={rec.from_name} size={36} />
               <div>

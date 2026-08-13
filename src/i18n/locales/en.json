@@ -655,7 +655,8 @@
     "accept": "Accept",
     "decline": "Decline",
     "viewDash": "Open dashboard",
-    "viewRec": "See match"
+    "viewRec": "See match",
+    "markAllRead": "Mark all read"
   },
   "skillPicker": {
     "suggestedFrom": "Suggested from: {{fields}}",

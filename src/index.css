@@ -3405,6 +3405,13 @@ sup {
   gap: 0.55rem;
 }
 
+.notify-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
 .notify-panel-title {
   margin: 0;
   font-family: var(--mono);
@@ -3412,6 +3419,20 @@ sup {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
+}
+
+.notify-mark-read {
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 650;
+  padding: 0.2rem 0;
+  cursor: pointer;
+}
+
+.notify-mark-read:hover {
+  text-decoration: underline;
 }
 
 .notify-empty {
