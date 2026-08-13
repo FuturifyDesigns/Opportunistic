@@ -66,7 +66,7 @@ export async function upsertProfile(supabase, row) {
   if (payload.bio != null) payload.bio = stripGoalTag(payload.bio)
   if (payload.goal != null) payload.goal = normalizeGoal(payload.goal)
 
-  const { error } = await supabase.from('profiles').upsert(payload)
+  const { error } = await supabase.from('profiles').upsert(payload, { defaultToNull: false })
   if (!error) return { error: null }
 
   const missingGoalCol =
@@ -76,7 +76,10 @@ export async function upsertProfile(supabase, row) {
     const goal = payload.goal
     const { goal: _drop, ...withoutGoal } = payload
     if (withoutGoal.bio != null) withoutGoal.bio = withGoalTag(withoutGoal.bio, goal)
-    return supabase.from('profiles').upsert(withoutGoal).then(({ error: e }) => ({ error: e }))
+    return supabase
+      .from('profiles')
+      .upsert(withoutGoal, { defaultToNull: false })
+      .then(({ error: e }) => ({ error: e }))
   }
 
   return { error }

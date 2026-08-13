@@ -56,12 +56,16 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [profileReady, setProfileReady] = useState(false)
 
-  async function refreshProfile(userId, user) {
+  async function refreshProfile(userId, user, { markBusy = true } = {}) {
     if (!userId) {
       setProfile(null)
+      setProfileReady(true)
       return null
     }
+    if (markBusy) setProfileReady(false)
+
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -69,28 +73,31 @@ export function AuthProvider({ children }) {
       .maybeSingle()
     if (error) {
       console.error(error)
+      setProfileReady(true)
       return null
     }
 
     let next = data
     const displayName = oauthDisplayName(user)
 
-    // Google (and other OAuth) may create auth.users before the profile trigger lands —
-    // ensure a profiles row always exists so sign-in can continue to onboarding/dashboard.
+    // Google (and other OAuth) may create auth.users before the profile trigger lands.
+    // Never upsert missing columns — that can reset onboarding_complete on sign-in.
     if (!next) {
-      const { data: created, error: createErr } = await supabase
-        .from('profiles')
-        .upsert(
-          {
-            user_id: userId,
-            full_name: displayName || '',
-          },
-          { onConflict: 'user_id' },
-        )
-        .select('*')
-        .maybeSingle()
+      const { error: createErr } = await supabase.from('profiles').upsert(
+        {
+          user_id: userId,
+          full_name: displayName || '',
+        },
+        { onConflict: 'user_id', ignoreDuplicates: true, defaultToNull: false },
+      )
       if (createErr) console.error(createErr)
-      next = created
+      const { data: again, error: againErr } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle()
+      if (againErr) console.error(againErr)
+      next = again
     } else if (displayName && !String(next.full_name || '').trim()) {
       const { data: updated } = await supabase
         .from('profiles')
@@ -102,7 +109,22 @@ export function AuthProvider({ children }) {
       else next = { ...next, full_name: displayName }
     }
 
+    if (next && !next.onboarding_complete && String(next.country || '').trim()) {
+      const [{ count: qCount }, { count: sCount }] = await Promise.all([
+        supabase.from('qualifications').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+        supabase.from('skills').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+      ])
+      if ((qCount || 0) > 0 && (sCount || 0) > 0) {
+        const { error: healErr } = await supabase
+          .from('profiles')
+          .update({ onboarding_complete: true })
+          .eq('user_id', userId)
+        if (!healErr) next = { ...next, onboarding_complete: true }
+      }
+    }
+
     setProfile(next)
+    setProfileReady(true)
     return next
   }
 
@@ -136,6 +158,7 @@ export function AuthProvider({ children }) {
           if (!mounted) return
           setSession(null)
           setProfile(null)
+          setProfileReady(true)
           return
         }
 
@@ -145,6 +168,10 @@ export function AuthProvider({ children }) {
         await refreshProfile(data.session?.user?.id, data.session?.user)
       } catch (err) {
         console.error(err)
+        if (mounted) {
+          setProfile(null)
+          setProfileReady(true)
+        }
       } finally {
         if (mounted) setLoading(false)
       }
@@ -154,7 +181,17 @@ export function AuthProvider({ children }) {
 
     const { data: sub } = supabase.auth.onAuthStateChange((event, next) => {
       setSession(next)
-      refreshProfile(next?.user?.id, next?.user)
+      if (!next?.user) {
+        setProfile(null)
+        setProfileReady(true)
+        return
+      }
+      const markBusy = event === 'SIGNED_IN' || event === 'INITIAL_SESSION'
+      if (markBusy) setProfileReady(false)
+      // Defer so the JWT is attached before profile RLS queries.
+      window.setTimeout(() => {
+        void refreshProfile(next.user.id, next.user, { markBusy })
+      }, 0)
       if (event === 'SIGNED_IN' && next?.user?.id) {
         let skipTrack = false
         try {
@@ -180,10 +217,11 @@ export function AuthProvider({ children }) {
       user: session?.user ?? null,
       profile,
       loading,
-      refreshProfile: () => refreshProfile(session?.user?.id, session?.user),
+      profileReady,
+      refreshProfile: () => refreshProfile(session?.user?.id, session?.user, { markBusy: false }),
       signOut: () => supabase.auth.signOut(),
     }),
-    [session, profile, loading],
+    [session, profile, loading, profileReady],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

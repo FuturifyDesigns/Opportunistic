@@ -96,7 +96,7 @@ export default function Auth() {
   const { t } = useTranslation()
   const [params] = useSearchParams()
   const navigate = useNavigate()
-  const { user, profile, loading } = useAuth()
+  const { user, profile, loading, profileReady } = useAuth()
   const toast = useToast()
   const root = useRef(null)
   const formRef = useRef(null)
@@ -208,6 +208,7 @@ export default function Auth() {
       }
       return
     }
+    if (!profileReady) return
 
     let emailConfirm = false
     let oauthIntent = null
@@ -253,12 +254,12 @@ export default function Auth() {
     } catch {
       /* ignore */
     }
-    if (!profile || !profile.onboarding_complete) {
+    if (!profile?.onboarding_complete) {
       navigate('/onboarding', { replace: true })
       return
     }
     navigate('/dashboard', { replace: true })
-  }, [user, profile, loading, navigate, toast, t, switchToSignIn])
+  }, [user, profile, loading, profileReady, navigate, toast, t, switchToSignIn])
 
   useGSAP(
     () => {
@@ -499,7 +500,7 @@ export default function Auth() {
     )
   }
 
-  if (loading) {
+  if (loading || (user && !profileReady)) {
     const oauthReturn =
       typeof window !== 'undefined' &&
       (new URLSearchParams(window.location.search).has('code') ||

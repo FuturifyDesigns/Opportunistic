@@ -24,7 +24,7 @@ gsap.registerPlugin(useGSAP)
 const emptyQual = { type: 'degree', field: '', institution: '', year: new Date().getFullYear() }
 
 export default function Onboarding() {
-  const { user, refreshProfile } = useAuth()
+  const { user, profile, profileReady, refreshProfile } = useAuth()
   const toast = useToast()
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
@@ -293,6 +293,19 @@ export default function Onboarding() {
   useEffect(() => {
     document.title = t('onboarding.metaTitle')
   }, [t, i18n.language])
+
+  useEffect(() => {
+    if (!profileReady) return
+    if (profile?.onboarding_complete) navigate('/dashboard', { replace: true })
+  }, [profileReady, profile?.onboarding_complete, navigate])
+
+  if (!profileReady || profile?.onboarding_complete) {
+    return (
+      <div className="page-center">
+        <div className="spinner" aria-label={t('common.loading')} />
+      </div>
+    )
+  }
 
   return (
     <PageBackdrop image="auth.jpg" className="onboarding-page">

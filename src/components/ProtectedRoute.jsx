@@ -3,11 +3,11 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 
 export default function ProtectedRoute({ children, requireOnboarding = false }) {
-  const { user, profile, loading } = useAuth()
+  const { user, profile, loading, profileReady } = useAuth()
   const { t } = useTranslation()
   const location = useLocation()
 
-  if (loading) {
+  if (loading || (user && !profileReady)) {
     return (
       <div className="page-center">
         <div className="spinner" aria-label={t('common.loading')} />
@@ -19,7 +19,7 @@ export default function ProtectedRoute({ children, requireOnboarding = false }) 
     return <Navigate to="/auth" replace state={{ from: location.pathname }} />
   }
 
-  if (requireOnboarding && profile && !profile.onboarding_complete) {
+  if (requireOnboarding && !profile?.onboarding_complete) {
     return <Navigate to="/onboarding" replace />
   }
 
