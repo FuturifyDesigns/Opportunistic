@@ -1,21 +1,23 @@
 const SEP = ' · '
 
-function wantsNextPart(value) {
-  return /(?:[,;|/]|·)\s*$/.test(value) || /\s{2,}$/.test(value)
+function commaPending(value) {
+  return /,\s*$/.test(value) || /(?:\s*·\s*)$/.test(value)
 }
 
 export function formatHeadline(value, { trailing = true } = {}) {
   const raw = String(value || '')
   if (!raw) return ''
 
-  const keepTrailing = trailing && wantsNextPart(raw)
+  const keepSep = trailing && commaPending(raw)
+  const keepSpaces = trailing && !keepSep ? raw.match(/\s+$/)?.[0] || '' : ''
+
   const parts = raw
-    .split(/\s*[·•|,;]\s*|\s+\/\s+|\s{2,}|\s+-\s+/)
+    .split(/[·•,]/)
     .map((part) => part.trim())
     .filter(Boolean)
 
   if (!parts.length) return ''
-  return keepTrailing ? `${parts.join(SEP)}${SEP}` : parts.join(SEP)
+  return `${parts.join(SEP)}${keepSep ? SEP : keepSpaces}`
 }
 
 export function finalizeHeadline(value) {
