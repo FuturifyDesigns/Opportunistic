@@ -5227,6 +5227,113 @@ a.btn-auth {
   font-weight: 500;
 }
 
+.headline-composer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.5rem;
+  width: 100%;
+  min-height: 2.75rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.45rem 0.6rem;
+  background: #fff;
+}
+
+.headline-composer:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(11, 110, 79, 0.12);
+}
+
+.headline-composer.invalid,
+.stack-form label.invalid .headline-composer {
+  border-color: #d98989;
+  background: #fff7f7;
+}
+
+.headline-slot {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1 1 12rem;
+  min-width: min(100%, 9rem);
+  max-width: 100%;
+}
+
+.headline-slot.solo {
+  flex: 1 1 100%;
+  min-width: 100%;
+}
+
+.headline-slot.active {
+  flex: 2 1 16rem;
+}
+
+.headline-sep {
+  color: var(--accent);
+  font-weight: 800;
+  user-select: none;
+  line-height: 1;
+}
+
+.stack-form .headline-composer .headline-part,
+.profile-field .headline-composer .headline-part,
+.headline-part {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  border: 0;
+  padding: 0.25rem 0.15rem;
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 550;
+}
+
+.headline-add {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-left: 0.05rem;
+  border: 1px dashed color-mix(in srgb, var(--accent) 45%, var(--line));
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.headline-add:hover {
+  border-style: solid;
+  border-color: var(--accent);
+}
+
+.headline-prompt {
+  margin: 0.5rem 0 0;
+  padding: 0.7rem 0.8rem;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--line));
+  background: var(--accent-soft);
+  color: var(--ink);
+  font-size: 0.88rem;
+  font-weight: 650;
+  line-height: 1.4;
+  animation: toast-in 0.2s ease-out;
+}
+
+.headline-prompt.early {
+  background: #fff4e8;
+  border-color: #efd2a8;
+  font-weight: 600;
+}
+
 .headline-hint {
   margin: 0.15rem 0 0;
   color: var(--muted);

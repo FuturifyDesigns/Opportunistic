@@ -14,7 +14,8 @@ import SkillPicker from '../components/SkillPicker'
 import MatchBeacon from '../components/MatchBeacon'
 import { prefersReducedMotion } from '../lib/animations'
 import { normalizeSkillName, normalizeFieldName } from '../lib/skillCatalog'
-import { applyHeadlineCaret, finalizeHeadline, nextHeadlineValue } from '../lib/headline'
+import HeadlineComposer from '../components/HeadlineComposer'
+import { finalizeHeadline } from '../lib/headline'
 import { validateOnboardingStep } from '../lib/fieldValidation'
 import { defaultBioForGoal, goalLabelKey, normalizeGoal, upsertProfile } from '../lib/goal'
 
@@ -376,13 +377,13 @@ export default function Onboarding() {
                 </label>
                 <label className={errMsg('headline') ? 'invalid' : ''}>
                   {t('onboarding.headline')} <span className="optional">{t('onboarding.optional')}</span>
-                  <input
+                  <HeadlineComposer
                     value={headline}
-                    onChange={(e) => {
-                      const el = e.target
-                      const { value, caret } = nextHeadlineValue(el.value, el.selectionStart)
-                      setHeadline(value)
-                      applyHeadlineCaret(el, caret)
+                    placeholder={t('onboarding.headlinePlaceholder')}
+                    ariaInvalid={Boolean(errMsg('headline'))}
+                    describedBy="onboarding-headline-hint"
+                    onChange={(next) => {
+                      setHeadline(next)
                       setFieldErrors((p) => ({ ...p, headline: undefined }))
                     }}
                     onBlur={() => {
@@ -390,9 +391,6 @@ export default function Onboarding() {
                       markTouched('headline')
                       validateCurrent()
                     }}
-                    placeholder={t('onboarding.headlinePlaceholder')}
-                    aria-invalid={Boolean(errMsg('headline'))}
-                    aria-describedby="onboarding-headline-hint"
                   />
                   <p id="onboarding-headline-hint" className="headline-hint">
                     {t('onboarding.headlineHint')}

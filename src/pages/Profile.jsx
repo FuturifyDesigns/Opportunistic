@@ -22,7 +22,8 @@ import SkillPicker from '../components/SkillPicker'
 import AvatarEditor from '../components/AvatarEditor'
 import CensoredText from '../components/CensoredText'
 import { normalizeSkillName, normalizeFieldName, suggestSkillsFromQualifications } from '../lib/skillCatalog'
-import { applyHeadlineCaret, finalizeHeadline, nextHeadlineValue } from '../lib/headline'
+import HeadlineComposer from '../components/HeadlineComposer'
+import { finalizeHeadline } from '../lib/headline'
 import { prefersReducedMotion } from '../lib/animations'
 import { removeAvatar, uploadAvatar } from '../lib/avatar'
 
@@ -371,16 +372,11 @@ export default function Profile() {
               </label>
               <label className="profile-field">
                 <span>{t('profile.headline')}</span>
-                <input
+                <HeadlineComposer
                   value={form.headline}
                   placeholder={t('profile.headlinePlaceholder')}
-                  aria-describedby="profile-headline-hint"
-                  onChange={(e) => {
-                    const el = e.target
-                    const { value, caret } = nextHeadlineValue(el.value, el.selectionStart)
-                    setForm((f) => ({ ...f, headline: value }))
-                    applyHeadlineCaret(el, caret)
-                  }}
+                  describedBy="profile-headline-hint"
+                  onChange={(next) => setForm((f) => ({ ...f, headline: next }))}
                   onBlur={() => {
                     setForm((f) => ({ ...f, headline: finalizeHeadline(f.headline) }))
                   }}
