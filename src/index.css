@@ -7754,7 +7754,7 @@ textarea {
 }
 
 .hub-skill-rooms-label {
-  margin: 0 0 0.55rem;
+  margin: 0 0 0.35rem;
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--muted);
@@ -7762,10 +7762,32 @@ textarea {
   letter-spacing: 0.04em;
 }
 
+.hub-skill-rooms-hint {
+  margin: 0 0 0.65rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
 .hub-skill-chips {
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem;
+}
+
+.hub-skill-chips .chip {
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 999px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hub-skill-chips .chip.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
 }
 
 .hub-peer-list,
@@ -7870,6 +7892,79 @@ textarea {
   min-width: 0;
 }
 
+.user-avatar {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--ink);
+  color: #fff;
+  font-family: var(--display);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-avatar-fallback {
+  font-size: 0.9em;
+}
+
+.hub-person-link {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.hub-person-name {
+  color: inherit;
+}
+
+.hub-person-name:hover {
+  text-decoration: underline;
+}
+
+.hub-peer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: flex-end;
+}
+
+.member-card h1 {
+  margin: 0.15rem 0 0.35rem;
+  font-family: var(--display);
+}
+
+.member-identity {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.member-bio {
+  white-space: pre-wrap;
+  margin: 0 0 1rem;
+}
+
+.member-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.hub-requests {
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+}
+
 .hub-post p {
   margin: 0 0 0.65rem;
   white-space: pre-wrap;
@@ -7895,15 +7990,23 @@ textarea {
   border: 0;
   border-bottom: 1px solid var(--line);
   background: transparent;
-  padding: 0.85rem 1rem;
+  padding: 0.75rem 0.9rem;
   display: grid;
-  gap: 0.2rem;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.7rem;
+  align-items: center;
   cursor: pointer;
 }
 
 .hub-thread:hover,
 .hub-thread.active {
   background: var(--accent-soft);
+}
+
+.hub-thread-copy {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
 }
 
 .hub-thread-title {
@@ -7950,9 +8053,22 @@ textarea {
   display: flex;
   justify-content: space-between;
   gap: 0.75rem;
-  align-items: baseline;
+  align-items: center;
   padding: 0.9rem 1rem;
   border-bottom: 1px solid var(--line);
+}
+
+.hub-chat-head-person {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
+.hub-chat-head-copy {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
 }
 
 .hub-chat-empty {
@@ -7971,21 +8087,45 @@ textarea {
   background: color-mix(in srgb, var(--bg) 70%, transparent);
 }
 
+.hub-msg-row {
+  display: flex;
+  gap: 0.45rem;
+  align-items: flex-end;
+  max-width: min(92%, 34rem);
+}
+
+.hub-msg-row.mine {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.hub-msg-row.theirs {
+  align-self: flex-start;
+}
+
 .hub-msg {
-  max-width: min(85%, 28rem);
-  padding: 0.65rem 0.8rem;
+  max-width: 100%;
+  padding: 0.55rem 0.75rem;
   border: 1px solid var(--line);
   background: var(--bg-elevated);
+  border-radius: 12px;
 }
 
 .hub-msg.mine {
-  align-self: flex-end;
   background: var(--accent-soft);
   border-color: color-mix(in srgb, var(--accent) 35%, var(--line));
 }
 
 .hub-msg.theirs {
-  align-self: flex-start;
+  border-radius: 12px 12px 12px 4px;
+}
+
+.hub-msg-name {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 0.2rem;
 }
 
 .hub-msg p {

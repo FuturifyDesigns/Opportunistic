@@ -119,6 +119,11 @@ export async function markThreadRead(threadId) {
   if (error) throw error
 }
 
+export async function leaveThread(threadId) {
+  const { error } = await supabase.rpc('leave_collab_thread', { p_thread_id: threadId })
+  if (error) throw error
+}
+
 export function subscribeThreadMessages(threadId, onInsert) {
   const channel = supabase
     .channel(`collab-msg-${threadId}`)
@@ -147,4 +152,55 @@ export async function loadMySkills(userId) {
     .order('skill_name')
   if (error) throw error
   return (data || []).map((r) => r.skill_name).filter(Boolean)
+}
+
+export async function getCollabProfile(userId) {
+  const { data, error } = await supabase.rpc('get_collab_profile', { p_user_id: userId })
+  if (error) throw error
+  return data?.[0] || null
+}
+
+export async function listThreadPeople(threadId) {
+  const { data, error } = await supabase.rpc('list_collab_thread_people', { p_thread_id: threadId })
+  if (error) throw error
+  return data || []
+}
+
+export async function listFriends() {
+  const { data, error } = await supabase.rpc('list_collab_friends')
+  if (error) throw error
+  return data || []
+}
+
+export async function listFriendRequests() {
+  const { data, error } = await supabase.rpc('list_friend_requests')
+  if (error) throw error
+  return data || []
+}
+
+export async function sendFriendRequest(userId) {
+  const { data, error } = await supabase.rpc('send_friend_request', { p_user_id: userId })
+  if (error) throw error
+  return data
+}
+
+export async function respondFriendRequest(userId, accept) {
+  const { data, error } = await supabase.rpc('respond_friend_request', {
+    p_user_id: userId,
+    accept,
+  })
+  if (error) throw error
+  return data
+}
+
+export async function cancelFriendRequest(userId) {
+  const { data, error } = await supabase.rpc('cancel_friend_request', { p_user_id: userId })
+  if (error) throw error
+  return data
+}
+
+export async function unfriend(userId) {
+  const { data, error } = await supabase.rpc('unfriend_collab', { p_user_id: userId })
+  if (error) throw error
+  return data
 }
