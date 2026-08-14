@@ -26,6 +26,11 @@ export function NotificationProvider({ children }) {
   const [recs, setRecs] = useState([])
   const [unread, setUnread] = useState(0)
   const readyRef = useRef(false)
+  const activeChatThreadRef = useRef(null)
+
+  const setActiveChatThread = useCallback((threadId) => {
+    activeChatThreadRef.current = threadId || null
+  }, [])
 
   const refresh = useCallback(async () => {
     if (!user?.id) {
@@ -102,7 +107,16 @@ export function NotificationProvider({ children }) {
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'collab_messages' },
         (payload) => {
-          if (payload.new?.user_id && payload.new.user_id !== user.id) bump()
+          const row = payload.new || {}
+          if (!row.user_id || row.user_id === user.id) return
+          bump()
+          if (!readyRef.current) return
+          if (row.thread_id && row.thread_id === activeChatThreadRef.current) return
+          const preview = String(row.body || '')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .slice(0, 80)
+          toast.info(preview ? t('notify.messageToast', { preview }) : t('notify.messageToastPlain'))
         },
       )
       .subscribe()
@@ -160,8 +174,9 @@ export function NotificationProvider({ children }) {
       declineRequest,
       dismissRec,
       markAllRead,
+      setActiveChatThread,
     }),
-    [friends, fitFriends, requests, recs, unseenRecs, unread, refresh, acceptRequest, declineRequest, dismissRec, markAllRead],
+    [friends, fitFriends, requests, recs, unseenRecs, unread, refresh, acceptRequest, declineRequest, dismissRec, markAllRead, setActiveChatThread],
   )
 
   return <NotificationContext.Provider value={value}>{children}</NotificationContext.Provider>
@@ -181,6 +196,7 @@ const EMPTY = {
   declineRequest: async () => {},
   dismissRec: async () => {},
   markAllRead: async () => {},
+  setActiveChatThread: () => {},
 }
 
 export function useNotifications() {

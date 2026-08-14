@@ -8648,6 +8648,7 @@ textarea {
   position: sticky;
   bottom: 0;
   z-index: 2;
+  align-items: center;
 }
 
 .hub-composer input {
@@ -8657,6 +8658,88 @@ textarea {
   padding: 0.65rem 0.75rem;
   border-radius: var(--radius);
   min-width: 0;
+}
+
+.emoji-picker {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.emoji-picker-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--bg);
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emoji-picker-btn:hover,
+.emoji-picker.open .emoji-picker-btn {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+  background: color-mix(in srgb, var(--accent) 10%, var(--bg));
+}
+
+.emoji-picker-panel {
+  position: absolute;
+  bottom: calc(100% + 0.45rem);
+  left: 0;
+  width: min(20.5rem, calc(100vw - 2rem));
+  max-height: 16.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) + 2px);
+  background: var(--bg-elevated);
+  box-shadow: 0 12px 32px color-mix(in srgb, #000 22%, transparent);
+  z-index: 20;
+}
+
+.emoji-picker-search {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  padding: 0.45rem 0.55rem;
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+}
+
+.emoji-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 0.15rem;
+  overflow-y: auto;
+  max-height: 12.5rem;
+  padding-right: 0.1rem;
+}
+
+.emoji-picker-item {
+  border: 0;
+  background: transparent;
+  border-radius: 0.35rem;
+  font-size: 1.25rem;
+  line-height: 1.35;
+  cursor: pointer;
+  padding: 0.2rem;
+}
+
+.emoji-picker-item:hover,
+.emoji-picker-item:focus-visible {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  outline: none;
+}
+
+.emoji-picker-empty {
+  grid-column: 1 / -1;
+  margin: 0.6rem 0.2rem;
+  font-size: 0.85rem;
 }
 
 @media (max-width: 900px) {

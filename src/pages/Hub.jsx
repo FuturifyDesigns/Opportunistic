@@ -12,6 +12,7 @@ import SiteFooter from '../components/SiteFooter'
 import UserAvatar from '../components/UserAvatar'
 import PresenceStatus from '../components/PresenceStatus'
 import CensoredText from '../components/CensoredText'
+import EmojiPicker from '../components/EmojiPicker'
 import {
   cancelFriendRequest,
   createCollabPost,
@@ -77,12 +78,14 @@ function PersonMeta({ headline, country, extra }) {
 export default function Hub() {
   const { user, profile, refreshProfile } = useAuth()
   const { isOnline, seedLastSeen } = usePresence()
-  const { friends, requests, refresh: refreshNotes } = useNotifications()
+  const { friends, requests, refresh: refreshNotes, setActiveChatThread } = useNotifications()
   const toast = useToast()
   const { t } = useTranslation()
   const location = useLocation()
   const navigate = useNavigate()
   const root = useRef(null)
+  const draftInputRef = useRef(null)
+  const [emojiOpen, setEmojiOpen] = useState(false)
 
   const [tab, setTab] = useState(location.state?.tab || 'people')
   const [open, setOpen] = useState(Boolean(profile?.open_to_collab))
@@ -262,6 +265,11 @@ export default function Hub() {
   }, [location.state?.openThreadId, user?.id, openThread, navigate])
 
   useEffect(() => {
+    setActiveChatThread(activeThreadId)
+    return () => setActiveChatThread(null)
+  }, [activeThreadId, setActiveChatThread])
+
+  useEffect(() => {
     if (!activeThreadId) return undefined
     const unsub = subscribeThreadMessages(activeThreadId, (row) => {
       setMessages((prev) => {
@@ -279,6 +287,24 @@ export default function Hub() {
     })
     return unsub
   }, [activeThreadId])
+
+  function insertEmoji(emoji) {
+    const el = draftInputRef.current
+    const text = draft
+    if (el && typeof el.selectionStart === 'number') {
+      const start = el.selectionStart
+      const end = el.selectionEnd
+      const next = `${text.slice(0, start)}${emoji}${text.slice(end)}`.slice(0, 4000)
+      setDraft(next)
+      window.requestAnimationFrame(() => {
+        el.focus()
+        const caret = Math.min(start + emoji.length, next.length)
+        el.setSelectionRange(caret, caret)
+      })
+      return
+    }
+    setDraft(`${text}${emoji}`.slice(0, 4000))
+  }
 
   useEffect(() => {
     const el = messagesPane.current
@@ -1056,7 +1082,9 @@ export default function Hub() {
                     })}
                   </div>
                   <form className="hub-composer" onSubmit={onSend}>
+                    <EmojiPicker open={emojiOpen} onOpenChange={setEmojiOpen} onPick={insertEmoji} />
                     <input
+                      ref={draftInputRef}
                       value={draft}
                       onChange={(e) => setDraft(e.target.value)}
                       placeholder={t('hub.messagePh')}
