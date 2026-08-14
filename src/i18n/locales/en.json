@@ -273,8 +273,7 @@
     "sideJobTitle": "Jobs",
     "sideJobBody": "Live jobs from Remotive and Arbeitnow, scored to your skills, plus searches on Indeed and LinkedIn for your country.",
     "sideWeekTitle": "Daily scan",
-    "sideWeekBody": "Every 24 hours we look again automatically. Saving your profile can update cards sooner without restarting this timer.",
-    "remotiveLink": "Browse Remotive jobs →"
+    "sideWeekBody": "Every 24 hours we look again automatically. Saving your profile can update cards sooner without restarting this timer."
   },
   "settings": {
     "title": "Account settings",

@@ -518,11 +518,6 @@ export default function Dashboard() {
                 <span>{t('dashboard.sideWeekBody')}</span>
               </li>
             </ul>
-            {showJobs ? (
-              <a className="text-link" href="https://remotive.com/remote-jobs" target="_blank" rel="noreferrer">
-                {t('dashboard.remotiveLink')}
-              </a>
-            ) : null}
           </aside>
         </div>
       </main>
