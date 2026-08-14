@@ -260,9 +260,10 @@ export default function Hub() {
   useEffect(() => {
     const incoming = location.state?.openThreadId
     if (!incoming || !user?.id) return
+    if (location.state?.tab) setTab(location.state.tab)
     void openThread(incoming)
-    navigate('/hub', { replace: true })
-  }, [location.state?.openThreadId, user?.id, openThread, navigate])
+    navigate('/hub', { replace: true, state: {} })
+  }, [location.state, location.key, user?.id, openThread, navigate])
 
   useEffect(() => {
     setActiveChatThread(activeThreadId)

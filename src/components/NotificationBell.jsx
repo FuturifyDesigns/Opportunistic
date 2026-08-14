@@ -5,11 +5,34 @@ import { useNotifications } from '../context/NotificationContext'
 import { useToast } from '../context/ToastContext'
 import UserAvatar from './UserAvatar'
 
+function chatNotifyLabel(thread, t) {
+  const count = Number(thread.unread_count || 0)
+  if (thread.kind === 'dm') {
+    const name = thread.peer_name || t('hub.dmFallback')
+    return count > 1
+      ? t('notify.unreadFromMany', { name, count })
+      : t('notify.unreadFrom', { name })
+  }
+  const name = thread.title || t('hub.conversation')
+  return count > 1
+    ? t('notify.unreadRoomMany', { name, count })
+    : t('notify.unreadRoom', { name })
+}
+
 export default function NotificationBell() {
   const { t } = useTranslation()
   const toast = useToast()
-  const { count, requests, unseenRecs, unread, acceptRequest, declineRequest, dismissRec, markAllRead } =
-    useNotifications()
+  const {
+    count,
+    requests,
+    unseenRecs,
+    unread,
+    unreadThreads,
+    acceptRequest,
+    declineRequest,
+    dismissRec,
+    markAllRead,
+  } = useNotifications()
   const [open, setOpen] = useState(false)
   const rootRef = useRef(null)
 
@@ -102,9 +125,7 @@ export default function NotificationBell() {
             <div key={`fr-${req.user_id}`} className="notify-item">
               <UserAvatar url={req.avatar_url} name={req.full_name} size={36} />
               <div>
-                <p>
-                  {t('notify.friendRequest', { name: req.full_name })}
-                </p>
+                <p>{t('notify.friendRequest', { name: req.full_name })}</p>
                 <div className="notify-item-actions">
                   <button type="button" className="btn btn-sm" onClick={() => void onAccept(req.user_id)}>
                     {t('notify.accept')}
@@ -121,9 +142,7 @@ export default function NotificationBell() {
             <div key={`rec-${rec.id}`} className="notify-item">
               <UserAvatar url={rec.from_avatar} name={rec.from_name} size={36} />
               <div>
-                <p>
-                  {t('notify.recItem', { name: rec.from_name, title: rec.title })}
-                </p>
+                <p>{t('notify.recItem', { name: rec.from_name, title: rec.title })}</p>
                 <div className="notify-item-actions">
                   <NavLink className="btn btn-sm" to={`/match/rec/${rec.id}`} onClick={() => setOpen(false)}>
                     {t('notify.viewRec')}
@@ -136,12 +155,28 @@ export default function NotificationBell() {
             </div>
           ))}
 
-          {unread > 0 ? (
-            <NavLink className="notify-item notify-link" to="/hub" state={{ tab: 'chats' }} onClick={() => setOpen(false)}>
-              <span className="notify-unread-dot" aria-hidden />
-              <span>{t('notify.unread', { count: unread })}</span>
-            </NavLink>
-          ) : null}
+          {unreadThreads.map((th) => {
+            const name = th.kind === 'dm' ? th.peer_name || t('hub.dmFallback') : th.title || t('hub.conversation')
+            const preview = String(th.last_body || '')
+              .replace(/\s+/g, ' ')
+              .trim()
+              .slice(0, 72)
+            return (
+              <NavLink
+                key={`chat-${th.thread_id}`}
+                className="notify-item notify-link"
+                to="/hub"
+                state={{ tab: 'chats', openThreadId: th.thread_id }}
+                onClick={() => setOpen(false)}
+              >
+                <UserAvatar url={th.peer_avatar} name={name} size={36} />
+                <div className="notify-chat-copy">
+                  <p>{chatNotifyLabel(th, t)}</p>
+                  {preview ? <span className="notify-chat-preview">{preview}</span> : null}
+                </div>
+              </NavLink>
+            )
+          })}
         </div>
       ) : null}
     </div>

@@ -24,7 +24,7 @@ export function NotificationProvider({ children }) {
   const [fitFriends, setFitFriends] = useState([])
   const [requests, setRequests] = useState([])
   const [recs, setRecs] = useState([])
-  const [unread, setUnread] = useState(0)
+  const [unreadThreads, setUnreadThreads] = useState([])
   const readyRef = useRef(false)
   const activeChatThreadRef = useRef(null)
 
@@ -38,7 +38,7 @@ export function NotificationProvider({ children }) {
       setFitFriends([])
       setRequests([])
       setRecs([])
-      setUnread(0)
+      setUnreadThreads([])
       return
     }
     try {
@@ -53,7 +53,11 @@ export function NotificationProvider({ children }) {
       setFitFriends(fitRows)
       setRequests(requestRows)
       setRecs(recRows)
-      setUnread(threads.reduce((n, th) => n + Number(th.unread_count || 0), 0))
+      setUnreadThreads(
+        (threads || [])
+          .filter((th) => Number(th.unread_count || 0) > 0)
+          .sort((a, b) => new Date(b.last_at || 0) - new Date(a.last_at || 0)),
+      )
     } catch {
       /* ignore */
     }
@@ -156,8 +160,13 @@ export function NotificationProvider({ children }) {
   const markAllRead = useCallback(async () => {
     await markNotificationsRead()
     setRecs((list) => list.map((r) => (r.seen_at ? r : { ...r, seen_at: new Date().toISOString() })))
-    setUnread(0)
+    setUnreadThreads([])
   }, [])
+
+  const unread = useMemo(
+    () => unreadThreads.reduce((n, th) => n + Number(th.unread_count || 0), 0),
+    [unreadThreads],
+  )
 
   const value = useMemo(
     () => ({
@@ -168,7 +177,8 @@ export function NotificationProvider({ children }) {
       recs,
       unseenRecs,
       unread,
-      count: requests.length + unseenRecs.length + (unread > 0 ? 1 : 0),
+      unreadThreads,
+      count: requests.length + unseenRecs.length + unreadThreads.length,
       refresh,
       acceptRequest,
       declineRequest,
@@ -176,7 +186,21 @@ export function NotificationProvider({ children }) {
       markAllRead,
       setActiveChatThread,
     }),
-    [friends, fitFriends, requests, recs, unseenRecs, unread, refresh, acceptRequest, declineRequest, dismissRec, markAllRead, setActiveChatThread],
+    [
+      friends,
+      fitFriends,
+      requests,
+      recs,
+      unseenRecs,
+      unread,
+      unreadThreads,
+      refresh,
+      acceptRequest,
+      declineRequest,
+      dismissRec,
+      markAllRead,
+      setActiveChatThread,
+    ],
   )
 
   return <NotificationContext.Provider value={value}>{children}</NotificationContext.Provider>
@@ -190,6 +214,7 @@ const EMPTY = {
   recs: [],
   unseenRecs: [],
   unread: 0,
+  unreadThreads: [],
   count: 0,
   refresh: async () => {},
   acceptRequest: async () => {},

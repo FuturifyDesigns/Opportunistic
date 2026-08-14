@@ -3468,6 +3468,20 @@ sup {
   align-items: center;
 }
 
+.notify-chat-copy {
+  min-width: 0;
+}
+
+.notify-chat-preview {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .notify-unread-dot {
   width: 0.55rem;
   height: 0.55rem;
