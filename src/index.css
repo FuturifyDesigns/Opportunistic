@@ -2265,7 +2265,7 @@ sup {
 .profile-page .profile-shell {
   width: min(760px, calc(100% - 2rem));
   margin: 0 auto;
-  padding: 1.5rem 0 6.5rem;
+  padding: 1.5rem 0 9rem;
 }
 
 .profile-topbar {
@@ -2886,15 +2886,17 @@ sup {
 }
 
 .profile-save-bar {
-  position: sticky;
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
   bottom: max(0.85rem, env(safe-area-inset-bottom));
+  width: min(760px, calc(100% - 2rem));
   z-index: 20;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 0.85rem 1rem;
-  margin-top: 0.35rem;
   padding: 0.95rem 1.1rem;
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -2934,7 +2936,7 @@ sup {
 @media (max-width: 720px) {
   .profile-page .profile-shell {
     width: min(100% - 1.25rem, 760px);
-    padding-bottom: 7.5rem;
+    padding-bottom: 11rem;
   }
 
   .profile-nav {
@@ -2955,6 +2957,7 @@ sup {
   }
 
   .profile-save-bar {
+    width: min(760px, calc(100% - 1.25rem));
     flex-direction: column;
     align-items: stretch;
   }
@@ -8112,8 +8115,7 @@ html {
   }
 
   .profile-save-bar {
-    inset-inline: 0;
-    width: 100%;
+    width: calc(100% - 0.85rem);
     border-radius: 10px;
     padding: 0.75rem 0.85rem;
   }
@@ -8180,11 +8182,6 @@ html {
 
   .lang-switch-panel.sheet {
     max-height: min(88vh, 22rem);
-  }
-
-  .profile-save-bar {
-    position: static;
-    margin: 1rem 0 0;
   }
 
   .sticky-cta {
