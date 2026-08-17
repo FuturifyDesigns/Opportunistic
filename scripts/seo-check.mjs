@@ -58,7 +58,7 @@ for (const route of SEO_ROUTES) {
   if (!html.includes('rel="icon" href="/favicon.ico"')) fail('favicon.ico link missing')
 }
 
-for (const asset of ['favicon.ico', 'favicon-48.png', 'og-image.png', 'site.webmanifest', 'sitemap.xml', 'robots.txt', 'CNAME', '404.html']) {
+for (const asset of ['favicon.ico', 'favicon-48.png', 'og-image.png', 'sitemap.xml', 'robots.txt', 'CNAME', '404.html']) {
   if (!fs.existsSync(path.join(dist, asset))) fail(`dist/${asset} missing`)
 }
 

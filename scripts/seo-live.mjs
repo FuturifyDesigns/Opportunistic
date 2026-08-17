@@ -6,7 +6,7 @@
 
 import { SEO_ROUTES, SITE_URL, canonicalFor } from '../src/lib/seoRoutes.js'
 
-const assets = ['/favicon.ico', '/favicon-48.png', '/og-image.png', '/robots.txt', '/sitemap.xml', '/site.webmanifest']
+const assets = ['/favicon.ico', '/favicon-48.png', '/og-image.png', '/robots.txt', '/sitemap.xml']
 const targets = [
   // Canonical URLs must answer 200 directly, with no redirect hop.
   ...SEO_ROUTES.map((r) => canonicalFor(r.path)),

@@ -21,7 +21,6 @@ import PageBackdrop from '../components/PageBackdrop'
 import SkillPicker from '../components/SkillPicker'
 import AvatarEditor from '../components/AvatarEditor'
 import { normalizeSkillName, normalizeFieldName, suggestSkillsFromQualifications } from '../lib/skillCatalog'
-import HeadlineComposer from '../components/HeadlineComposer'
 import { finalizeHeadline } from '../lib/headline'
 import { validateProfileForm } from '../lib/fieldValidation'
 import { prefersReducedMotion } from '../lib/animations'
@@ -30,6 +29,8 @@ import { removeAvatar, uploadAvatar } from '../lib/avatar'
 gsap.registerPlugin(useGSAP)
 
 const emptyQual = { type: 'degree', field: '', institution: '', year: new Date().getFullYear() }
+
+const SECTIONS = ['about', 'focus', 'quals', 'skills']
 
 function initialsFromName(name) {
   const parts = String(name || '')
@@ -47,6 +48,8 @@ export default function Profile() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const root = useRef(null)
+  const sectionRefs = useRef({})
+  const [activeSection, setActiveSection] = useState('about')
   const [form, setForm] = useState({
     full_name: '',
     headline: '',
@@ -142,11 +145,11 @@ export default function Profile() {
   useGSAP(
     () => {
       if (prefersReducedMotion()) return
-      gsap.from('.profile-identity, .profile-section, .profile-save-bar', {
-        y: 18,
+      gsap.from('.profile-topbar, .profile-preview-card, .profile-nav, .profile-section', {
+        y: 16,
         opacity: 0,
-        duration: 0.45,
-        stagger: 0.07,
+        duration: 0.42,
+        stagger: 0.06,
         ease: 'power2.out',
         clearProps: 'all',
       })
@@ -168,6 +171,25 @@ export default function Profile() {
     if (form.goal === 'jobs') return t('onboarding.goalJobs')
     return t('onboarding.goalBoth')
   }, [form.goal, t])
+
+  const goalOptions = useMemo(
+    () => [
+      { value: 'both', label: t('onboarding.goalBoth'), desc: t('profile.goalBothDesc') },
+      { value: 'scholarships', label: t('onboarding.goalScholarships'), desc: t('profile.goalSchDesc') },
+      { value: 'jobs', label: t('onboarding.goalJobs'), desc: t('profile.goalJobsDesc') },
+    ],
+    [t],
+  )
+
+  const sectionNav = useMemo(
+    () => [
+      { id: 'about', label: t('profile.navAbout'), step: t('profile.sectionAboutStep') },
+      { id: 'focus', label: t('profile.navFocus'), step: t('profile.sectionFocusStep') },
+      { id: 'quals', label: t('profile.navQuals'), step: t('profile.sectionQualsStep') },
+      { id: 'skills', label: t('profile.navSkills'), step: t('profile.sectionSkillsStep') },
+    ],
+    [t],
+  )
 
   const needsRematch = useMemo(() => {
     if (!baseline) return false
@@ -196,6 +218,11 @@ export default function Profile() {
       nextSkills !== baseline.skills
     )
   }, [baseline, form.country, form.goal, qualifications, skills])
+
+  function scrollToSection(id) {
+    setActiveSection(id)
+    sectionRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 
   function updateQual(i, patch) {
     setErrors((prev) => {
@@ -229,6 +256,14 @@ export default function Profile() {
     if (!ok) {
       setErrors(nextErrors)
       toast.error(t('onboarding.errFixFields'))
+      const first = SECTIONS.find((id) => {
+        if (id === 'about' && (nextErrors.fullName || nextErrors.headline || nextErrors.bio)) return true
+        if (id === 'quals' && Object.keys(nextErrors).some((k) => k.startsWith('qual') || k === 'qualifications'))
+          return true
+        if (id === 'skills' && nextErrors.skills) return true
+        return false
+      })
+      if (first) scrollToSection(first)
       return
     }
     setErrors({})
@@ -326,87 +361,95 @@ export default function Profile() {
     <PageBackdrop image="auth.jpg" className="profile-page">
       <SiteHeader />
       <main className="profile-shell" ref={root}>
-        <header className="profile-identity" data-no-glitch data-live-preview>
-          <div className="profile-identity-main">
-            <div className="profile-avatar-wrap">
-              <button
-                type="button"
-                className={`profile-avatar ${profile?.avatar_url ? 'has-photo' : ''}`}
-                disabled={avatarBusy}
-                onClick={() => setEditorOpen(true)}
-                aria-label={profile?.avatar_url ? t('profile.avatarEdit') : t('profile.avatarUpload')}
-              >
-                {profile?.avatar_url ? (
-                  <img src={profile.avatar_url} alt="" />
-                ) : (
-                  <span aria-hidden="true">{initialsFromName(form.full_name)}</span>
-                )}
-              </button>
-              <div className="profile-avatar-actions">
-                <button
-                  type="button"
-                  className="btn btn-sm"
-                  disabled={avatarBusy}
-                  onClick={() => setEditorOpen(true)}
-                >
-                  {profile?.avatar_url ? t('profile.avatarEdit') : t('profile.avatarUpload')}
-                </button>
-                {profile?.avatar_url ? (
-                  <button
-                    type="button"
-                    className="btn btn-ghost btn-sm"
-                    disabled={avatarBusy}
-                    onClick={() => void onRemoveAvatar()}
-                  >
-                    {t('profile.avatarRemove')}
-                  </button>
-                ) : null}
-              </div>
-            </div>
-            <div className="profile-identity-copy">
-              <p className="eyebrow">{t('profile.eyebrow')}</p>
-              <h1 data-no-glitch>
-                {form.full_name.trim() || t('profile.title')}
-              </h1>
-              <p className="profile-identity-headline">
-                {form.headline.trim() || t('profile.headlinePlaceholder')}
-              </p>
-              <div className="profile-meta-row">
-                <span className="profile-chip">{form.country}</span>
-                <span className="profile-chip">{goalLabel}</span>
-                <span className="profile-chip">
-                  {t('profile.statQuals', { count: filledQuals })}
-                </span>
-                <span className="profile-chip">
-                  {t('profile.statSkills', { count: filledSkills })}
-                </span>
-              </div>
-            </div>
-          </div>
-          <p className="profile-identity-lede">{t('profile.lede')}</p>
+        <div className="profile-topbar">
           <Link className="profile-back" to="/dashboard">
             {t('profile.backDashboard')}
           </Link>
-        </header>
+          <div className="profile-topbar-copy">
+            <h1 data-no-glitch>{t('profile.title')}</h1>
+            <p>{t('profile.lede')}</p>
+          </div>
+        </div>
 
-        <AvatarEditor
-          open={editorOpen}
-          onClose={() => setEditorOpen(false)}
-          onSave={onSaveAvatar}
-        />
+        <div className="profile-preview-card" data-no-glitch data-live-preview>
+          <button
+            type="button"
+            className={`profile-avatar ${profile?.avatar_url ? 'has-photo' : ''}`}
+            disabled={avatarBusy}
+            onClick={() => setEditorOpen(true)}
+            aria-label={profile?.avatar_url ? t('profile.avatarEdit') : t('profile.avatarUpload')}
+          >
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt="" />
+            ) : (
+              <span aria-hidden="true">{initialsFromName(form.full_name)}</span>
+            )}
+          </button>
+          <div className="profile-preview-copy">
+            <p className="profile-preview-name">{form.full_name.trim() || t('profile.fullName')}</p>
+            <p className="profile-preview-headline">
+              {form.headline.trim() || t('profile.headlinePlaceholder')}
+            </p>
+            <div className="profile-meta-row">
+              <span className="profile-chip">{form.country}</span>
+              <span className="profile-chip">{goalLabel}</span>
+              <span className="profile-chip">{t('profile.statQuals', { count: filledQuals })}</span>
+              <span className="profile-chip">{t('profile.statSkills', { count: filledSkills })}</span>
+            </div>
+          </div>
+          <div className="profile-preview-actions">
+            <button type="button" className="btn btn-sm" disabled={avatarBusy} onClick={() => setEditorOpen(true)}>
+              {profile?.avatar_url ? t('profile.avatarEdit') : t('profile.avatarUpload')}
+            </button>
+            {profile?.avatar_url ? (
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                disabled={avatarBusy}
+                onClick={() => void onRemoveAvatar()}
+              >
+                {t('profile.avatarRemove')}
+              </button>
+            ) : null}
+          </div>
+        </div>
+
+        <nav className="profile-nav" aria-label={t('profile.progressLabel')}>
+          {sectionNav.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={`profile-nav-btn ${activeSection === item.id ? 'active' : ''}`}
+              onClick={() => scrollToSection(item.id)}
+            >
+              <span className="profile-nav-step">{item.step}</span>
+              <span className="profile-nav-label">{item.label}</span>
+            </button>
+          ))}
+        </nav>
+
+        <AvatarEditor open={editorOpen} onClose={() => setEditorOpen(false)} onSave={onSaveAvatar} />
 
         <form className="profile-form" onSubmit={save}>
-          <section className="profile-section" aria-labelledby="profile-about-heading">
+          <section
+            className="profile-section"
+            id="profile-about"
+            aria-labelledby="profile-about-heading"
+            ref={(el) => {
+              sectionRefs.current.about = el
+            }}
+          >
             <div className="profile-section-head">
               <p className="profile-step">{t('profile.sectionAboutStep')}</p>
               <h2 id="profile-about-heading">{t('profile.sectionAbout')}</h2>
               <p>{t('profile.sectionAboutHint')}</p>
             </div>
-            <div className="profile-fields">
+            <div className="profile-fields profile-fields-stack">
               <label className={`profile-field${errors.fullName ? ' invalid' : ''}`}>
                 <span>{t('profile.fullName')}</span>
                 <input
                   value={form.full_name}
+                  placeholder="Jane Doe"
                   onChange={(e) => {
                     setErrors((prev) => ({ ...prev, fullName: undefined }))
                     setForm({ ...form, full_name: e.target.value })
@@ -418,33 +461,31 @@ export default function Profile() {
                   <span className="field-error">{t(`onboarding.${errors.fullName}`)}</span>
                 ) : null}
               </label>
+
               <label className={`profile-field${errors.headline ? ' invalid' : ''}`}>
                 <span>{t('profile.headline')}</span>
-                <HeadlineComposer
+                <input
                   value={form.headline}
                   placeholder={t('profile.headlinePlaceholder')}
-                  describedBy="profile-headline-hint"
-                  ariaInvalid={Boolean(errors.headline)}
-                  onChange={(next) => {
+                  aria-invalid={Boolean(errors.headline)}
+                  onChange={(e) => {
                     setErrors((prev) => ({ ...prev, headline: undefined }))
-                    setForm((f) => ({ ...f, headline: next }))
+                    setForm((f) => ({ ...f, headline: e.target.value }))
                   }}
                   onBlur={() => {
                     setForm((f) => ({ ...f, headline: finalizeHeadline(f.headline) }))
                   }}
                 />
+                <span className="field-hint">{t('profile.headlineHint')}</span>
                 {errors.headline ? (
                   <span className="field-error">{t(`onboarding.${errors.headline}`)}</span>
                 ) : null}
-                <p id="profile-headline-hint" className="headline-hint">
-                  {t('profile.headlineHint')}
-                  <span className="headline-hint-example">{t('profile.headlineHintExample')}</span>
-                </p>
               </label>
-              <label className={`profile-field profile-field-full${errors.bio ? ' invalid' : ''}`}>
+
+              <label className={`profile-field${errors.bio ? ' invalid' : ''}`}>
                 <span>{t('profile.bio')}</span>
                 <textarea
-                  rows={4}
+                  rows={3}
                   value={form.bio}
                   placeholder={t('profile.bioPlaceholder')}
                   aria-invalid={Boolean(errors.bio)}
@@ -455,12 +496,10 @@ export default function Profile() {
                 />
                 {errors.bio ? <span className="field-error">{t(`onboarding.${errors.bio}`)}</span> : null}
               </label>
-              <label className="profile-field">
+
+              <label className="profile-field profile-field-half">
                 <span>{t('profile.country')}</span>
-                <select
-                  value={form.country}
-                  onChange={(e) => setForm({ ...form, country: e.target.value })}
-                >
+                <select value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })}>
                   {COUNTRIES.map((c) => (
                     <option key={c} value={c}>
                       {c}
@@ -471,32 +510,44 @@ export default function Profile() {
             </div>
           </section>
 
-          <section className="profile-section" aria-labelledby="profile-focus-heading">
+          <section
+            className="profile-section"
+            id="profile-focus"
+            aria-labelledby="profile-focus-heading"
+            ref={(el) => {
+              sectionRefs.current.focus = el
+            }}
+          >
             <div className="profile-section-head">
               <p className="profile-step">{t('profile.sectionFocusStep')}</p>
               <h2 id="profile-focus-heading">{t('profile.sectionFocus')}</h2>
               <p>{t('profile.goalHint')}</p>
             </div>
-            <div className="choice-pills profile-goal-pills" role="group" aria-label={t('onboarding.goalAria')}>
-              {[
-                ['both', t('onboarding.goalBoth')],
-                ['scholarships', t('onboarding.goalScholarships')],
-                ['jobs', t('onboarding.goalJobs')],
-              ].map(([value, label]) => (
+            <div className="profile-goal-grid" role="radiogroup" aria-label={t('onboarding.goalAria')}>
+              {goalOptions.map((option) => (
                 <button
-                  key={value}
+                  key={option.value}
                   type="button"
-                  className={`choice-pill ${form.goal === value ? 'active' : ''}`}
-                  aria-pressed={form.goal === value}
-                  onClick={() => setForm({ ...form, goal: value })}
+                  role="radio"
+                  aria-checked={form.goal === option.value}
+                  className={`profile-goal-card ${form.goal === option.value ? 'active' : ''}`}
+                  onClick={() => setForm({ ...form, goal: option.value })}
                 >
-                  {label}
+                  <strong>{option.label}</strong>
+                  <span>{option.desc}</span>
                 </button>
               ))}
             </div>
           </section>
 
-          <section className="profile-section" aria-labelledby="profile-quals-heading">
+          <section
+            className="profile-section"
+            id="profile-quals"
+            aria-labelledby="profile-quals-heading"
+            ref={(el) => {
+              sectionRefs.current.quals = el
+            }}
+          >
             <div className="profile-section-head">
               <p className="profile-step">{t('profile.sectionQualsStep')}</p>
               <h2 id="profile-quals-heading">{t('profile.qualsTitle')}</h2>
@@ -507,15 +558,9 @@ export default function Profile() {
               {qualifications.map((q, i) => (
                 <div className="profile-qual" key={i}>
                   <div className="profile-qual-top">
-                    <span className="profile-qual-index">
-                      {t('profile.qualIndex', { n: i + 1 })}
-                    </span>
+                    <span className="profile-qual-index">{t('profile.qualIndex', { n: i + 1 })}</span>
                     {qualifications.length > 1 ? (
-                      <button
-                        type="button"
-                        className="profile-qual-remove"
-                        onClick={() => removeQual(i)}
-                      >
+                      <button type="button" className="profile-qual-remove" onClick={() => removeQual(i)}>
                         {t('profile.removeQual')}
                       </button>
                     ) : null}
@@ -563,7 +608,9 @@ export default function Profile() {
                         <span className="field-error">{errMsg('qualifications')}</span>
                       ) : null}
                     </label>
-                    <label className={`profile-field profile-field-full${errMsg(`qualInstitution_${i}`) ? ' invalid' : ''}`}>
+                    <label
+                      className={`profile-field profile-field-full${errMsg(`qualInstitution_${i}`) ? ' invalid' : ''}`}
+                    >
                       <span>{t('profile.qualInstitution')}</span>
                       <input
                         value={q.institution || ''}
@@ -584,11 +631,18 @@ export default function Profile() {
               className="btn btn-ghost profile-add-qual"
               onClick={() => setQualifications((r) => [...r, { ...emptyQual }])}
             >
-              {t('profile.addQual')}
+              + {t('profile.addQual')}
             </button>
           </section>
 
-          <section className="profile-section" aria-labelledby="profile-skills-heading">
+          <section
+            className="profile-section"
+            id="profile-skills"
+            aria-labelledby="profile-skills-heading"
+            ref={(el) => {
+              sectionRefs.current.skills = el
+            }}
+          >
             <div className="profile-section-head">
               <p className="profile-step">{t('profile.sectionSkillsStep')}</p>
               <h2 id="profile-skills-heading">{t('profile.skillsTitle')}</h2>
@@ -602,9 +656,7 @@ export default function Profile() {
                 setSkills(next)
               }}
             />
-            {errors.skills ? (
-              <p className="field-error">{t(`onboarding.${errors.skills}`)}</p>
-            ) : null}
+            {errors.skills ? <p className="field-error">{t(`onboarding.${errors.skills}`)}</p> : null}
           </section>
 
           <div className="profile-save-bar">
