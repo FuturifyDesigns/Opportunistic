@@ -2885,13 +2885,34 @@ sup {
   width: fit-content;
 }
 
-.profile-save-bar {
+.profile-footer-sentinel {
+  height: 1px;
+  margin: 0;
+  pointer-events: none;
+}
+
+.profile-save-dock {
   position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
   bottom: max(0.85rem, env(safe-area-inset-bottom));
-  width: min(760px, calc(100% - 2rem));
   z-index: 20;
+  display: flex;
+  justify-content: center;
+  padding-inline: max(1rem, env(safe-area-inset-left)) max(1rem, env(safe-area-inset-right));
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.profile-save-dock.is-hidden {
+  opacity: 0;
+  transform: translateY(0.75rem);
+  pointer-events: none;
+}
+
+.profile-save-bar {
+  width: min(760px, calc(100vw - 2rem));
+  pointer-events: auto;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -2956,8 +2977,12 @@ sup {
     grid-template-columns: 1fr;
   }
 
+  .profile-save-dock {
+    padding-inline: max(0.625rem, env(safe-area-inset-left)) max(0.625rem, env(safe-area-inset-right));
+  }
+
   .profile-save-bar {
-    width: min(760px, calc(100% - 1.25rem));
+    width: min(760px, calc(100vw - 1.25rem));
     flex-direction: column;
     align-items: stretch;
   }
@@ -8114,8 +8139,12 @@ html {
     font-size: 1.1rem;
   }
 
+  .profile-save-dock {
+    padding-inline: max(0.425rem, env(safe-area-inset-left)) max(0.425rem, env(safe-area-inset-right));
+  }
+
   .profile-save-bar {
-    width: calc(100% - 0.85rem);
+    width: min(760px, calc(100vw - 0.85rem));
     border-radius: 10px;
     padding: 0.75rem 0.85rem;
   }
@@ -8199,7 +8228,7 @@ html {
 }
 
 /* Cookie banner lifts sticky chrome so actions stay tappable */
-body.has-cookie-banner .profile-save-bar,
+body.has-cookie-banner .profile-save-dock,
 body.has-cookie-banner .sticky-cta {
   bottom: max(7.25rem, calc(env(safe-area-inset-bottom) + 6.5rem));
 }

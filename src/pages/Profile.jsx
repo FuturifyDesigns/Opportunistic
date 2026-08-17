@@ -48,8 +48,10 @@ export default function Profile() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const root = useRef(null)
+  const footerSentinelRef = useRef(null)
   const sectionRefs = useRef({})
   const [activeSection, setActiveSection] = useState('about')
+  const [saveBarVisible, setSaveBarVisible] = useState(true)
   const [form, setForm] = useState({
     full_name: '',
     headline: '',
@@ -69,6 +71,19 @@ export default function Profile() {
   useEffect(() => {
     document.title = t('profile.metaTitle')
   }, [t, i18n.language])
+
+  useEffect(() => {
+    const sentinel = footerSentinelRef.current
+    if (!sentinel) return undefined
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setSaveBarVisible(!entry.isIntersecting),
+      { threshold: 0, rootMargin: '0px 0px -1rem 0px' },
+    )
+
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     if (!user?.id || !profile || hydratedRef.current) return
@@ -430,7 +445,7 @@ export default function Profile() {
 
         <AvatarEditor open={editorOpen} onClose={() => setEditorOpen(false)} onSave={onSaveAvatar} />
 
-        <form className="profile-form" onSubmit={save}>
+        <form id="profile-form" className="profile-form" onSubmit={save}>
           <section
             className="profile-section"
             id="profile-about"
@@ -658,29 +673,36 @@ export default function Profile() {
             />
             {errors.skills ? <p className="field-error">{t(`onboarding.${errors.skills}`)}</p> : null}
           </section>
-
-          <div className="profile-save-bar">
-            <div className="profile-save-copy">
-              <strong>{needsRematch ? t('profile.saveBarTitleRematch') : t('profile.saveBarTitle')}</strong>
-              <span>{needsRematch ? t('profile.saveBarBodyRematch') : t('profile.saveBarBody')}</span>
-            </div>
-            <div className="profile-save-actions">
-              <Link className="btn btn-ghost" to="/dashboard">
-                {t('common.cancel')}
-              </Link>
-              <button className="btn btn-match" type="submit" disabled={busy}>
-                {busy
-                  ? needsRematch
-                    ? t('profile.savingRematch')
-                    : t('profile.saving')
-                  : needsRematch
-                    ? t('profile.saveRematch')
-                    : t('profile.save')}
-              </button>
-            </div>
-          </div>
         </form>
       </main>
+
+      <div
+        className={`profile-save-dock${saveBarVisible ? '' : ' is-hidden'}`}
+        aria-hidden={!saveBarVisible}
+      >
+        <div className="profile-save-bar">
+          <div className="profile-save-copy">
+            <strong>{needsRematch ? t('profile.saveBarTitleRematch') : t('profile.saveBarTitle')}</strong>
+            <span>{needsRematch ? t('profile.saveBarBodyRematch') : t('profile.saveBarBody')}</span>
+          </div>
+          <div className="profile-save-actions">
+            <Link className="btn btn-ghost" to="/dashboard">
+              {t('common.cancel')}
+            </Link>
+            <button className="btn btn-match" type="submit" form="profile-form" disabled={busy}>
+              {busy
+                ? needsRematch
+                  ? t('profile.savingRematch')
+                  : t('profile.saving')
+                : needsRematch
+                  ? t('profile.saveRematch')
+                  : t('profile.save')}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div ref={footerSentinelRef} className="profile-footer-sentinel" aria-hidden="true" />
       <SiteFooter />
     </PageBackdrop>
   )
