@@ -242,6 +242,21 @@ export default function Profile() {
 
   function removeQual(i) {
     setQualifications((rows) => (rows.length <= 1 ? rows : rows.filter((_, idx) => idx !== i)))
+    // Qualification errors are keyed by row index, so they must shift with the rows.
+    setErrors((prev) => {
+      const next = {}
+      for (const [key, message] of Object.entries(prev)) {
+        const match = key.match(/^(qualField|qualInstitution|qualYear)_(\d+)$/)
+        if (!match) {
+          next[key] = message
+          continue
+        }
+        const idx = Number(match[2])
+        if (idx === i) continue
+        next[idx > i ? `${match[1]}_${idx - 1}` : key] = message
+      }
+      return next
+    })
   }
 
   async function save(e) {
@@ -288,8 +303,11 @@ export default function Profile() {
         /* ignore */
       }
 
-      await supabase.from('qualifications').delete().eq('user_id', user.id)
-      await supabase.from('skills').delete().eq('user_id', user.id)
+      // Rows are replaced wholesale, so a failed delete would duplicate them.
+      const { error: qDelErr } = await supabase.from('qualifications').delete().eq('user_id', user.id)
+      if (qDelErr) throw qDelErr
+      const { error: sDelErr } = await supabase.from('skills').delete().eq('user_id', user.id)
+      if (sDelErr) throw sDelErr
 
       const qualRows = qualifications
         .filter((q) => q.field?.trim())
@@ -310,8 +328,30 @@ export default function Profile() {
         }))
         .filter((s) => s.skill_name)
 
-      if (qualRows.length) await supabase.from('qualifications').insert(qualRows)
-      if (skillRows.length) await supabase.from('skills').insert(skillRows)
+      if (qualRows.length) {
+        const { error: qErr } = await supabase.from('qualifications').insert(qualRows)
+        if (qErr) throw qErr
+      }
+      if (skillRows.length) {
+        const { error: sErr } = await supabase.from('skills').insert(skillRows)
+        if (sErr) throw sErr
+      }
+
+      setBaseline({
+        country: form.country,
+        goal: focus,
+        quals: JSON.stringify(
+          qualRows.map((q) => ({
+            type: q.type,
+            field: q.field,
+            institution: q.institution || '',
+            year: q.year,
+          })),
+        ),
+        skills: JSON.stringify(
+          skillRows.map((s) => ({ skill_name: s.skill_name, proficiency: s.proficiency })),
+        ),
+      })
 
       if (needsRematch) {
         await runMatchingForUser(user.id, { reason: 'profile' })

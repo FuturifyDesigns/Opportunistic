@@ -58,6 +58,8 @@ export function validateProfileForm(data) {
       const field = String(q.field || '').trim()
       const institution = String(q.institution || '').trim()
       if (!field && !institution) return
+      // A row is only saved when it has a field of study, so flag institution-only rows.
+      if (!field) errors[`qualField_${i}`] = 'errQualFieldRequired'
       if (field && !hasMeaningfulText(field)) errors[`qualField_${i}`] = 'errTextJunk'
       if (institution && !hasMeaningfulText(institution)) errors[`qualInstitution_${i}`] = 'errTextJunk'
       if (field || institution) {
@@ -100,6 +102,7 @@ export function validateOnboardingStep(step, data) {
         const field = String(q.field || '').trim()
         const institution = String(q.institution || '').trim()
         if (!field && !institution) return
+        if (!field) errors[`qualField_${i}`] = 'errQualFieldRequired'
         if (field && !hasMeaningfulText(field)) errors[`qualField_${i}`] = 'errTextJunk'
         if (institution && !hasMeaningfulText(institution)) errors[`qualInstitution_${i}`] = 'errTextJunk'
         if (field || institution) {
