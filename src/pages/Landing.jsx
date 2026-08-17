@@ -106,11 +106,11 @@ export default function Landing() {
               </Link>
             </InteractiveCard>
             <InteractiveCard className="teaser" data-reveal="right">
-              <p className="eyebrow">{t('landing.modules')}</p>
-              <h2>{t('landing.whatShips')}</h2>
-              <p>{t('landing.whatShipsBody')}</p>
-              <Link className="text-link" to="/features">
-                {t('landing.viewModules')}
+              <p className="eyebrow">{t('landing.collab')}</p>
+              <h2>{t('landing.collabTitle')}</h2>
+              <p>{t('landing.collabBody')}</p>
+              <Link className="text-link" to="/hub">
+                {t('landing.openHub')}
               </Link>
             </InteractiveCard>
             <InteractiveCard className="teaser" data-reveal="up">
