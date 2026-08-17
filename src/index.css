@@ -2617,6 +2617,29 @@ sup {
   box-shadow: 0 0 0 3px rgba(11, 110, 79, 0.12);
 }
 
+.profile-field.invalid input,
+.profile-field.invalid select,
+.profile-field.invalid textarea,
+.profile-field.invalid .headline-composer {
+  border-color: #c0392b;
+}
+
+.error-boundary-panel {
+  max-width: 28rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.error-boundary-panel h1 {
+  margin: 0 0 0.65rem;
+  font-size: 1.35rem;
+}
+
+.error-boundary-panel p {
+  margin: 0 0 1rem;
+  color: var(--muted);
+}
+
 .profile-field textarea {
   resize: vertical;
   min-height: 6.5rem;

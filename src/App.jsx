@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AuthProvider } from './context/AuthContext'
 import { PresenceProvider } from './context/PresenceContext'
@@ -28,6 +28,7 @@ import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
 import Admin from './pages/Admin'
 import NotFound from './pages/NotFound'
+import ErrorBoundary from './components/ErrorBoundary'
 
 function AppRoutes() {
   const { i18n } = useTranslation()
@@ -112,6 +113,15 @@ function AppRoutes() {
   )
 }
 
+function RoutedShell() {
+  const location = useLocation()
+  return (
+    <ErrorBoundary key={`${location.pathname}${location.search}`}>
+      <AppRoutes />
+    </ErrorBoundary>
+  )
+}
+
 export default function App() {
   return (
     <AuthProvider>
@@ -124,7 +134,7 @@ export default function App() {
               <PageLifecycle />
               <CookieConsent />
               <div id="page-shell" className="page-shell">
-                <AppRoutes />
+                <RoutedShell />
               </div>
           </BrowserRouter>
           </NotificationProvider>

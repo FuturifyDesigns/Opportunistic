@@ -42,6 +42,42 @@ export function isValidYear(value, { min = 1950, max = new Date().getFullYear() 
  * Validate onboarding step fields. Returns { ok, errors } where errors is
  * a map of field keys to i18n message keys (without the onboarding. prefix).
  */
+export function validateProfileForm(data) {
+  const errors = {}
+
+  if (!isValidPersonName(data.fullName)) errors.fullName = 'errNameInvalid'
+  if (!isValidOptionalText(data.headline)) errors.headline = 'errTextJunk'
+  if (!isValidOptionalText(data.bio)) errors.bio = 'errTextJunk'
+
+  const quals = data.qualifications || []
+  const filled = quals.filter((q) => String(q.field || '').trim())
+  if (!filled.length) {
+    errors.qualifications = 'errQualRequired'
+  } else {
+    quals.forEach((q, i) => {
+      const field = String(q.field || '').trim()
+      const institution = String(q.institution || '').trim()
+      if (!field && !institution) return
+      if (field && !hasMeaningfulText(field)) errors[`qualField_${i}`] = 'errTextJunk'
+      if (institution && !hasMeaningfulText(institution)) errors[`qualInstitution_${i}`] = 'errTextJunk'
+      if (field || institution) {
+        if (!isValidYear(q.year)) errors[`qualYear_${i}`] = 'errYearInvalid'
+      }
+    })
+  }
+
+  const skills = (data.skills || []).filter((s) => String(s.skill_name || '').trim())
+  if (!skills.length) {
+    errors.skills = 'errSkillsRequired'
+  } else {
+    skills.forEach((s, i) => {
+      if (!hasMeaningfulText(s.skill_name)) errors[`skill_${i}`] = 'errTextJunk'
+    })
+  }
+
+  return { ok: Object.keys(errors).length === 0, errors }
+}
+
 export function validateOnboardingStep(step, data) {
   const errors = {}
 

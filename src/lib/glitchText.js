@@ -61,7 +61,11 @@ function clearEnhanced(el) {
 
 function isSkippable(el) {
   if (!el || el.nodeType !== 1) return true
-  if (el.closest('[data-no-glitch], button, input, textarea, select, a.btn, .nav-start-logo, .glitch-mark')) {
+  if (
+    el.closest(
+      '[data-no-glitch], [data-live-preview], form, .profile-identity, button, input, textarea, select, a.btn, .nav-start-logo, .glitch-mark',
+    )
+  ) {
     return true
   }
   const kids = [...el.childNodes]

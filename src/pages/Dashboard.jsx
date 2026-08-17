@@ -308,8 +308,8 @@ export default function Dashboard() {
           <div className="dash-hero-copy">
             <p className="eyebrow">{t('nav.dashboard')}</p>
             <h1>
-              {profile?.full_name
-                ? t('dashboard.hello', { name: profile.full_name.split(' ')[0] })
+              {profile?.full_name?.trim()
+                ? t('dashboard.hello', { name: profile.full_name.trim().split(/\s+/)[0] })
                 : t('dashboard.helloGuest')}
             </h1>
             <p className="muted">

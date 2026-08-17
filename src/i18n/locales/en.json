@@ -51,6 +51,11 @@
     "body": "That link doesn’t lead anywhere on Opportunistic.",
     "home": "Back to home"
   },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "body": "This page hit an unexpected error. Reload or go back home.",
+    "reload": "Reload page"
+  },
   "nav": {
     "howItWorks": "How it works",
     "features": "Features",

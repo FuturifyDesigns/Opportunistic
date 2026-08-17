@@ -20,10 +20,10 @@ import SiteFooter from '../components/SiteFooter'
 import PageBackdrop from '../components/PageBackdrop'
 import SkillPicker from '../components/SkillPicker'
 import AvatarEditor from '../components/AvatarEditor'
-import CensoredText from '../components/CensoredText'
 import { normalizeSkillName, normalizeFieldName, suggestSkillsFromQualifications } from '../lib/skillCatalog'
 import HeadlineComposer from '../components/HeadlineComposer'
 import { finalizeHeadline } from '../lib/headline'
+import { validateProfileForm } from '../lib/fieldValidation'
 import { prefersReducedMotion } from '../lib/animations'
 import { removeAvatar, uploadAvatar } from '../lib/avatar'
 
@@ -60,27 +60,36 @@ export default function Profile() {
   const [avatarBusy, setAvatarBusy] = useState(false)
   const [editorOpen, setEditorOpen] = useState(false)
   const [baseline, setBaseline] = useState(null)
+  const [errors, setErrors] = useState({})
+  const hydratedRef = useRef(false)
 
   useEffect(() => {
     document.title = t('profile.metaTitle')
   }, [t, i18n.language])
 
   useEffect(() => {
+    if (!user?.id || !profile || hydratedRef.current) return
+
+    let cancelled = false
+
     async function load() {
-      if (profile) {
-        setForm({
-          full_name: profile.full_name || '',
-          headline: profile.headline || '',
-          bio: stripGoalTag(profile.bio || ''),
-          country: profile.country || 'Botswana',
-          goal: resolveGoal(profile),
-        })
-      }
       const [{ data: q }, { data: s }] = await Promise.all([
         supabase.from('qualifications').select('*').eq('user_id', user.id),
         supabase.from('skills').select('*').eq('user_id', user.id),
       ])
+      if (cancelled) return
+
+      setForm({
+        full_name: profile.full_name || '',
+        headline: profile.headline || '',
+        bio: stripGoalTag(profile.bio || ''),
+        country: profile.country || 'Botswana',
+        goal: resolveGoal(profile),
+      })
+
       if (q?.length) setQualifications(q)
+      else setQualifications([{ ...emptyQual }])
+
       if (s?.length) {
         const catalog = new Set(
           suggestSkillsFromQualifications(q || []).map((name) => name.toLowerCase()),
@@ -97,8 +106,8 @@ export default function Profile() {
       }
 
       setBaseline({
-        country: profile?.country || 'Botswana',
-        goal: resolveGoal(profile || {}),
+        country: profile.country || 'Botswana',
+        goal: resolveGoal(profile),
         quals: JSON.stringify(
           (q || []).map((row) => ({
             type: row.type,
@@ -114,9 +123,21 @@ export default function Profile() {
           })),
         ),
       })
+      hydratedRef.current = true
     }
-    load()
-  }, [profile, user.id])
+
+    void load()
+    return () => {
+      cancelled = true
+    }
+  }, [profile, user?.id])
+
+  useEffect(
+    () => () => {
+      hydratedRef.current = false
+    },
+    [user?.id],
+  )
 
   useGSAP(
     () => {
@@ -177,7 +198,19 @@ export default function Profile() {
   }, [baseline, form.country, form.goal, qualifications, skills])
 
   function updateQual(i, patch) {
+    setErrors((prev) => {
+      const next = { ...prev }
+      delete next.qualifications
+      delete next[`qualField_${i}`]
+      delete next[`qualInstitution_${i}`]
+      delete next[`qualYear_${i}`]
+      return next
+    })
     setQualifications((rows) => rows.map((row, idx) => (idx === i ? { ...row, ...patch } : row)))
+  }
+
+  function errMsg(key) {
+    return errors[key] ? t(`onboarding.${errors[key]}`) : ''
   }
 
   function removeQual(i) {
@@ -186,12 +219,25 @@ export default function Profile() {
 
   async function save(e) {
     e.preventDefault()
+    const { ok, errors: nextErrors } = validateProfileForm({
+      fullName: form.full_name,
+      headline: form.headline,
+      bio: form.bio,
+      qualifications,
+      skills,
+    })
+    if (!ok) {
+      setErrors(nextErrors)
+      toast.error(t('onboarding.errFixFields'))
+      return
+    }
+    setErrors({})
     setBusy(true)
     try {
       const focus = normalizeGoal(form.goal)
       const bioText = stripGoalTag(form.bio).trim() || stripGoalTag(defaultBioForGoal(focus, t))
       const { error: pErr } = await updateProfile(supabase, user.id, {
-        full_name: form.full_name,
+        full_name: form.full_name.trim(),
         headline: finalizeHeadline(form.headline),
         bio: bioText,
         country: form.country,
@@ -280,7 +326,7 @@ export default function Profile() {
     <PageBackdrop image="auth.jpg" className="profile-page">
       <SiteHeader />
       <main className="profile-shell" ref={root}>
-        <header className="profile-identity">
+        <header className="profile-identity" data-no-glitch data-live-preview>
           <div className="profile-identity-main">
             <div className="profile-avatar-wrap">
               <button
@@ -319,15 +365,11 @@ export default function Profile() {
             </div>
             <div className="profile-identity-copy">
               <p className="eyebrow">{t('profile.eyebrow')}</p>
-              <h1>
-                {form.full_name?.trim() ? <CensoredText text={form.full_name.trim()} /> : t('profile.title')}
+              <h1 data-no-glitch>
+                {form.full_name.trim() || t('profile.title')}
               </h1>
               <p className="profile-identity-headline">
-                {form.headline?.trim() ? (
-                  <CensoredText text={form.headline.trim()} />
-                ) : (
-                  t('profile.headlinePlaceholder')
-                )}
+                {form.headline.trim() || t('profile.headlinePlaceholder')}
               </p>
               <div className="profile-meta-row">
                 <span className="profile-chip">{form.country}</span>
@@ -361,39 +403,57 @@ export default function Profile() {
               <p>{t('profile.sectionAboutHint')}</p>
             </div>
             <div className="profile-fields">
-              <label className="profile-field">
+              <label className={`profile-field${errors.fullName ? ' invalid' : ''}`}>
                 <span>{t('profile.fullName')}</span>
                 <input
                   value={form.full_name}
-                  onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+                  onChange={(e) => {
+                    setErrors((prev) => ({ ...prev, fullName: undefined }))
+                    setForm({ ...form, full_name: e.target.value })
+                  }}
                   autoComplete="name"
-                  required
+                  aria-invalid={Boolean(errors.fullName)}
                 />
+                {errors.fullName ? (
+                  <span className="field-error">{t(`onboarding.${errors.fullName}`)}</span>
+                ) : null}
               </label>
-              <label className="profile-field">
+              <label className={`profile-field${errors.headline ? ' invalid' : ''}`}>
                 <span>{t('profile.headline')}</span>
                 <HeadlineComposer
                   value={form.headline}
                   placeholder={t('profile.headlinePlaceholder')}
                   describedBy="profile-headline-hint"
-                  onChange={(next) => setForm((f) => ({ ...f, headline: next }))}
+                  ariaInvalid={Boolean(errors.headline)}
+                  onChange={(next) => {
+                    setErrors((prev) => ({ ...prev, headline: undefined }))
+                    setForm((f) => ({ ...f, headline: next }))
+                  }}
                   onBlur={() => {
                     setForm((f) => ({ ...f, headline: finalizeHeadline(f.headline) }))
                   }}
                 />
+                {errors.headline ? (
+                  <span className="field-error">{t(`onboarding.${errors.headline}`)}</span>
+                ) : null}
                 <p id="profile-headline-hint" className="headline-hint">
                   {t('profile.headlineHint')}
                   <span className="headline-hint-example">{t('profile.headlineHintExample')}</span>
                 </p>
               </label>
-              <label className="profile-field profile-field-full">
+              <label className={`profile-field profile-field-full${errors.bio ? ' invalid' : ''}`}>
                 <span>{t('profile.bio')}</span>
                 <textarea
                   rows={4}
                   value={form.bio}
                   placeholder={t('profile.bioPlaceholder')}
-                  onChange={(e) => setForm({ ...form, bio: e.target.value })}
+                  aria-invalid={Boolean(errors.bio)}
+                  onChange={(e) => {
+                    setErrors((prev) => ({ ...prev, bio: undefined }))
+                    setForm({ ...form, bio: e.target.value })
+                  }}
                 />
+                {errors.bio ? <span className="field-error">{t(`onboarding.${errors.bio}`)}</span> : null}
               </label>
               <label className="profile-field">
                 <span>{t('profile.country')}</span>
@@ -468,7 +528,7 @@ export default function Profile() {
                         <option value="certificate">{t('profile.qualCertificate')}</option>
                       </select>
                     </label>
-                    <label className="profile-field">
+                    <label className={`profile-field${errMsg(`qualYear_${i}`) ? ' invalid' : ''}`}>
                       <span>{t('profile.qualYear')}</span>
                       <input
                         type="number"
@@ -477,8 +537,15 @@ export default function Profile() {
                         value={q.year || ''}
                         onChange={(e) => updateQual(i, { year: e.target.value })}
                       />
+                      {errMsg(`qualYear_${i}`) ? (
+                        <span className="field-error">{errMsg(`qualYear_${i}`)}</span>
+                      ) : null}
                     </label>
-                    <label className="profile-field profile-field-full">
+                    <label
+                      className={`profile-field profile-field-full${
+                        errMsg(`qualField_${i}`) || (i === 0 && errMsg('qualifications')) ? ' invalid' : ''
+                      }`}
+                    >
                       <span>{t('profile.qualField')}</span>
                       <input
                         value={q.field || ''}
@@ -489,14 +556,23 @@ export default function Profile() {
                           if (fixed && fixed !== q.field) updateQual(i, { field: fixed })
                         }}
                       />
+                      {errMsg(`qualField_${i}`) ? (
+                        <span className="field-error">{errMsg(`qualField_${i}`)}</span>
+                      ) : null}
+                      {i === 0 && errMsg('qualifications') && !errMsg(`qualField_${i}`) ? (
+                        <span className="field-error">{errMsg('qualifications')}</span>
+                      ) : null}
                     </label>
-                    <label className="profile-field profile-field-full">
+                    <label className={`profile-field profile-field-full${errMsg(`qualInstitution_${i}`) ? ' invalid' : ''}`}>
                       <span>{t('profile.qualInstitution')}</span>
                       <input
                         value={q.institution || ''}
                         placeholder={t('profile.qualInstitutionPlaceholder')}
                         onChange={(e) => updateQual(i, { institution: e.target.value })}
                       />
+                      {errMsg(`qualInstitution_${i}`) ? (
+                        <span className="field-error">{errMsg(`qualInstitution_${i}`)}</span>
+                      ) : null}
                     </label>
                   </div>
                 </div>
@@ -518,7 +594,17 @@ export default function Profile() {
               <h2 id="profile-skills-heading">{t('profile.skillsTitle')}</h2>
               <p>{t('profile.skillsHint')}</p>
             </div>
-            <SkillPicker qualifications={qualifications} value={skills} onChange={setSkills} />
+            <SkillPicker
+              qualifications={qualifications}
+              value={skills}
+              onChange={(next) => {
+                setErrors((prev) => ({ ...prev, skills: undefined }))
+                setSkills(next)
+              }}
+            />
+            {errors.skills ? (
+              <p className="field-error">{t(`onboarding.${errors.skills}`)}</p>
+            ) : null}
           </section>
 
           <div className="profile-save-bar">
