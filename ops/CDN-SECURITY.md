@@ -49,7 +49,7 @@ Create a rule matching `http.host eq "opportunistic.online" or http.host eq "www
 Recommended CSP (single line):
 
 ```
-default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests; img-src 'self' data: blob: https:; font-src 'self'; style-src 'self' 'unsafe-inline'; style-src-attr 'unsafe-inline'; script-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://remotive.com https://www.arbeitnow.com; worker-src 'self' blob:; manifest-src 'self'
+default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests; img-src 'self' data: blob: https:; font-src 'self'; style-src 'self' 'unsafe-inline'; style-src-attr 'unsafe-inline'; script-src 'self' https://static.cloudflareinsights.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://remotive.com https://www.arbeitnow.com https://cloudflareinsights.com; worker-src 'self' blob:; manifest-src 'self'
 ```
 
 `style-src 'unsafe-inline'` is required for animation libraries that set

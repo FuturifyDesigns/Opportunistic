@@ -5,6 +5,8 @@
 
 export const SUPABASE_CONNECT = 'https://*.supabase.co wss://*.supabase.co'
 export const JOB_FEED_CONNECT = 'https://remotive.com https://www.arbeitnow.com'
+export const CLOUDFLARE_ANALYTICS_SCRIPT = 'https://static.cloudflareinsights.com'
+export const CLOUDFLARE_ANALYTICS_CONNECT = 'https://cloudflareinsights.com'
 
 /** Response-header CSP (supports frame-ancestors). Prefer this at the CDN edge. */
 export function buildCspHeader({ scriptHashes = [] } = {}) {
@@ -20,8 +22,8 @@ export function buildCspHeader({ scriptHashes = [] } = {}) {
     "font-src 'self'",
     "style-src 'self' 'unsafe-inline'",
     "style-src-attr 'unsafe-inline'",
-    `script-src ${scriptSrc}`,
-    `connect-src 'self' ${SUPABASE_CONNECT} ${JOB_FEED_CONNECT}`,
+    `script-src ${scriptSrc} ${CLOUDFLARE_ANALYTICS_SCRIPT}`,
+    `connect-src 'self' ${SUPABASE_CONNECT} ${JOB_FEED_CONNECT} ${CLOUDFLARE_ANALYTICS_CONNECT}`,
     "worker-src 'self' blob:",
     "manifest-src 'self'",
   ].join('; ')

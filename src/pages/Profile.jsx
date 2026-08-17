@@ -78,7 +78,7 @@ export default function Profile() {
 
     const observer = new IntersectionObserver(
       ([entry]) => setSaveBarVisible(!entry.isIntersecting),
-      { threshold: 0, rootMargin: '0px 0px -1rem 0px' },
+      { threshold: 0, rootMargin: '0px 0px -16px 0px' },
     )
 
     observer.observe(sentinel)

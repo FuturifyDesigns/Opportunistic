@@ -114,7 +114,6 @@ for (const file of htmlFiles) {
 
   html = upsertMetaHttpEquiv(html, 'Content-Security-Policy', csp)
   html = upsertMetaHttpEquiv(html, 'X-Content-Type-Options', 'nosniff')
-  html = upsertMetaHttpEquiv(html, 'X-Frame-Options', 'DENY')
   html = upsertMetaName(html, 'referrer', REFERRER_POLICY)
   html = upsertMetaHttpEquiv(html, 'Permissions-Policy', PERMISSIONS_POLICY)
 
