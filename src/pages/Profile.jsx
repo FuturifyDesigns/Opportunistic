@@ -19,6 +19,7 @@ import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
 import PageBackdrop from '../components/PageBackdrop'
 import SkillPicker from '../components/SkillPicker'
+import HeadlineComposer from '../components/HeadlineComposer'
 import AvatarEditor from '../components/AvatarEditor'
 import { normalizeSkillName, normalizeFieldName, suggestSkillsFromQualifications } from '../lib/skillCatalog'
 import { finalizeHeadline } from '../lib/headline'
@@ -504,19 +505,23 @@ export default function Profile() {
 
               <label className={`profile-field${errors.headline ? ' invalid' : ''}`}>
                 <span>{t('profile.headline')}</span>
-                <input
+                <HeadlineComposer
                   value={form.headline}
                   placeholder={t('profile.headlinePlaceholder')}
-                  aria-invalid={Boolean(errors.headline)}
-                  onChange={(e) => {
+                  ariaInvalid={Boolean(errors.headline)}
+                  describedBy="profile-headline-hint"
+                  onChange={(next) => {
                     setErrors((prev) => ({ ...prev, headline: undefined }))
-                    setForm((f) => ({ ...f, headline: e.target.value }))
+                    setForm((f) => ({ ...f, headline: next }))
                   }}
                   onBlur={() => {
                     setForm((f) => ({ ...f, headline: finalizeHeadline(f.headline) }))
                   }}
                 />
-                <span className="field-hint">{t('profile.headlineHint')}</span>
+                <p id="profile-headline-hint" className="headline-hint">
+                  {t('profile.headlineHint')}
+                  <span className="headline-hint-example">{t('profile.headlineHintExample')}</span>
+                </p>
                 {errors.headline ? (
                   <span className="field-error">{t(`onboarding.${errors.headline}`)}</span>
                 ) : null}

@@ -135,11 +135,6 @@
     },
     "settings": {
       "title": "Dipeakanyo tsa akhaonto",
-      "emailDigest": "Kakaretso ya imeile",
-      "digestOff": "Tima",
-      "digestWeekly": "BeKe",
-      "digestMonthly": "Kgwedi",
-      "saveSettings": "Boloka dipeakanyo",
       "privacyCookies": "Sephiri le dikhukhi",
       "privacyCookiesBody": "Laola dikhukhi tsa boithaopo nako nngwe le nngwe.",
       "dangerZone": "Lefelo le le kotsi",
@@ -387,11 +382,6 @@
     },
     "settings": {
       "title": "Ajustes de la cuenta",
-      "emailDigest": "Frecuencia del resumen por correo",
-      "digestOff": "Desactivado",
-      "digestWeekly": "Semanal",
-      "digestMonthly": "Mensual",
-      "saveSettings": "Guardar ajustes",
       "privacyCookies": "Privacidad y cookies",
       "privacyCookiesBody": "Gestiona las cookies opcionales en cualquier momento.",
       "dangerZone": "Zona de peligro",

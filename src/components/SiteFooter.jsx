@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { openCookiePreferences } from '../lib/consent'
 import LanguageSwitcher from './LanguageSwitcher'
 
 const year = new Date().getFullYear()
@@ -35,11 +34,7 @@ export default function SiteFooter() {
           <div className="footer-col">
             <p className="footer-label">{t('nav.legal')}</p>
             <Link to="/privacy?section=overview">{t('nav.privacy')}</Link>
-            <Link to="/privacy?section=cookies">{t('nav.cookies')}</Link>
             <Link to="/terms?section=role">{t('nav.terms')}</Link>
-            <button type="button" className="footer-linkish" onClick={() => openCookiePreferences()}>
-              {t('nav.cookieSettings')}
-            </button>
           </div>
         </nav>
       </div>
